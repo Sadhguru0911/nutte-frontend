@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NuttE Chatbot</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-section">
+        <img src="assets/NuttE_edited.png" alt="Nutty Logo" class="app-logo" />
+        <div class="app-title">
+          <span class="main-title">NuttE</span>
+          <span class="sub-title">CommunitE Assistant</span>
+        </div>
+      </div>
+      <div class="cart-icon" id="cartIcon" onclick="toggleCart()">
+        <i class="fas fa-shopping-cart"></i> Cart (<span id="cartCount">0</span>)
+      </div>
+    </header>
+
+    <div class="chat-window">
+      <div class="chat-messages" id="chatContainer">
+        <div class="message bot-message">
+          <div class="message-avatar">
+            <img src="assets/NuttE_edited.png" alt="NuttE" />
+          </div>
+          <div class="message-content">
+            <div class="message-text">
+              🙏 Namaste! I'm NuttE, your friendly CommunitE assistant!  
+              I'm here to help you order fresh nuts, dried fruits, and healthy snacks. Let's get started!
+            </div>
+            <div class="customer-type-buttons">
+              <button class="btn btn-primary" id="returningCustomerBtn">
+                <i class="fas fa-user-check"></i>
+                Returning Customer
+                <small>I've ordered before</small>
+              </button>
+              <button class="btn btn-secondary" id="newCustomerBtn">
+                <i class="fas fa-user-plus"></i>
+                New Customer
+                <small>First time ordering</small>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button class="btn btn-send" id="sendMessageBtn">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="floating-cart-btn" id="floatingCartBtn" onclick="toggleCart()">
+  <i class="fas fa-shopping-cart"></i>
+  <span id="floatingCartCount" class="floating-cart-count">0</span>
+</div>
+
+    <div class="cart-sidebar" id="cartSidebar">
+      <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button class="close-btn" id="closeCartBtn" onclick="toggleCart()">&times;</button>
+      </div>
+      <div class="cart-content" id="cartContent">
+        <div class="empty-cart">
+          <i class="fas fa-shopping-cart"></i>
+          <p>Your cart is empty</p>
+          <small>Add some delicious items to get started!</small>
+        </div>
+      </div>
+      <div class="cart-footer" id="cartFooter" style="display: none;">
+        <div class="cart-summary">
+          <span>Subtotal: ₹<span id="cartSubtotal">0</span></span>
+          <span>Delivery: ₹50</span>
+        </div>
+        <div class="cart-total">
+          <span>Total: ₹<span id="cartTotal">0</span></span>
+        </div>
+        <button class="btn btn-primary btn-full" id="checkoutBtn">
+          <i class="fas fa-money-check-alt"></i> Proceed to Checkout
+        </button>
+      </div>
+    </div>
+
+    <div class="modal" id="customerModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Customer Details</h2>
+          <button class="close-btn" id="closeCustomerModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="customerForm">
+            <div class="form-group">
+              <label for="fullName">Full Name:</label>
+              <input type="text" id="fullName" name="fullName" required />
+            </div>
+            <div class="form-group">
+              <label for="mobileNumber">Mobile Number:</label>
+              <input type="tel" id="mobileNumber" name="mobileNumber" required />
+            </div>
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+              <label for="aptNumber">Apartment Number:</label>
+              <input type="text" id="aptNumber" name="aptNumber" required />
+            </div>
+            <div class="form-group">
+              <label for="community">Community:</label>
+              <input type="text" id="community" name="community" required />
+            </div>
+            <div class="form-group">
+              <label for="deliveryInstructions">Delivery Instructions (Optional):</label>
+              <textarea id="deliveryInstructions" name="deliveryInstructions"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Submit Order</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-overlay" id="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+  </div>
+<!-- Floating Back to Categories Button -->
+<div class="floating-back-btn" id="backToCategoriesBtn" onclick="chatbot.goBackToCategories()" style="display: none;">
+  <i class="fas fa-arrow-left"></i> Categories
+</div>
+
+</body>
+</html>
