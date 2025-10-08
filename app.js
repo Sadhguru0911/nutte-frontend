@@ -169,27 +169,27 @@ class NuttyChatbot {
     }
 
     async createCategoryButtons() {
-        // Fetch product categories and return buttons as HTML
-        try {
-            const response = await this.apiCall('/categories');
-            const categories = response.categories;
-            
-            let buttonsHtml = '<div class="category-buttons">';
-            categories.forEach(category => {
-                buttonsHtml += `
-                    <button class="category-btn" onclick="window.chatbot.selectCategory('${category}')">
-                        <i class="fas fa-leaf"></i>
-                        <div style="margin-top: 0.5rem; font-weight: 600;">${category}</div>
-                    </button>
-                `;
-            });
-            buttonsHtml += '</div>';
-            
-            return buttonsHtml;
-        } catch (error) {
-            return '<p>Sorry, I couldn\'t load the categories. Please try again.</p>';
-        }
-    }
+  try {
+    const response = await this.apiCall('/categories');
+    const categories = response.categories;
+
+    let buttonsHtml = '<div class="slider-container">';
+    categories.forEach(category => {
+      buttonsHtml += `
+        <button class="category-btn" onclick="window.chatbot.selectCategory('${category}')">
+          <i class="fas fa-leaf"></i>
+          <div style="margin-top: 0.5rem; font-weight: 600;">${category}</div>
+        </button>
+      `;
+    });
+    buttonsHtml += '</div>';
+
+    return buttonsHtml;
+  } catch (error) {
+    return '<p>Sorry, I couldn\'t load the categories. Please try again.</p>';
+  }
+}
+
 
     async selectCategory(category) {
 	// Handle category selection and display subcategories
@@ -206,12 +206,12 @@ class NuttyChatbot {
             const subcategories = response.subcategories;
             
             let buttonsHtml = `
-                <button class="back-btn" onclick="window.chatbot.goBackToCategories()">
-                    <i class="fas fa-arrow-left"></i> Back to Categories
-                </button>
-                <div class="subcategory-buttons">
+               <button class="back-btn" onclick="window.chatbot.goBackToCategories()">
+                   <i class="fas fa-arrow-left"></i> Back to Categories
+               </button>
+               <div class="slider-container">
             `;
-            
+		
             subcategories.forEach(subcategory => {
                 buttonsHtml += `
                     <button class="subcategory-btn" onclick="window.chatbot.selectSubCategory('${subcategory}')">
@@ -248,7 +248,7 @@ class NuttyChatbot {
             <button class="back-btn" onclick="window.chatbot.goBackToSubCategories()">
                 <i class="fas fa-arrow-left"></i> Back to ${this.selectedCategory}
             </button>
-            <div class="product-list-grouped">
+            <div class="slider-container">
         `;
         
         const groupedProducts = {};
