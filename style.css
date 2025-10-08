@@ -877,4 +877,43 @@ body {
     border: 1px solid #ced4da;
     border-radius: 5px;
     font-size: 0.95em;
-    width
+    width: 100%;
+    background-color: #fff;
+}
+
+
+/* 🌟 Make category, subcategory and product sections scroll horizontally */
+.slider-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  scroll-behavior: smooth;
+  padding: 10px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.slider-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.slider-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+/* Keep button/card width fixed so they appear like slides */
+.category-btn,
+.subcategory-btn,
+.product-card-grouped {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* 💰 Make price blue and bold */
+.product-price-grouped {
+  font-weight: bold;
+  color: #007bff;
+}
+
+
+
