@@ -915,5 +915,74 @@ body {
   color: #007bff;
 }
 
+/* ---------------------------------------------------
+   🌰 CATEGORY & SUBCATEGORY BUTTONS - Uniform Size
+----------------------------------------------------*/
+.category-btn,
+.subcategory-btn {
+  flex: 0 0 130px;              /* fixed width for uniform look */
+  height: 120px;                /* equal height for all cards */
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  word-wrap: break-word;        /* allow long words to wrap */
+  white-space: normal;          /* ensure text wraps to next line */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-btn div,
+.subcategory-btn div {
+  word-break: break-word;       /* wrap long category names cleanly */
+  line-height: 1.2;
+}
+
+/* ---------------------------------------------------
+   🛒 FLOATING CART BUTTON (Avoid Chat Input Overlap)
+----------------------------------------------------*/
+@media (max-width: 768px) {
+  .floating-cart-btn {
+    bottom: 80px;               /* move it above chat input */
+    right: 16px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.3em;
+  }
+
+  .floating-cart-count {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+}
+
+/* ---------------------------------------------------
+   📦 PRODUCT CARDS - Slightly Smaller for Better Fit
+----------------------------------------------------*/
+.product-card-grouped {
+  transform: scale(0.95);       /* shrink slightly to fit viewport */
+  width: 90%;                   /* reduce card width */
+  max-width: 350px;             /* ensure consistent size */
+  margin: 0 auto;               /* center it within slider */
+}
+
+.product-image-container-grouped {
+  width: 65px;                  /* smaller product image */
+  height: 65px;
+}
+
+/* 💰 Make price bold & blue (reinforce earlier rule) */
+.product-price-grouped {
+  font-weight: bold;
+  color: #007bff;
+  font-size: 1.1em;
+}
+
+
+.category-btn i,
+.subcategory-btn i {
+  margin-bottom: 8px;
+}
+
 
 
