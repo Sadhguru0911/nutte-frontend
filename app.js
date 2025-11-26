@@ -8,7 +8,7 @@ class NuttyChatbot {
         this.cart = [];
         this.selectedCategory = null;
         this.selectedSubCategory = null;
-        this.apiBase = "https://nutte-backend.onrender.com"; // Backend API base URL
+        this.apiBase = "https://nutte-communite-994718298855.asia-south1.run.app/api"; // Backend API base URL
         this.DELIVERY_CHARGE = 50; // Fixed delivery charge
         
 	// Setup event listeners and update cart UI on start
