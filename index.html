@@ -1,69 +1,153 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CommunitE Store</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CommunitE — Shop</title>
+  <link rel="stylesheet" href="style.css" />
   <script src="app.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
 </head>
-
 <body>
-
-  <!-- TOP BAR -->
+  <!-- Top bar -->
   <header class="topbar">
-      <div class="brand">
-        <img src="assets/NuttE_edited.png" class="brand-logo" alt="Logo">
-        <div>
-          <div class="brand-name">CommunitE</div>
-          <div class="brand-sub">Healthy Eats, Delivered</div>
-        </div>
+    <div class="brand">
+      <img src="assets/NuttE_edited.png" alt="CommunitE" class="brand-logo" />
+      <div class="brand-text">
+        <div class="brand-name">CommunitE</div>
+        <div class="brand-sub">Healthy eats, locally sourced</div>
       </div>
+    </div>
 
-      <div class="top-actions">
-        <button id="backToCategoriesBtn" class="pill-btn" style="display:none">
-          <i class="fas fa-arrow-left"></i> Categories
-        </button>
+    <div class="top-actions">
+      <button id="backToCategoriesBtn" class="pill-btn" style="display:none" title="Back to categories">
+        <i class="fas fa-arrow-left"></i> Categories
+      </button>
 
-        <button id="openCartBtn" class="cart-btn">
-          <i class="fas fa-shopping-cart"></i>
-          <span id="cartCount">0</span>
-        </button>
-      </div>
+      <button id="openCartBtn" class="cart-btn" title="Open cart">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cartCount">0</span>
+      </button>
+    </div>
   </header>
 
-  <!-- HERO BLOCKS -->
-  <section class="hero-row">
-    <div class="hero-card lavender"><div class="hero-top">ABOUT</div><div class="hero-bottom">99</div></div>
-    <div class="hero-card pink"><div class="hero-top">SHOWREEL</div><div class="hero-bottom">*</div></div>
-    <div class="hero-card lime large">
+  <!-- HERO / STEVIA-STYLE BLOCKS -->
+  <section class="hero-row" aria-label="hero">
+    <div class="hero-card lavender" role="button" onclick="scrollToSection('categorySection')">
+      <div class="hero-top">ABOUT</div>
+      <div class="hero-bottom">99</div>
+    </div>
+
+    <div class="hero-card pink" role="button" onclick="scrollToSection('categorySection')">
+      <div class="hero-top">SHOWREEL</div>
+      <div class="hero-bottom">*</div>
+    </div>
+
+    <div class="hero-card lime large" role="button" onclick="scrollToSection('categorySection')">
       <div class="brand-big">CommunitE</div>
-      <div class="brand-sm">A community store with a twist</div>
+      <div class="brand-sm">A Community Store with a twist</div>
     </div>
   </section>
 
-  <!-- CATEGORIES -->
-  <section id="categorySection" class="catalog-section">
-    <h2 class="section-title">Shop by Category</h2>
-    <div id="categoryContainer" class="scroll-row"></div>
-  </section>
+  <main>
+    <!-- Categories -->
+    <section id="categorySection" class="catalog-section">
+      <h2 class="section-title">Shop by category</h2>
+      <div id="categoryContainer" class="scroll-row"></div>
+    </section>
 
-  <!-- SUBCATEGORIES -->
-  <section id="subcategorySection" class="catalog-section" style="display:none">
-    <h2 class="section-title" id="subcategoryTitle"></h2>
-    <div id="subcategoryContainer" class="scroll-row"></div>
-  </section>
+    <!-- Subcategories -->
+    <section id="subcategorySection" class="catalog-section" style="display:none">
+      <h2 class="section-title" id="subcategoryTitle"></h2>
+      <div id="subcategoryContainer" class="scroll-row"></div>
+    </section>
 
-  <!-- PRODUCTS -->
-  <section id="productSection" class="catalog-section" style="display:none">
-    <h2 class="section-title" id="productTitle"></h2>
-    <div id="productContainer" class="scroll-row"></div>
-  </section>
+    <!-- Products -->
+    <section id="productSection" class="catalog-section" style="display:none">
+      <h2 class="section-title" id="productTitle"></h2>
+      <div id="productContainer" class="scroll-row"></div>
+    </section>
+  </main>
 
-  <!-- CART SIDEBAR + CHECKOUT MODAL (unchanged from previous version) -->
-  <aside id="cartSidebar" class="cart-sidebar"></aside>
-  <div id="overlay" class="overlay"></div>
-  <div id="customerModal" class="modal"></div>
+  <!-- Cart Sidebar -->
+  <aside id="cartSidebar" class="cart-sidebar" aria-hidden="true">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-btn" id="closeCartBtn" aria-label="Close cart">&times;</button>
+    </div>
 
+    <div id="cartContent" class="cart-content">
+      <div class="empty-cart">
+        <i class="fas fa-shopping-cart"></i>
+        <p>Your cart is empty</p>
+        <small>Add some tasty items to get started</small>
+      </div>
+    </div>
+
+    <div id="cartFooter" class="cart-footer" style="display:none">
+      <div class="cart-summary">
+        <div>Subtotal: ₹<span id="cartSubtotal">0</span></div>
+        <div>Delivery: ₹<span id="deliveryCharge">50</span></div>
+      </div>
+      <div class="cart-total">Total: ₹<span id="cartTotal">0</span></div>
+      <button id="checkoutBtn" class="btn-primary btn-block">Proceed to checkout</button>
+    </div>
+  </aside>
+
+  <!-- Overlay -->
+  <div id="overlay" class="overlay" style="display:none"></div>
+
+  <!-- Customer Modal -->
+  <div id="customerModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Customer details</h2>
+        <button class="close-btn" id="closeCustomerModalBtn" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="mobileLookupRow" class="form-row">
+          <label>Mobile number</label>
+          <div class="inline-row">
+            <input id="lookupMobile" type="tel" placeholder="10-digit mobile" maxlength="10" />
+            <button id="lookupBtn" class="btn-secondary">Lookup</button>
+          </div>
+        </div>
+
+        <form id="customerForm" style="display:none">
+          <div class="form-group">
+            <label>Full name</label>
+            <input id="fullName" name="fullName" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Mobile number</label>
+            <input id="mobileNumber" name="mobileNumber" type="tel" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input id="email" name="email" type="email" required />
+          </div>
+          <div class="form-group">
+            <label>Apartment / Address</label>
+            <input id="aptNumber" name="aptNumber" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Community</label>
+            <input id="community" name="community" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Delivery instructions (optional)</label>
+            <textarea id="deliveryInstructions" name="deliveryInstructions"></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary btn-block">Submit Order</button>
+        </form>
+
+        <div id="lookupResult" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <noscript><style>.scroll-row{overflow-x:auto}</style></noscript>
 </body>
 </html>
