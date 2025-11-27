@@ -1,296 +1,261 @@
-/* =====================================================
-   CommunitE — Animated Frontend (Option A2)
-   Hero + floating category cards + scroll stagger + tilt
-===================================================== */
+/* CommunitE - SteviaPlease B1 Frontend JS
+   - animated cards, stagger, tilt, responsive stack on mobile
+   - cart + checkout + customer lookup
+*/
 
-const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
+const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app"; // backend base
 const DELIVERY_CHARGE = 50;
 
 let cart = [];
 let selectedCategory = null;
 let selectedSubcategory = null;
 
-/* FALLBACK IMAGES */
-const DEFAULT_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1503602642458-232111445657";
-const DEFAULT_SUBCATEGORY_IMAGE = "https://images.unsplash.com/photo-1501004318641-b39e6451bec6";
+/* fallback images */
+const DEFAULT_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1200&auto=format&fit=crop";
+const DEFAULT_SUBCATEGORY_IMAGE = "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1200&auto=format&fit=crop";
 const DEFAULT_PRODUCT_IMAGE = "assets/placeholder.png";
 
-/* DOM Helper */
-const $ = (id) => document.getElementById(id);
-const escapeHtml = (s) => (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] ));
-function sanitizeId(s){ return (s||"").replace(/[^a-z0-9]/gi,'_').toLowerCase(); }
-function scrollToSection(id){ const el=$(id); if(el) el.scrollIntoView({behavior:'smooth'}); }
+/* helpers */
+const $ = id => document.getElementById(id);
+const escapeHtml = s => (s||"").toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function sanitizeId(s){ return (s||'').replace(/[^a-z0-9]/gi,'_').toLowerCase(); }
+function scrollToSection(id){ const el=$(id); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
 
-/* API wrapper */
-async function apiCall(endpoint, options={}){
+/* API */
+async function apiCall(endpoint, options = {}) {
   const res = await fetch(`${apiBase}/api${endpoint}`, {
-    headers:{'Content-Type':'application/json'},
+    headers: {'Content-Type':'application/json'},
     ...options
   });
   if(!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-/* =====================================================
-   INITIALIZATION
-===================================================== */
-document.addEventListener("DOMContentLoaded", () => {
+/* boot */
+document.addEventListener('DOMContentLoaded', () => {
   bindUI();
   loadCategories();
   initScrollAnimations();
-  initTiltEffects();
+  initTilt();
 });
 
-/* Topbar actions */
+/* UI bind */
 function bindUI(){
-  $('openCartBtn').onclick = toggleCart;
-  $('closeCartBtn').onclick = toggleCart;
-
-  $('checkoutBtn').onclick = proceedToCheckout;
-  $('backToCategoriesBtn').onclick = goBackToCategories;
-
-  $('lookupBtn').onclick = lookupCustomerFromModal;
-  $('closeCustomerModalBtn').onclick = closeCustomerModal;
-
+  $('openCartBtn').addEventListener('click', toggleCart);
+  $('closeCartBtn').addEventListener('click', toggleCart);
+  $('checkoutBtn').addEventListener('click', proceedToCheckout);
+  $('backToCategoriesBtn').addEventListener('click', goBackToCategories);
+  $('lookupBtn').addEventListener('click', lookupCustomerFromModal);
+  $('closeCustomerModalBtn').addEventListener('click', closeCustomerModal);
   $('customerForm').addEventListener('submit', submitOrder);
 }
 
-/* =====================================================
-   SCROLL ANIMATION STAGGER
-===================================================== */
-function initScrollAnimations(){
-  const observer = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        entry.target.classList.add("card-animated");
-      }
-    });
-  },{
-    threshold:0.2
-  });
-
-  // Apply to future nodes dynamically
-  window.observeCard = (el) => observer.observe(el);
-}
-
-/* =====================================================
-   MOBILE TILT EFFECT
-===================================================== */
-function initTiltEffects(){
-  document.addEventListener("pointermove", (e)=>{
-    const targets = document.querySelectorAll(".category-card, .subcat-card, .product-card");
-    targets.forEach(el=>{
-      const rect = el.getBoundingClientRect();
-      if(rect.top < window.innerHeight && rect.bottom > 0){
-        const dx = (e.clientX - rect.left) / rect.width - 0.5;
-        const dy = (e.clientY - rect.top) / rect.height - 0.5;
-        const rotateX = dy * 6;
-        const rotateY = dx * -6;
-        el.style.transform = `translateY(-4px) scale(1.04) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      }
-    });
-  });
-
-  document.addEventListener("pointerleave", ()=>{
-    const targets = document.querySelectorAll(".category-card, .subcat-card, .product-card");
-    targets.forEach(el=>{
-      el.style.transform = "";
-    });
-  });
-}
-
-/* =====================================================
-   LOAD CATEGORIES
-===================================================== */
+/* compatibility loader for categories */
 async function loadCategories(){
-  const res = await apiCall('/categories');
-  const cats = res.categories || [];
-  const container = $('categoryContainer');
+  try {
+    const res = await apiCall('/categories');
+    let cats = [];
+    if (Array.isArray(res)) {
+      cats = res.map(c => (typeof c === 'string') ? {name:c, image:DEFAULT_CATEGORY_IMAGE} : {name:c.name || c.title, image:c.image || DEFAULT_CATEGORY_IMAGE});
+    } else if (Array.isArray(res.categories)) {
+      cats = res.categories.map(c => (typeof c === 'string')? {name:c, image:DEFAULT_CATEGORY_IMAGE} : {name:c.name || c.title, image:c.image || DEFAULT_CATEGORY_IMAGE});
+    } else {
+      // object values
+      cats = Object.values(res).flat().map(c => (typeof c === 'string') ? {name:c, image:DEFAULT_CATEGORY_IMAGE} : {name:c.name || c.title, image:c.image || DEFAULT_CATEGORY_IMAGE});
+    }
 
-  container.innerHTML = cats.map((c,i)=>`
-    <div class="category-card" style="animation-delay:${i*80}ms"
-      onclick="selectCategory('${escapeHtml(c.name)}')">
-      <img src="${c.image || DEFAULT_CATEGORY_IMAGE}">
-      <div class="category-card-title">${c.name}</div>
-    </div>
-  `).join('');
+    if(!cats.length){ $('categoryContainer').innerHTML = `<div style="padding:16px;color:var(--muted)">No categories found</div>`; return; }
 
-  container.querySelectorAll(".category-card").forEach(el => observeCard(el));
+    const container = $('categoryContainer');
+    container.innerHTML = cats.map((c,i)=>`
+      <div class="category-card" style="animation-delay:${i*80}ms" onclick="selectCategory('${escapeHtml(c.name)}')">
+        <img src="${escapeHtml(c.image || DEFAULT_CATEGORY_IMAGE)}" alt="${escapeHtml(c.name)}" />
+        <div class="category-card-title">${escapeHtml(c.name)}</div>
+      </div>
+    `).join('');
+    container.querySelectorAll('.category-card').forEach(el => observeCard(el));
+  } catch(e){
+    console.error("loadCategories", e);
+    $('categoryContainer').innerHTML = `<div style="padding:16px;color:var(--muted)">Failed to load categories</div>`;
+  }
 }
 
-/* =====================================================
-   LOAD SUBCATEGORIES
-===================================================== */
+/* subcategories */
 async function selectCategory(category){
   selectedCategory = category;
-  $('subcategorySection').style.display='block';
-  $('productSection').style.display='none';
+  selectedSubcategory = null;
+  $('subcategorySection').style.display = 'block';
+  $('productSection').style.display = 'none';
   $('subcategoryTitle').innerText = category;
-  $('backToCategoriesBtn').style.display='inline-flex';
-
-  const res = await apiCall(`/subcategories/${encodeURIComponent(category)}`);
-  const subs = res.subcategories || [];
-  const container = $('subcategoryContainer');
-
-  container.innerHTML = subs.map((s,i)=>`
-    <div class="subcat-card" style="animation-delay:${i*80}ms"
-      onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(s.name)}')">
-      <img src="${s.image || DEFAULT_SUBCATEGORY_IMAGE}">
-      <div class="subcat-title">${s.name}</div>
-    </div>
-  `).join('');
-
-  container.querySelectorAll(".subcat-card").forEach(el => observeCard(el));
-  scrollToSection('subcategorySection');
+  $('backToCategoriesBtn').style.display = 'inline-flex';
+  try {
+    const res = await apiCall(`/subcategories/${encodeURIComponent(category)}`);
+    let subs = res.subcategories || [];
+    if(Array.isArray(res)) subs = res;
+    const container = $('subcategoryContainer');
+    container.innerHTML = subs.map((s,i) => `
+      <div class="subcat-card" style="animation-delay:${i*80}ms" onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(typeof s === 'string' ? s : s.name)}')">
+        <img src="${escapeHtml(typeof s === 'string' ? DEFAULT_SUBCATEGORY_IMAGE : (s.image || DEFAULT_SUBCATEGORY_IMAGE))}" alt="${escapeHtml(typeof s === 'string' ? s : s.name)}" />
+        <div class="subcat-title">${escapeHtml(typeof s === 'string' ? s : s.name)}</div>
+      </div>
+    `).join('');
+    container.querySelectorAll('.subcat-card').forEach(el => observeCard(el));
+    scrollToSection('subcategorySection');
+  } catch(e){ console.error("selectCategory", e); $('subcategoryContainer').innerHTML=`<div style="padding:16px;color:var(--muted)">No subcategories</div>`;}
 }
 
-/* =====================================================
-   LOAD PRODUCTS
-===================================================== */
+/* products */
 async function selectSubcategory(category, subcat){
   selectedSubcategory = subcat;
-  $('productSection').style.display='block';
+  $('productSection').style.display = 'block';
   $('productTitle').innerText = subcat;
+  try {
+    const res = await apiCall(`/products/${encodeURIComponent(category)}/${encodeURIComponent(subcat)}`);
+    const products = res.products || (Array.isArray(res) ? res : []);
+    if(products.length===0){ $('productContainer').innerHTML = `<div style="padding:16px;color:var(--muted)">No products found.</div>`; return; }
 
-  const res = await apiCall(`/products/${encodeURIComponent(category)}/${encodeURIComponent(subcat)}`);
-  const products = res.products || [];
+    const grouped = {};
+    products.forEach(p => {
+      const key = p.product_name || p['Product Name'];
+      if(!grouped[key]) grouped[key] = [];
+      grouped[key].push(p);
+    });
 
-  const grouped = {};
-  products.forEach(p=>{
-    if(!grouped[p.product_name]) grouped[p.product_name]=[];
-    grouped[p.product_name].push(p);
-  });
+    const container = $('productContainer');
+    container.innerHTML = Object.keys(grouped).map((name,i) => {
+      const variants = grouped[name];
+      const first = variants[0];
+      const id = `prod_${sanitizeId(name)}_${i}`;
+      const img = first.image || first.Image || DEFAULT_PRODUCT_IMAGE;
+      return `
+        <div class="product-card" id="${id}" style="animation-delay:${i*80}ms">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" />
+          <div class="product-title">${escapeHtml(name)}</div>
+          <div class="product-desc">${escapeHtml(first.description || first['Product Description'] || '')}</div>
 
-  const container = $('productContainer');
-  const keys = Object.keys(grouped);
+          <div class="controls-row">
+            <select class="variant-select" id="variant_${id}" onchange="updateProductDisplay('${id}')">
+              ${variants.map(v => {
+                const variant = v.variant || v['Variant/Weight'] || 'Default';
+                const price = v.price || v['Price (INR)'] || v.Price || 0;
+                const vimg = v.image || v.Image || '';
+                const desc = v.description || v['Product Description'] || '';
+                return `<option value="${escapeHtml(variant)}" data-price="${price}" data-img="${escapeHtml(vimg)}" data-desc="${escapeHtml(desc)}">${escapeHtml(variant)} - ₹${price}</option>`;
+              }).join('')}
+            </select>
 
-  container.innerHTML = keys.map((name,i)=>{
-    const variants = grouped[name];
-    const first = variants[0];
-    const id = `prod_${sanitizeId(name)}_${i}`;
-    return `
-      <div class="product-card" id="${id}" style="animation-delay:${i*80}ms">
-        <img src="${first.image || DEFAULT_PRODUCT_IMAGE}">
-        <div class="product-title">${name}</div>
-        <div class="product-desc">${escapeHtml(first.description||'')}</div>
+            <div class="qty-control" style="margin-left:8px">
+              <button onclick="changeQuantity('${id}', -1)">-</button>
+              <input id="qty_${id}" type="number" value="1" min="1" />
+              <button onclick="changeQuantity('${id}', 1)">+</button>
+            </div>
+          </div>
 
-        <div class="controls-row">
-          <select id="variant_${id}" class="variant-select"
-            onchange="updateProductDisplay('${id}')">
-            ${variants.map(v=>`
-              <option value="${v.variant}" data-price="${v.price}"
-                data-img="${v.image||''}" data-desc="${escapeHtml(v.description||'')}">
-                ${v.variant} - ₹${v.price}
-              </option>
-            `).join('')}
-          </select>
-
-          <div class="qty-control">
-            <button onclick="changeQuantity('${id}',-1)">-</button>
-            <input id="qty_${id}" value="1" min="1">
-            <button onclick="changeQuantity('${id}',1)">+</button>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+            <div class="product-price" id="price_${id}">₹${(variants[0].price || variants[0]['Price (INR)'] || 0)}</div>
+            <button class="add-btn" onclick="addToCartFromCard('${id}','${escapeHtml(name)}')"><i class="fas fa-cart-plus"></i> Add</button>
           </div>
         </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-          <div class="product-price" id="price_${id}">₹${variants[0].price}</div>
-          <button class="add-btn" onclick="addToCartFromCard('${id}','${escapeHtml(name)}')">
-            Add
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  container.querySelectorAll(".product-card").forEach(el => observeCard(el));
-
-  scrollToSection('productSection');
+      `;
+    }).join('');
+    container.querySelectorAll('.product-card').forEach(el => observeCard(el));
+    scrollToSection('productSection');
+  } catch(e){ console.error("selectSubcategory", e); $('productContainer').innerHTML = `<div style="padding:16px;color:var(--muted)">Error loading products</div>`;}
 }
 
-/* update price + image on variant change */
-function updateProductDisplay(id){
-  const sel = $(`variant_${id}`);
-  const opt = sel.options[sel.selectedIndex];
-  $(`price_${id}`).innerText = `₹${opt.dataset.price}`;
+/* update display for variant selection */
+function updateProductDisplay(unique){
+  const select = $(`variant_${unique}`);
+  if(!select) return;
+  const opt = select.options[select.selectedIndex];
+  const price = opt.dataset.price;
   const img = opt.dataset.img;
   const desc = opt.dataset.desc;
 
-  if(img) document.querySelector(`#${id} img`).src = img;
-  document.querySelector(`#${id} .product-desc`).innerText = desc || "";
+  const priceEl = $(`price_${unique}`);
+  if(priceEl) priceEl.textContent = `₹${price}`;
+
+  const imgEl = document.querySelector(`#${unique} img`);
+  if(imgEl && img) imgEl.src = img;
+  const descEl = document.querySelector(`#${unique} .product-desc`);
+  if(descEl) descEl.textContent = desc || '';
 }
 
-/* quantity helpers */
-function changeQuantity(id,delta){
-  const el = $(`qty_${id}`);
-  let v = parseInt(el.value||1);
-  v = Math.max(1,Math.min(99,v+delta));
-  el.value = v;
+/* quantity */
+function changeQuantity(unique, delta){
+  const input = $(`qty_${unique}`);
+  if(!input) return;
+  let v = parseInt(input.value||'1',10);
+  v = Math.max(1, Math.min(99, v + delta));
+  input.value = v;
 }
 
-/* =====================================================
-   CART + CHECKOUT (unchanged logic)
-===================================================== */
-function addToCartFromCard(id,name){
-  const qty = parseInt($(`qty_${id}`).value||1);
-  const sel = $(`variant_${id}`);
-  const variant = sel.value;
-  const price = parseFloat(sel.options[sel.selectedIndex].dataset.price);
-  addToCart(name,variant,price,qty);
-  showCartToast(`${qty} x ${name}`);
+/* CART logic */
+function addToCartFromCard(uniqueId, productName){
+  const select = $(`variant_${uniqueId}`);
+  const qty = parseInt($(`qty_${uniqueId}`).value || '1',10);
+  const variant = select.value;
+  const price = parseFloat(select.options[select.selectedIndex].dataset.price || 0);
+  addToCart(productName, variant, price, qty);
+  showCartToast(`${qty} x ${productName}`);
 }
-
-function addToCart(name,variant,price,qty){
-  const idx = cart.findIndex(i => i.product_name===name && i.variant===variant);
-  if(idx>-1){
-    cart[idx].quantity += qty;
-    cart[idx].total_price = cart[idx].quantity * cart[idx].price;
+function addToCart(product_name, variant, price, quantity){
+  const idx = cart.findIndex(i => i.product_name === product_name && i.variant === variant);
+  if(idx > -1){
+    cart[idx].quantity += quantity;
+    cart[idx].total_price = cart[idx].price * cart[idx].quantity;
   } else {
-    cart.push({product_name:name,variant,price,quantity:qty,total_price:price*qty});
+    cart.push({product_name, variant, price, quantity, total_price: price * quantity});
   }
   renderCart();
 }
-
+function removeFromCart(index){
+  cart.splice(index,1);
+  renderCart();
+}
+function updateCartQuantity(index, qty){
+  if(qty <= 0) return removeFromCart(index);
+  cart[index].quantity = qty;
+  cart[index].total_price = cart[index].price * qty;
+  renderCart();
+}
 function renderCart(){
-  $('cartCount').innerText = cart.reduce((t,i)=>t+i.quantity,0);
+  const count = cart.reduce((s,i)=>s+i.quantity,0);
+  $('cartCount').textContent = count;
+  const container = $('cartContent');
+  const footer = $('cartFooter');
 
-  if(cart.length===0){
-    $('cartContent').innerHTML = `<div class="empty-cart"><p>Your cart is empty</p></div>`;
-    $('cartFooter').style.display="none";
-    return;
-  }
-
-  $('cartContent').innerHTML = cart.map((i,idx)=>`
-    <div class="cart-item">
-      <div style="display:flex;justify-content:space-between">
-        <div class="name">${i.product_name}</div>
-        <button onclick="removeFromCart(${idx})">&times;</button>
-      </div>
-      <div class="meta">${i.variant}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-        <div>
-          <button class="btn-secondary" onclick="updateCartQuantity(${idx},${i.quantity-1})">-</button>
-          <span style="padding:0 8px;font-weight:700">${i.quantity}</span>
-          <button class="btn-secondary" onclick="updateCartQuantity(${idx},${i.quantity+1})">+</button>
+  if(cart.length === 0){
+    container.innerHTML = `<div class="empty-cart"><i class="fas fa-shopping-cart"></i><p>Your cart is empty</p><small>Add items to get started</small></div>`;
+    footer.style.display = 'none';
+  } else {
+    container.innerHTML = cart.map((it, idx) => `
+      <div class="cart-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="name" style="font-weight:800">${escapeHtml(it.product_name)}</div>
+          <button class="close-btn" onclick="removeFromCart(${idx})">&times;</button>
         </div>
-        <div style="font-weight:800">₹${i.total_price}</div>
+        <div class="meta" style="color:var(--muted)">${escapeHtml(it.variant)}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+          <div>
+            <button class="btn-secondary" onclick="updateCartQuantity(${idx}, ${it.quantity - 1})">-</button>
+            <span style="padding:0 8px;font-weight:700">${it.quantity}</span>
+            <button class="btn-secondary" onclick="updateCartQuantity(${idx}, ${it.quantity + 1})">+</button>
+          </div>
+          <div style="font-weight:900">₹${it.total_price}</div>
+        </div>
       </div>
-    </div>
-  `).join('');
-
-  $('cartFooter').style.display="block";
-  const subtotal = cart.reduce((t,i)=>t+i.total_price,0);
-  $('cartSubtotal').innerText=subtotal;
-  $('cartTotal').innerText=subtotal+DELIVERY_CHARGE;
+    `).join('');
+    footer.style.display = 'block';
+    const subtotal = cart.reduce((s,i)=>s+i.total_price,0);
+    const total = subtotal + (subtotal > 0 ? DELIVERY_CHARGE : 0);
+    $('cartSubtotal').textContent = subtotal;
+    $('cartTotal').textContent = total;
+    $('deliveryCharge').textContent = DELIVERY_CHARGE;
+  }
 }
 
-function removeFromCart(i){ cart.splice(i,1); renderCart(); }
-function updateCartQuantity(i,qty){
-  if(qty<=0) return removeFromCart(i);
-  cart[i].quantity=qty;
-  cart[i].total_price=qty*cart[i].price;
-  renderCart();
-}
-
+/* toggle cart (drawer / bottom sheet) */
 function toggleCart(){
   const sidebar = $('cartSidebar');
   const overlay = $('overlay');
@@ -299,96 +264,152 @@ function toggleCart(){
   overlay.style.display = isOpen ? "none" : "block";
 }
 
-/* =====================================================
-   CHECKOUT
-===================================================== */
+/* checkout flow */
 function proceedToCheckout(){
-  if(cart.length===0) return alert("Your cart is empty");
+  if(cart.length === 0){ alert('Your cart is empty!'); return; }
   toggleCart();
   openCustomerModal();
 }
 
 function openCustomerModal(){
-  $('overlay').style.display="block";
-  $('customerModal').style.display="block";
-  $('mobileLookupRow').style.display="block";
-  $('customerForm').style.display="none";
+  $('overlay').style.display = 'block';
+  $('customerModal').style.display = 'block';
+  $('mobileLookupRow').style.display = 'block';
+  $('customerForm').style.display = 'none';
 }
-
 function closeCustomerModal(){
-  $('overlay').style.display="none";
-  $('customerModal').style.display="none";
+  $('overlay').style.display = 'none';
+  $('customerModal').style.display = 'none';
 }
 
+/* customer lookup */
 async function lookupCustomerFromModal(){
-  const mobile = $('lookupMobile').value.trim();
-  if(!/^\d{10}$/.test(mobile)) return alert("Enter valid mobile");
-
-  const res = await apiCall(`/customer/${mobile}`);
-
-  $('mobileLookupRow').style.display="none";
-  $('customerForm').style.display="block";
-
-  if(res.found){
-    const c = res.customer;
-    $('fullName').value = c.full_name;
-    $('mobileNumber').value = c.mobile_number;
-    $('email').value = c.email;
-    $('aptNumber').value = c.apt_number;
-    $('community').value = c.community;
-    $('deliveryInstructions').value = c.delivery_instructions || "";
-  } else {
-    $('mobileNumber').value = mobile;
+  const mobile = ($('lookupMobile').value || '').trim();
+  if(!/^\d{10}$/.test(mobile)){ alert('Please enter a valid 10-digit mobile number'); return; }
+  try {
+    const res = await apiCall(`/customer/${mobile}`);
+    if(res.found){
+      const c = res.customer;
+      $('customerForm').style.display = 'block';
+      $('mobileLookupRow').style.display = 'none';
+      $('fullName').value = c.full_name || '';
+      $('mobileNumber').value = c.mobile_number || '';
+      $('email').value = c.email || '';
+      $('aptNumber').value = c.apt_number || '';
+      $('community').value = c.community || '';
+      $('deliveryInstructions').value = c.delivery_instructions || '';
+    } else {
+      $('customerForm').style.display = 'block';
+      $('mobileLookupRow').style.display = 'none';
+      $('mobileNumber').value = mobile;
+    }
+  } catch (e) {
+    alert('Error looking up customer. Please try again.');
   }
 }
 
+/* order submit */
 async function submitOrder(e){
   e.preventDefault();
+  const fullName = $('fullName').value.trim();
+  const mobileNumber = $('mobileNumber').value.trim();
+  const email = $('email').value.trim();
+  const aptNumber = $('aptNumber').value.trim();
+  const community = $('community').value.trim();
+  const deliveryInstructions = $('deliveryInstructions').value.trim();
 
-  const payload = {
-    customer:{
-      full_name:$('fullName').value,
-      mobile_number:$('mobileNumber').value,
-      email:$('email').value,
-      apt_number:$('aptNumber').value,
-      community:$('community').value
+  if(!fullName || !mobileNumber || !email || !aptNumber || !community){ alert('Please fill all required fields'); return; }
+
+  const order = {
+    customer: {
+      full_name: fullName,
+      mobile_number: mobileNumber,
+      email: email,
+      apt_number: aptNumber,
+      community: community
     },
     cart,
-    subtotal:cart.reduce((t,i)=>t+i.total_price,0),
-    delivery_charge:DELIVERY_CHARGE,
-    total_amount:cart.reduce((t,i)=>t+i.total_price,0) + DELIVERY_CHARGE,
-    delivery_instructions:$('deliveryInstructions').value||""
+    subtotal: cart.reduce((s,i)=>s+i.total_price,0),
+    delivery_charge: DELIVERY_CHARGE,
+    total_amount: cart.reduce((s,i)=>s+i.total_price,0) + DELIVERY_CHARGE,
+    delivery_instructions: deliveryInstructions || ''
   };
 
-  const r = await apiCall('/submit-order',{method:'POST',body:JSON.stringify(payload)});
-  if(r.success){
-    alert(`Order placed! ID: ${r.order_id}`);
-    cart=[]; renderCart();
-    closeCustomerModal();
-  } else {
-    alert("Failed: "+r.message);
+  try {
+    const resp = await apiCall('/submit-order', {
+      method: 'POST',
+      body: JSON.stringify(order)
+    });
+
+    if(resp.success){
+      alert(`Order submitted! Order ID: ${resp.order_id}`);
+      cart = [];
+      renderCart();
+      closeCustomerModal();
+      const sidebar = $('cartSidebar');
+      if(sidebar.classList.contains('open')) toggleCart();
+    } else {
+      alert('Could not submit order: ' + (resp.message || 'Unknown error'));
+    }
+  } catch (e) {
+    alert('Error submitting order. Try again later.');
   }
 }
 
-/* Toast */
-function showCartToast(msg){
-  const t=document.createElement("div");
-  t.textContent=msg;
-  t.style.cssText=`
-    position:fixed;right:20px;bottom:120px;
-    background:#28a745;color:white;
-    padding:12px;border-radius:10px;
-    box-shadow:0 6px 20px rgba(0,0,0,.2);
-    z-index:2000;font-weight:600;
-  `;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2200);
+/* navigation helpers */
+function goBackToCategories(){
+  selectedCategory = null;
+  selectedSubcategory = null;
+  $('subcategorySection').style.display = 'none';
+  $('productSection').style.display = 'none';
+  $('backToCategoriesBtn').style.display = 'none';
+  scrollToSection('categorySection');
 }
 
-/* Back nav */
-function goBackToCategories(){
-  $('subcategorySection').style.display='none';
-  $('productSection').style.display='none';
-  $('backToCategoriesBtn').style.display='none';
-  scrollToSection('categorySection');
+/* Scroll-trigger observer for staggered entrance */
+function initScrollAnimations(){
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('card-animated');
+      }
+    });
+  }, {threshold:0.2});
+  window.observeCard = (el) => { observer.observe(el); };
+}
+
+/* Observe new cards (used after injecting markup) */
+function observeCard(el){ if(window.observeCard) window.observeCard(el); }
+
+/* Tilt/parallax effect (pointer-based) */
+function initTilt(){
+  let moving = false;
+  document.addEventListener('pointermove', (e)=>{
+    const targets = document.querySelectorAll('.category-card, .subcat-card, .product-card');
+    targets.forEach(el=>{
+      const rect = el.getBoundingClientRect();
+      if(rect.top < window.innerHeight && rect.bottom > 0){
+        const dx = (e.clientX - rect.left) / rect.width - 0.5;
+        const dy = (e.clientY - rect.top) / rect.height - 0.5;
+        const rotateX = dy * 6;
+        const rotateY = dx * -6;
+        el.style.transform = `translateY(-6px) scale(1.04) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      }
+    });
+  });
+  document.addEventListener('pointerleave', ()=>{
+    document.querySelectorAll('.category-card, .subcat-card, .product-card').forEach(el=>{
+      el.style.transform = '';
+    });
+  });
+}
+
+/* small helpers */
+function escapeJs(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
+function showCartToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;right:18px;bottom:110px;background:#28a745;color:#fff;padding:12px;border-radius:8px;z-index:2000;box-shadow:0 6px 18px rgba(0,0,0,0.12)';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2600);
 }

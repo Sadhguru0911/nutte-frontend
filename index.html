@@ -6,15 +6,14 @@
   <title>CommunitE — Shop</title>
   <link rel="stylesheet" href="style.css" />
   <script src="app.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <!-- Top bar -->
   <header class="topbar">
     <div class="brand">
       <img src="assets/NuttE_edited.png" alt="CommunitE" class="brand-logo" />
-      <div class="brand-text">
+      <div>
         <div class="brand-name">CommunitE</div>
         <div class="brand-sub">Healthy eats, locally sourced</div>
       </div>
@@ -32,7 +31,7 @@
     </div>
   </header>
 
-  <!-- HERO / STEVIA-STYLE BLOCKS -->
+  <!-- HERO -->
   <section class="hero-row" aria-label="hero">
     <div class="hero-card lavender" role="button" onclick="scrollToSection('categorySection')">
       <div class="hero-top">ABOUT</div>
@@ -70,7 +69,7 @@
     </section>
   </main>
 
-  <!-- Cart Sidebar -->
+  <!-- Cart Sidebar / Bottom Sheet -->
   <aside id="cartSidebar" class="cart-sidebar" aria-hidden="true">
     <div class="cart-header">
       <h3>Your Cart</h3>
@@ -95,7 +94,6 @@
     </div>
   </aside>
 
-  <!-- Overlay -->
   <div id="overlay" class="overlay" style="display:none"></div>
 
   <!-- Customer Modal -->
@@ -115,29 +113,31 @@
         </div>
 
         <form id="customerForm" style="display:none">
-          <div class="form-group">
-            <label>Full name</label>
-            <input id="fullName" name="fullName" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Mobile number</label>
-            <input id="mobileNumber" name="mobileNumber" type="tel" required />
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input id="email" name="email" type="email" required />
-          </div>
-          <div class="form-group">
-            <label>Apartment / Address</label>
-            <input id="aptNumber" name="aptNumber" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Community</label>
-            <input id="community" name="community" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Delivery instructions (optional)</label>
-            <textarea id="deliveryInstructions" name="deliveryInstructions"></textarea>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full name</label>
+              <input id="fullName" name="fullName" type="text" required />
+            </div>
+            <div class="form-group">
+              <label>Mobile number</label>
+              <input id="mobileNumber" name="mobileNumber" type="tel" required />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input id="email" name="email" type="email" required />
+            </div>
+            <div class="form-group">
+              <label>Apartment / Address</label>
+              <input id="aptNumber" name="aptNumber" type="text" required />
+            </div>
+            <div class="form-group">
+              <label>Community</label>
+              <input id="community" name="community" type="text" required />
+            </div>
+            <div class="form-group full">
+              <label>Delivery instructions (optional)</label>
+              <textarea id="deliveryInstructions" name="deliveryInstructions"></textarea>
+            </div>
           </div>
 
           <button type="submit" class="btn-primary btn-block">Submit Order</button>
