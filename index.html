@@ -53,10 +53,10 @@
         <p class="hero-stat-label">Happy Members</p>
       </div>
 
-      <div class="hero-card hero-card--fresh" onclick="scrollToSection('categorySection')">
-        <p class="hero-label">Always</p>
-        <p class="hero-stat">Fresh</p>
-        <i class="fas fa-leaf hero-icon"></i>
+      <div class="hero-card hero-card--fresh" onclick="openReels()">
+        <p class="hero-label">Watch</p>
+        <p class="hero-stat">Reels</p>
+        <i class="fab fa-instagram hero-icon"></i>
       </div>
 
     </div>
@@ -241,6 +241,29 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- REELS MODAL -->
+  <div id="reelsModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--reels">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fab fa-instagram" style="color:var(--green);margin-right:8px"></i>Our Reels</h2>
+        <button id="closeReelsBtn" class="icon-btn" aria-label="Close"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body reels-body">
+        <p class="reels-intro">Follow us <a href="https://instagram.com/dryfruits_communitE" target="_blank" class="reels-handle">@dryfruits_communitE</a> for the latest!</p>
+        <div class="reels-strip-wrapper">
+          <button class="reels-arrow reels-arrow--left" onclick="scrollReels(-1)"><i class="fas fa-chevron-left"></i></button>
+          <div class="reels-strip" id="reelsStrip">
+            <div class="reel-item reel-placeholder">
+              <i class="fab fa-instagram"></i>
+              <p>Loading reels…</p>
+            </div>
+          </div>
+          <button class="reels-arrow reels-arrow--right" onclick="scrollReels(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
       </div>
     </div>
   </div>

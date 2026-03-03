@@ -853,3 +853,92 @@ main {
   .about-hero { padding: 24px 12px 20px; }
   .nav-about-btn { display: none; }
 }
+
+/* ── REELS MODAL ── */
+.modal-box--reels { max-width: 860px; }
+
+.reels-body { padding: 0 28px 32px; }
+
+.reels-intro {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.reels-handle {
+  color: var(--green);
+  font-weight: 700;
+  text-decoration: none;
+}
+.reels-handle:hover { text-decoration: underline; }
+
+.reels-strip-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reels-strip {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 4px 12px;
+  flex: 1;
+}
+.reels-strip::-webkit-scrollbar { height: 4px; }
+.reels-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.reel-item {
+  flex: 0 0 240px;
+  height: 420px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  scroll-snap-align: start;
+  background: var(--cream);
+}
+.reel-item iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none;
+}
+
+.reel-placeholder {
+  border: 2px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.reel-placeholder i { font-size: 2rem; opacity: 0.3; }
+
+.reels-arrow {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: background 0.2s, transform 0.15s;
+  z-index: 2;
+}
+.reels-arrow:hover { background: var(--green); transform: scale(1.08); }
+
+@media (max-width: 600px) {
+  .reels-arrow { display: none; }
+  .reel-item { flex: 0 0 75vw; height: 380px; }
+  .reels-body { padding: 0 16px 24px; }
+}

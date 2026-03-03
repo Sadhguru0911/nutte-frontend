@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // About modal close button
   const closeAboutBtn = document.getElementById('closeAboutBtn');
   if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
+  const closeReelsBtn = document.getElementById('closeReelsBtn');
+  if (closeReelsBtn) closeReelsBtn.addEventListener('click', closeReels);
 });
 
 /* UI bind */
@@ -53,6 +55,7 @@ function bindUI() {
     if ($('cartSidebar').classList.contains('open')) toggleCart();
     if ($('customerModal').style.display !== 'none') closeCustomerModal();
     if ($('aboutModal') && $('aboutModal').style.display !== 'none') closeAbout();
+    if ($('reelsModal') && $('reelsModal').style.display !== 'none') closeReels();
   });
 }
 
@@ -434,4 +437,60 @@ function closeAbout() {
   $('overlay').style.display = 'none';
   $('aboutModal').style.display = 'none';
   $('aboutModal').setAttribute('aria-hidden', 'true');
+}
+
+/* ── Reels modal ── */
+async function openReels() {
+  $('overlay').style.display = 'block';
+  $('reelsModal').style.display = 'flex';
+  $('reelsModal').setAttribute('aria-hidden', 'false');
+  await loadReels();
+}
+
+async function loadReels() {
+  const strip = $('reelsStrip');
+  if (!strip || strip.dataset.loaded === 'true') return;
+  try {
+    const res = await fetch('reels.txt?nocache=' + Date.now());
+    const text = await res.text();
+
+    // Parse: strip comment lines, split by blank lines
+    const lines = text.split('\n').filter(l => !l.trim().startsWith('#'));
+    const blocks = lines.join('\n').split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+
+    if (blocks.length === 0) {
+      strip.innerHTML = `<div class="reel-placeholder reel-item"><i class="fab fa-instagram"></i><p>No reels yet.<br>Add embed codes to reels.txt</p></div>`;
+      return;
+    }
+
+    strip.innerHTML = blocks.map(embed => `
+      <div class="reel-item">${embed}</div>
+    `).join('');
+
+    // Load Instagram embed script if not already loaded
+    if (!window.instgrm) {
+      const s = document.createElement('script');
+      s.src = 'https://www.instagram.com/embed.js';
+      s.async = true;
+      document.body.appendChild(s);
+    } else {
+      window.instgrm.Embeds.process();
+    }
+
+    strip.dataset.loaded = 'true';
+  } catch(e) {
+    console.error('Could not load reels.txt', e);
+    strip.innerHTML = `<div class="reel-placeholder reel-item"><i class="fab fa-instagram"></i><p>Could not load reels.</p></div>`;
+  }
+}
+
+function closeReels() {
+  $('overlay').style.display = 'none';
+  $('reelsModal').style.display = 'none';
+  $('reelsModal').setAttribute('aria-hidden', 'true');
+}
+
+function scrollReels(direction) {
+  const strip = $('reelsStrip');
+  if (strip) strip.scrollBy({ left: direction * 260, behavior: 'smooth' });
 }
