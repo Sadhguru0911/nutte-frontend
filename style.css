@@ -665,3 +665,191 @@ main {
   .nav-inner { padding: 0 16px; }
   .hero { padding: 16px 16px 0; }
 }
+
+/* ── NAV ABOUT BUTTON ── */
+.nav-about-btn {
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--black);
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.nav-about-btn:hover { background: var(--green-light); border-color: var(--green-mid); }
+
+/* ── ABOUT MODAL ── */
+.modal-box--about { max-width: 660px; }
+
+.about-body { padding: 0 28px 32px; }
+
+.about-hero {
+  text-align: center;
+  padding: 32px 20px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+.about-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+.about-tagline {
+  font-size: 1rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* Stats row */
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.about-stat {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 20px 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.about-stat-num {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--green);
+  letter-spacing: -0.03em;
+}
+.about-stat-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Mission / Vision cards */
+.about-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.about-card {
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  border: 1px solid var(--border);
+}
+.about-card--mission { background: var(--black); color: var(--white); }
+.about-card--vision  { background: var(--green); color: var(--white); }
+.about-card-icon {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  opacity: 0.7;
+}
+.about-card h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.about-card p {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+/* Sections */
+.about-section { margin-bottom: 28px; }
+.about-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Values */
+.about-values { display: flex; flex-direction: column; gap: 10px; }
+.about-value {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.about-value i {
+  color: var(--green);
+  font-size: 0.85rem;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* Product tags */
+.about-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.about-products span {
+  background: var(--green-light);
+  color: var(--green);
+  border: 1px solid rgba(26, 92, 58, 0.2);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+
+/* Contact */
+.about-contact {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  border: 1px solid var(--border);
+}
+.about-contact-name {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 14px;
+}
+.about-contact-name span {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin-left: 6px;
+}
+.about-contact-links { display: flex; flex-direction: column; gap: 10px; }
+.about-contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--black);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.about-contact-item:hover { color: var(--green); }
+.about-contact-item i { color: var(--green); width: 16px; text-align: center; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .about-cards { grid-template-columns: 1fr; }
+  .about-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .about-stat-num { font-size: 1.4rem; }
+  .about-body { padding: 0 16px 24px; }
+  .about-hero { padding: 24px 12px 20px; }
+  .nav-about-btn { display: none; }
+}

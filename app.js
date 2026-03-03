@@ -49,6 +49,7 @@ function bindUI() {
   $('overlay').addEventListener('click', () => {
     if ($('cartSidebar').classList.contains('open')) toggleCart();
     if ($('customerModal').style.display !== 'none') closeCustomerModal();
+    if ($('aboutModal') && $('aboutModal').style.display !== 'none') closeAbout();
   });
 }
 
@@ -418,3 +419,21 @@ function showCartToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2800);
 }
+
+/* ── About modal ── */
+function openAbout() {
+  $('overlay').style.display = 'block';
+  $('aboutModal').style.display = 'flex';
+  $('aboutModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeAbout() {
+  $('overlay').style.display = 'none';
+  $('aboutModal').style.display = 'none';
+  $('aboutModal').setAttribute('aria-hidden', 'true');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const closeAboutBtn = document.getElementById('closeAboutBtn');
+  if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
+});

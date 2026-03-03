@@ -25,6 +25,7 @@
           <i class="fas fa-arrow-left"></i> Back
         </button>
         <span class="nav-tagline">Healthy eats, locally sourced</span>
+        <button onclick="openAbout()" class="nav-about-btn">About Us</button>
         <button id="openCartBtn" class="cart-btn">
           <i class="fas fa-bag-shopping"></i>
           <span id="cartCount" class="cart-count">0</span>
@@ -47,10 +48,10 @@
         <div class="hero-deco hero-deco--circle"></div>
       </div>
 
-      <div class="hero-card hero-card--about" onclick="scrollToSection('categorySection')">
+      <div class="hero-card hero-card--about" onclick="openAbout()">
         <p class="hero-label">About us</p>
-        <p class="hero-stat">100%</p>
-        <p class="hero-stat-label">Locally Sourced</p>
+        <p class="hero-stat">450+</p>
+        <p class="hero-stat-label">Happy Members</p>
       </div>
 
       <div class="hero-card hero-card--fresh" onclick="scrollToSection('categorySection')">
@@ -166,6 +167,81 @@
           <button type="submit" class="btn-primary btn-block">Submit Order <i class="fas fa-check"></i></button>
         </form>
         <div id="lookupResult" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT MODAL -->
+  <div id="aboutModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--about">
+      <div class="modal-header">
+        <h2 class="modal-title">About Us</h2>
+        <button id="closeAboutBtn" class="icon-btn" aria-label="Close"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body about-body">
+
+        <div class="about-hero">
+          <h3 class="about-brand">CommunitE</h3>
+          <p class="about-tagline">"Come Unite" — Bringing your community together, one order at a time.</p>
+        </div>
+
+        <div class="about-stats">
+          <div class="about-stat">
+            <span class="about-stat-num">450+</span>
+            <span class="about-stat-label">Members</span>
+          </div>
+          <div class="about-stat">
+            <span class="about-stat-num">20+</span>
+            <span class="about-stat-label">Societies</span>
+          </div>
+          <div class="about-stat">
+            <span class="about-stat-num">₹50</span>
+            <span class="about-stat-label">Per Order</span>
+          </div>
+        </div>
+
+        <div class="about-cards">
+          <div class="about-card about-card--mission">
+            <div class="about-card-icon"><i class="fas fa-bullseye"></i></div>
+            <h4>Our Mission</h4>
+            <p>To create a platform where people find high-quality products at competitive prices, while fostering a true sense of community and collaboration.</p>
+          </div>
+          <div class="about-card about-card--vision">
+            <div class="about-card-icon"><i class="fas fa-eye"></i></div>
+            <h4>Our Vision</h4>
+            <p>We believe that when people come together, great things happen. By buying in bulk, we pass the price advantage directly to our members — no middlemen, just quality.</p>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h4 class="about-section-title">Our Values</h4>
+          <div class="about-values">
+            <div class="about-value"><i class="fas fa-star"></i><span><strong>Quality</strong> — Every product meets the highest standards, no compromises.</span></div>
+            <div class="about-value"><i class="fas fa-bolt"></i><span><strong>Convenience</strong> — Shopping made easy, delivered to your door.</span></div>
+            <div class="about-value"><i class="fas fa-tag"></i><span><strong>Value</strong> — Competitive pricing without ever compromising on quality.</span></div>
+            <div class="about-value"><i class="fas fa-heart"></i><span><strong>Community</strong> — We believe in the power of coming together.</span></div>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h4 class="about-section-title">What We Offer</h4>
+          <div class="about-products">
+            <span>Dry Fruits</span><span>Dates</span><span>Whole Spices</span>
+            <span>Cold-Pressed Oils</span><span>A2 Ghee</span><span>Honey</span>
+            <span>Peanut Butter</span><span>Millets, Rice & Atta</span><span>Snacks</span>
+          </div>
+        </div>
+
+        <div class="about-contact">
+          <h4 class="about-section-title">Get in Touch</h4>
+          <p class="about-contact-name">Sameer Gupta <span>Founder &amp; Managing Director</span></p>
+          <div class="about-contact-links">
+            <a href="tel:+918951048013" class="about-contact-item"><i class="fas fa-phone"></i> +91 89510 48013</a>
+            <a href="mailto:sameer.sg.gupta@gmail.com" class="about-contact-item"><i class="fas fa-envelope"></i> sameer.sg.gupta@gmail.com</a>
+            <a href="https://instagram.com/dryfruits_communitE" target="_blank" class="about-contact-item"><i class="fab fa-instagram"></i> @dryfruits_communitE</a>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
