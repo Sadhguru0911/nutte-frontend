@@ -230,12 +230,93 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   z-index: 1;
 }
 
+/* ── FLUID BLOB ANIMATIONS ── */
+
+/* Blob base — sits behind card content */
+.hero-card::before,
+.hero-card::after {
+  content: '';
+  position: absolute;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  opacity: 0.18;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Large slow blob */
+.hero-card::before {
+  width: 320px;
+  height: 320px;
+  top: -80px;
+  right: -80px;
+  animation: blob1 9s ease-in-out infinite;
+}
+
+/* Small fast blob */
+.hero-card::after {
+  width: 180px;
+  height: 180px;
+  bottom: -40px;
+  left: -40px;
+  animation: blob2 7s ease-in-out infinite;
+  opacity: 0.12;
+}
+
+/* Main card — accent coloured blobs */
+.hero-card--main::before { background: var(--accent); }
+.hero-card--main::after  { background: var(--accent); animation-delay: -3s; }
+
+/* About card — dark blobs */
+.hero-card--about::before { background: #000; opacity: 0.08; }
+.hero-card--about::after  { background: #000; opacity: 0.06; animation-delay: -2s; }
+
+/* Fresh/Reels card — white blobs */
+.hero-card--fresh::before { background: #fff; opacity: 0.15; }
+.hero-card--fresh::after  { background: #fff; opacity: 0.1; animation-delay: -4s; }
+
+/* Blob morph keyframes */
+@keyframes blob1 {
+  0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1) rotate(0deg); }
+  25%      { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: scale(1.05) rotate(8deg); }
+  50%      { border-radius: 50% 60% 30% 60% / 30% 40% 70% 50%; transform: scale(0.95) rotate(-6deg); }
+  75%      { border-radius: 40% 30% 60% 50% / 70% 50% 40% 30%; transform: scale(1.08) rotate(4deg); }
+}
+
+@keyframes blob2 {
+  0%,100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: scale(1) rotate(0deg); }
+  33%      { border-radius: 70% 30% 40% 60% / 60% 40% 50% 40%; transform: scale(1.1) rotate(-10deg); }
+  66%      { border-radius: 30% 70% 50% 50% / 50% 70% 30% 60%; transform: scale(0.92) rotate(7deg); }
+}
+
+/* Card image zoom on hover — fluid feel */
+.hero-card:hover::before { animation-play-state: paused; opacity: 0.28; transition: opacity 0.4s; }
+.hero-card:hover::after  { animation-play-state: paused; opacity: 0.18; transition: opacity 0.4s; }
+
+/* Make sure text stays above blobs */
+.hero-card-inner,
+.hero-label,
+.hero-title,
+.hero-sub,
+.hero-cta,
+.hero-stat,
+.hero-stat-label,
+.hero-icon { position: relative; z-index: 2; }
+
 /* Hero entrance animation */
 .hero-card { opacity: 0; transform: translateY(24px); animation: fadeUp 0.7s var(--ease-spring) forwards; }
 .hero-card:nth-child(1) { animation-delay: 0.05s; }
 .hero-card:nth-child(2) { animation-delay: 0.15s; }
 .hero-card:nth-child(3) { animation-delay: 0.25s; }
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* Subtle float on category cards after they appear */
+.category-card.card-animated { animation: cardFloat 4s ease-in-out infinite; }
+.category-card.card-animated:nth-child(2n) { animation-delay: -1.5s; }
+.category-card.card-animated:nth-child(3n) { animation-delay: -3s; }
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
 
 /* ── MAIN ── */
 main {
@@ -855,9 +936,9 @@ main {
 }
 
 /* ── REELS MODAL ── */
-.modal-box--reels { max-width: 960px; }
+.modal-box--reels { max-width: 860px; }
 
-.reels-body { padding: 0 24px 32px; }
+.reels-body { padding: 0 28px 32px; }
 
 .reels-intro {
   font-size: 0.9rem;
@@ -865,31 +946,48 @@ main {
   margin-bottom: 20px;
   text-align: center;
 }
-.reels-handle { color: var(--green); font-weight: 700; text-decoration: none; }
+.reels-handle {
+  color: var(--green);
+  font-weight: 700;
+  text-decoration: none;
+}
 .reels-handle:hover { text-decoration: underline; }
 
-.reels-strip-wrapper { position: relative; }
+.reels-strip-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .reels-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  padding: 4px;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 4px 12px;
+  flex: 1;
 }
+.reels-strip::-webkit-scrollbar { height: 4px; }
+.reels-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
 .reel-item {
+  flex: 0 0 240px;
+  height: 420px;
   border-radius: var(--radius);
   overflow: hidden;
+  scroll-snap-align: start;
   background: var(--cream);
-  border: 1px solid var(--border);
-  min-height: 480px;
+}
+.reel-item iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none;
 }
 
-.reel-item iframe,
-.reel-item blockquote { width: 100% !important; border: none !important; margin: 0 !important; }
-
 .reel-placeholder {
-  min-height: 480px;
   border: 2px dashed var(--border);
   display: flex;
   flex-direction: column;
@@ -902,13 +1000,26 @@ main {
 }
 .reel-placeholder i { font-size: 2rem; opacity: 0.3; }
 
-/* Hide arrows — not needed for grid */
-.reels-arrow { display: none; }
-
-@media (max-width: 700px) {
-  .reels-strip { grid-template-columns: 1fr 1fr; }
-  .reels-body { padding: 0 12px 24px; }
+.reels-arrow {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: background 0.2s, transform 0.15s;
+  z-index: 2;
 }
-@media (max-width: 480px) {
-  .reels-strip { grid-template-columns: 1fr; }
+.reels-arrow:hover { background: var(--green); transform: scale(1.08); }
+
+@media (max-width: 600px) {
+  .reels-arrow { display: none; }
+  .reel-item { flex: 0 0 75vw; height: 380px; }
+  .reels-body { padding: 0 16px 24px; }
 }
