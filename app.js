@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
   bindUI();
   loadCategories();
   initScrollAnimations();
+  // About modal close button
+  const closeAboutBtn = document.getElementById('closeAboutBtn');
+  if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
 });
 
 /* UI bind */
@@ -432,8 +435,3 @@ function closeAbout() {
   $('aboutModal').style.display = 'none';
   $('aboutModal').setAttribute('aria-hidden', 'true');
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const closeAboutBtn = document.getElementById('closeAboutBtn');
-  if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
-});
