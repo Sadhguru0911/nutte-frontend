@@ -855,9 +855,9 @@ main {
 }
 
 /* ── REELS MODAL ── */
-.modal-box--reels { max-width: 860px; }
+.modal-box--reels { max-width: 920px; }
 
-.reels-body { padding: 0 28px 32px; }
+.reels-body { padding: 0 20px 32px; }
 
 .reels-intro {
   font-size: 0.9rem;
@@ -876,34 +876,39 @@ main {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
 .reels-strip {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   overflow-x: auto;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding: 8px 4px 12px;
+  padding: 8px 8px 16px;
   flex: 1;
 }
 .reels-strip::-webkit-scrollbar { height: 4px; }
 .reels-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
 .reel-item {
-  flex: 0 0 240px;
-  height: 420px;
+  flex: 0 0 320px;
+  height: 560px;
   border-radius: var(--radius);
   overflow: hidden;
   scroll-snap-align: start;
   background: var(--cream);
+  border: 1px solid var(--border);
 }
-.reel-item iframe {
+
+/* Force Instagram embed to fill the card */
+.reel-item iframe,
+.reel-item blockquote {
   width: 100% !important;
+  min-width: 100% !important;
   height: 100% !important;
-  border: none;
+  border: none !important;
+  margin: 0 !important;
 }
 
 .reel-placeholder {
@@ -919,10 +924,13 @@ main {
 }
 .reel-placeholder i { font-size: 2rem; opacity: 0.3; }
 
+/* Arrows overlaid on edges of the strip */
 .reels-arrow {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--black);
   color: var(--white);
@@ -931,14 +939,17 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
-  transition: background 0.2s, transform 0.15s;
-  z-index: 2;
+  font-size: 0.9rem;
+  transition: background 0.2s, transform 0.2s;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-.reels-arrow:hover { background: var(--green); transform: scale(1.08); }
+.reels-arrow--left  { left: -12px; }
+.reels-arrow--right { right: -12px; }
+.reels-arrow:hover  { background: var(--green); transform: translateY(-50%) scale(1.1); }
 
 @media (max-width: 600px) {
   .reels-arrow { display: none; }
-  .reel-item { flex: 0 0 75vw; height: 380px; }
-  .reels-body { padding: 0 16px 24px; }
+  .reel-item { flex: 0 0 82vw; height: 460px; }
+  .reels-body { padding: 0 12px 24px; }
 }
