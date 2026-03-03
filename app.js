@@ -454,16 +454,21 @@ async function loadReels() {
     const res = await fetch('reels.txt?nocache=' + Date.now());
     const text = await res.text();
 
-    // Parse: strip comment lines, split by blank lines
+    // Parse: strip comment lines, then split by each <blockquote> block
+    // Works regardless of spacing between embeds
     const lines = text.split('\n').filter(l => !l.trim().startsWith('#'));
-    const blocks = lines.join('\n').split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+    const cleaned = lines.join('\n');
 
-    if (blocks.length === 0) {
+    // Extract each blockquote (one per reel) — ignore the duplicate <script> tags
+    const blockquotes = [...cleaned.matchAll(/<blockquote[\s\S]*?<\/blockquote>/gi)].map(m => m[0]);
+
+    if (blockquotes.length === 0) {
       strip.innerHTML = `<div class="reel-placeholder reel-item"><i class="fab fa-instagram"></i><p>No reels yet.<br>Add embed codes to reels.txt</p></div>`;
       return;
     }
 
-    strip.innerHTML = blocks.map(embed => `
+    // Add the embed script once at the end
+    strip.innerHTML = blockquotes.map(embed => `
       <div class="reel-item">${embed}</div>
     `).join('');
 
