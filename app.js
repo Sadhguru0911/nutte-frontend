@@ -318,6 +318,7 @@ function proceedToCheckout() {
 function openCustomerModal() {
   $('overlay').style.display = 'block';
   $('customerModal').style.display = 'flex';
+  $('customerForm').dataset.isNew = 'false';
   $('mobileLookupRow').style.display = 'block';
   $('customerForm').style.display = 'none';
 }
@@ -345,6 +346,7 @@ async function lookupCustomerFromModal() {
       $('deliveryInstructions').value = c.delivery_instructions || '';
     } else {
       $('mobileNumber').value = mobile;
+      $('customerForm').dataset.isNew = 'true'; // flag: new customer
     }
   } catch (e) {
     alert('Error looking up customer. Please try again.');
@@ -379,6 +381,25 @@ async function submitOrder(e) {
   try {
     const resp = await apiCall('/submit-order', { method: 'POST', body: JSON.stringify(order) });
     if (resp.success) {
+      // If this was a new customer, save them for future lookups
+      if ($('customerForm').dataset.isNew === 'true') {
+        try {
+          await apiCall('/new-customer', {
+            method: 'POST',
+            body: JSON.stringify({
+              full_name: fullName,
+              mobile_number: mobileNumber,
+              email,
+              apt_number: aptNumber,
+              community,
+              delivery_instructions: deliveryInstructions || ''
+            })
+          });
+          delete $('customerForm').dataset.isNew;
+        } catch (saveErr) {
+          console.warn('Customer save failed (non-critical):', saveErr);
+        }
+      }
       alert(`Order submitted! Order ID: ${resp.order_id}`);
       cart = [];
       updateCartCount();
