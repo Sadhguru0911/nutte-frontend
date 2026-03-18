@@ -65,7 +65,6 @@ function bindUI() {
   $('backToCategoriesBtn').addEventListener('click', goBackToCategories);
   $('lookupBtn').addEventListener('click', lookupCustomerFromModal);
   $('closeCustomerModalBtn').addEventListener('click', closeCustomerModal);
-  $('customerForm').addEventListener('submit', submitOrder);
   $('overlay').addEventListener('click', () => {
     if ($('cartSidebar').classList.contains('open')) toggleCart();
     if ($('customerModal').style.display !== 'none') closeCustomerModal();
@@ -411,6 +410,7 @@ function openCustomerModal() {
   $('customerForm').dataset.isNew = 'false';
   $('mobileLookupRow').style.display = 'block';
   $('customerForm').style.display = 'none';
+  $('paymentStep').style.display = 'none';
 }
 
 function closeCustomerModal() {
@@ -484,9 +484,54 @@ function applyMembershipStatus(customer, mobile) {
   renderCart();
 }
 
-/* order submit */
-async function submitOrder(e) {
-  e.preventDefault();
+/* Step 1 → Step 2: validate details, show payment */
+function goToPaymentStep() {
+  const fullName = $('fullName').value.trim();
+  const mobileNumber = $('mobileNumber').value.trim();
+  const email = $('email').value.trim();
+  const aptNumber = $('aptNumber').value.trim();
+  const community = $('community').value.trim();
+
+  if (!fullName || !mobileNumber || !email || !aptNumber || !community) {
+    alert('Please fill all required fields before proceeding to payment');
+    return;
+  }
+
+  // Calculate amounts to show in payment step
+  const productItems = cart.filter(i => !i._isMembershipFee);
+  const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
+  const total = subtotal + membershipFeeAmount + DELIVERY_CHARGE;
+
+  $('oasSubtotal').textContent = subtotal;
+  $('oasTotal').textContent = total;
+
+  if (membershipAddedToCart && membershipFeeAmount > 0) {
+    $('oasMemberRow').style.display = 'flex';
+    $('oasMemberFee').textContent = membershipFeeAmount;
+    $('oasMemberPlan').textContent = selectedMemberPlan === 'annual' ? 'Annual' : 'Monthly';
+  } else {
+    $('oasMemberRow').style.display = 'none';
+  }
+
+  $('customerForm').style.display = 'none';
+  $('paymentStep').style.display = 'block';
+  $('orderRRNumber').value = '';
+}
+
+/* Step 2 → Step 1: back to details */
+function backToDetailsStep() {
+  $('paymentStep').style.display = 'none';
+  $('customerForm').style.display = 'block';
+}
+
+/* Final submit with RR number */
+async function submitOrderWithPayment() {
+  const rrNumber = ($('orderRRNumber').value || '').trim();
+  if (!rrNumber) {
+    alert('Please enter your UPI Transaction ID / RR Number after making the payment');
+    return;
+  }
+
   const fullName = $('fullName').value.trim();
   const mobileNumber = $('mobileNumber').value.trim();
   const email = $('email').value.trim();
@@ -494,13 +539,9 @@ async function submitOrder(e) {
   const community = $('community').value.trim();
   const deliveryInstructions = $('deliveryInstructions').value.trim();
 
-  if (!fullName || !mobileNumber || !email || !aptNumber || !community) {
-    alert('Please fill all required fields');
-    return;
-  }
-
   const productItems = cart.filter(i => !i._isMembershipFee);
   const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
+
   const order = {
     customer: { full_name: fullName, mobile_number: mobileNumber, email, apt_number: aptNumber, community },
     cart: productItems,
@@ -508,6 +549,7 @@ async function submitOrder(e) {
     delivery_charge: DELIVERY_CHARGE,
     total_amount: subtotal + membershipFeeAmount + DELIVERY_CHARGE,
     delivery_instructions: deliveryInstructions || '',
+    upi_rr_number: rrNumber,
     is_member: memberState.status === 'active' || memberState.status === 'pending' || membershipAddedToCart,
     membership_plan: membershipAddedToCart ? selectedMemberPlan : null,
     membership_fee: membershipAddedToCart ? membershipFeeAmount : 0
@@ -516,27 +558,41 @@ async function submitOrder(e) {
   try {
     const resp = await apiCall('/submit-order', { method: 'POST', body: JSON.stringify(order) });
     if (resp.success) {
-      // If this was a new customer, save them for future lookups
+      // Save new customer if first time
       if ($('customerForm').dataset.isNew === 'true') {
         try {
           await apiCall('/new-customer', {
             method: 'POST',
-            body: JSON.stringify({
-              full_name: fullName,
-              mobile_number: mobileNumber,
-              email,
-              apt_number: aptNumber,
-              community,
-              delivery_instructions: deliveryInstructions || ''
-            })
+            body: JSON.stringify({ full_name: fullName, mobile_number: mobileNumber, email, apt_number: aptNumber, community, delivery_instructions: deliveryInstructions || '' })
           });
           delete $('customerForm').dataset.isNew;
         } catch (saveErr) {
           console.warn('Customer save failed (non-critical):', saveErr);
         }
       }
-      alert(`Order submitted! Order ID: ${resp.order_id}`);
+      // Save membership if bundled
+      if (membershipAddedToCart) {
+        try {
+          await apiCall('/join-member', {
+            method: 'POST',
+            body: JSON.stringify({
+              mobile_number: mobileNumber,
+              full_name: fullName,
+              email,
+              plan: selectedMemberPlan,
+              amount_paid: membershipFeeAmount,
+              rr_number: rrNumber
+            })
+          });
+        } catch (memErr) {
+          console.warn('Membership save failed (non-critical):', memErr);
+        }
+      }
+      alert(`✅ Order confirmed! Order ID: ${resp.order_id}\n\nWe'll verify your payment and process your order shortly.`);
       cart = [];
+      membershipAddedToCart = false;
+      membershipFeeAmount = 0;
+      selectedMemberPlan = null;
       updateCartCount();
       renderCart();
       closeCustomerModal();
@@ -544,7 +600,7 @@ async function submitOrder(e) {
       alert('Could not submit order: ' + (resp.message || 'Unknown error'));
     }
   } catch (e) {
-    alert('Error submitting order. Try again later.');
+    alert('Error submitting order. Please try again.');
   }
 }
 

@@ -208,8 +208,48 @@
               <textarea id="deliveryInstructions" class="field-input field-textarea" name="deliveryInstructions"></textarea>
             </div>
           </div>
-          <button type="submit" class="btn-primary btn-block">Submit Order <i class="fas fa-check"></i></button>
+          <button type="button" class="btn-primary btn-block" onclick="goToPaymentStep()">
+            Continue to Payment <i class="fas fa-arrow-right"></i>
+          </button>
         </form>
+
+        <!-- PAYMENT STEP -->
+        <div id="paymentStep" style="display:none">
+          <div class="order-amount-summary">
+            <div class="oas-row"><span>Products</span><span>₹<span id="oasSubtotal">0</span></span></div>
+            <div class="oas-row" id="oasMemberRow" style="display:none">
+              <span>Membership <span id="oasMemberPlan" class="plan-badge"></span></span>
+              <span>₹<span id="oasMemberFee">0</span></span>
+            </div>
+            <div class="oas-row"><span>Delivery</span><span>₹50</span></div>
+            <div class="oas-total"><span>Pay exactly</span><strong>₹<span id="oasTotal">0</span></strong></div>
+          </div>
+
+          <div class="upi-payment-box">
+            <p class="upi-instruction">Scan QR or use UPI ID to pay the amount above</p>
+            <img src="assets/upi_qr.jpg" alt="UPI QR Code" class="upi-qr-img" />
+            <div class="upi-id-box">
+              <span class="upi-id-label">UPI ID</span>
+              <span class="upi-id-value">Mab.037213027680043@axisbank</span>
+              <button class="upi-copy-btn" onclick="copyUPI()"><i class="fas fa-copy"></i></button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:16px">
+            <label class="field-label">UPI Transaction ID / RR Number <span style="color:var(--green)">*</span></label>
+            <input id="orderRRNumber" class="field-input" type="text" placeholder="Enter 12-digit transaction ID after paying" />
+          </div>
+
+          <div class="payment-step-actions">
+            <button class="btn-secondary" onclick="backToDetailsStep()">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button class="btn-primary" onclick="submitOrderWithPayment()">
+              Confirm Order <i class="fas fa-check"></i>
+            </button>
+          </div>
+        </div>
+
         <div id="lookupResult" style="display:none"></div>
       </div>
     </div>
@@ -281,7 +321,7 @@
           <p class="about-contact-name">Sameer Gupta <span>Founder &amp; Managing Director</span></p>
           <div class="about-contact-links">
             <a href="tel:+918951048013" class="about-contact-item"><i class="fas fa-phone"></i> +91 89510 48013</a>
-            <a href="mailto:sameer.sg.gupta@gmail.com" class="about-contact-item"><i class="fas fa-envelope"></i> sameer.sg.gupta@gmail.com</a>
+            <a href="/cdn-cgi/l/email-protection#1063717d7575623e63773e776560647150777d71797c3e737f7d" class="about-contact-item"><i class="fas fa-envelope"></i> <span class="__cf_email__" data-cfemail="91e2f0fcf4f4e3bfe2f6bff6e4e1e5f0d1f6fcf0f8fdbff2fefc">[email&#160;protected]</span></a>
             <a href="https://instagram.com/dryfruits_communitE" target="_blank" class="about-contact-item"><i class="fab fa-instagram"></i> @dryfruits_communitE</a>
           </div>
         </div>
@@ -422,13 +462,4 @@
               <div class="mac-row"><span>Plan</span><strong id="memberActivePlan"></strong></div>
               <div class="mac-row"><span>Valid until</span><strong id="memberActiveExpiry"></strong></div>
             </div>
-            <p class="mac-note">You're enjoying exclusive member pricing on all products 🎉</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-</body>
-</html>
+            <p class="mac-note">Yo
