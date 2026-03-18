@@ -131,7 +131,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .hero-grid {
   display: grid;
-  grid-template-columns: 1fr 240px 240px;
+  grid-template-columns: 1fr 200px 200px 200px;
   grid-template-rows: 300px;
   gap: 16px;
 }
@@ -165,6 +165,25 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+/* Gold membership card */
+.hero-card--member {
+  background: linear-gradient(135deg, #b8860b 0%, #d4a017 40%, #f5c842 70%, #b8860b 100%);
+  color: #1a1200;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.hero-card--member .hero-label { color: rgba(26,18,0,0.7); }
+.hero-card--member .hero-stat { font-size: 2.4rem; line-height: 1; }
+.hero-member-hint {
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(0,0,0,0.15);
+  border-radius: 999px;
+  padding: 4px 10px;
+  display: inline-block;
+  width: fit-content;
 }
 
 .hero-card-inner { position: relative; z-index: 2; }
@@ -706,7 +725,7 @@ main {
 @media (max-width: 960px) {
   .nav-tagline { display: none; }
   .hero-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto;
     gap: 12px;
   }
@@ -715,6 +734,7 @@ main {
     min-height: 220px;
   }
   .hero-card--about,
+  .hero-card--member,
   .hero-card--fresh { min-height: 160px; }
   .hero { padding: 24px 20px 0; }
   main { padding: 40px 20px 60px; }
@@ -725,11 +745,11 @@ main {
 
 @media (max-width: 600px) {
   .hero-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
   }
-  .hero-card--main { min-height: 200px; padding: 28px; }
-  .hero-card--about, .hero-card--fresh { min-height: 140px; padding: 24px; }
+  .hero-card--main { grid-column: 1 / -1; min-height: 200px; padding: 28px; }
+  .hero-card--about, .hero-card--member, .hero-card--fresh { min-height: 140px; padding: 20px; }
   .hero-title { font-size: 2.4rem; }
   .hero-stat { font-size: 2.4rem; }
   .cart-sidebar { width: 100%; right: -100%; border-left: none; border-top: 1px solid var(--border); border-radius: 20px 20px 0 0; top: auto; bottom: -100%; height: 90vh; transition: bottom 0.4s var(--ease-spring), right 0s; }
@@ -745,6 +765,8 @@ main {
   main { padding: 32px 16px 60px; }
   .nav-inner { padding: 0 16px; }
   .hero { padding: 16px 16px 0; }
+  .member-login-btn span { display: none; }
+  .member-plans { grid-template-columns: 1fr; }
 }
 
 /* ── NAV ABOUT BUTTON ── */
@@ -1022,4 +1044,265 @@ main {
   .reels-arrow { display: none; }
   .reel-item { flex: 0 0 75vw; height: 380px; }
   .reels-body { padding: 0 16px 24px; }
+}
+
+/* ── CSS VARIABLES ADDITIONS ── */
+:root { --gold: #d4a017; --gold-dark: #b8860b; --gold-light: #f5c842; }
+
+/* ── HERO TAGLINE SMALL ── */
+.hero-tagline-small {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  margin-bottom: 16px;
+  margin-top: -8px;
+}
+
+/* ── MEMBER LOGIN BUTTON (nav) ── */
+.member-login-btn {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  color: #1a1200;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s, box-shadow 0.2s;
+  margin-right: 8px;
+}
+.member-login-btn:hover { transform: scale(1.04); box-shadow: 0 4px 16px rgba(212,160,23,0.35); }
+.member-login-btn.is-member { background: linear-gradient(135deg, #1a5c3a, #2d8a5e); color: #fff; }
+
+/* ── DUAL PRICING ON PRODUCT CARDS ── */
+.product-price-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.product-price--regular {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.product-price--member {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.product-price--member .member-tag {
+  font-size: 0.65rem;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  color: #1a1200;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.product-price--single {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+/* ── MEMBER SAVINGS BANNER (cart) ── */
+.member-savings-banner,
+.renewal-banner {
+  margin: 0 16px 12px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.member-savings-banner { background: linear-gradient(135deg, #1a5c3a, #2d8a5e); color: #fff; }
+.renewal-banner { background: linear-gradient(135deg, #7a4400, #b86000); color: #fff; }
+.msb-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+}
+.msb-icon { font-size: 1.4rem; flex-shrink: 0; }
+.msb-text { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 0.82rem; }
+.msb-text strong { font-size: 0.88rem; }
+.msb-btn {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.msb-btn:hover { background: rgba(255,255,255,0.35); }
+
+/* Membership fee cart row */
+.cart-row--membership { color: var(--gold-dark); font-weight: 600; }
+.plan-badge {
+  font-size: 0.68rem;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  color: #1a1200;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* ── MEMBERSHIP MODAL ── */
+.modal-box--membership { max-width: 520px; }
+.membership-body { padding: 24px; }
+
+.member-benefits { background: var(--cream); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+.member-benefits-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; }
+.member-benefit-list { display: flex; flex-direction: column; gap: 10px; }
+.member-benefit { display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; }
+.member-benefit i { color: var(--green); margin-top: 2px; flex-shrink: 0; }
+
+.member-plans-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+.member-plans { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.member-plan {
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+  position: relative;
+  text-align: center;
+}
+.member-plan:hover { border-color: var(--gold); transform: translateY(-2px); }
+.member-plan.selected { border-color: var(--gold-dark); background: #fffbf0; }
+.member-plan--featured { border-color: var(--gold); background: linear-gradient(135deg, #fffbf0, #fff8e0); }
+.member-plan--featured.selected { border-color: var(--gold-dark); background: #fff5cc; }
+.plan-save-tag {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  color: #1a1200;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.plan-badge-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; margin-bottom: 6px; }
+.plan-price { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; line-height: 1; }
+.plan-price span { font-size: 0.75rem; font-weight: 500; opacity: 0.6; }
+.plan-desc { font-size: 0.75rem; opacity: 0.65; margin-top: 6px; }
+
+/* Member confirm card */
+.member-confirm-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f0faf4;
+  border: 1.5px solid #a8dfbe;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+.member-confirm-card i { color: var(--green); font-size: 1.4rem; flex-shrink: 0; }
+.member-confirm-card strong { display: block; font-size: 0.95rem; }
+.member-confirm-card span { font-size: 0.8rem; color: var(--muted); }
+
+/* UPI payment box */
+.upi-payment-box {
+  background: var(--cream);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin: 16px 0;
+}
+.upi-instruction { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; }
+.upi-qr-img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  margin-bottom: 16px;
+  background: #fff;
+}
+.upi-id-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.upi-id-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.upi-id-value { font-size: 0.85rem; font-weight: 600; font-family: monospace; }
+.upi-copy-btn { background: none; border: none; cursor: pointer; color: var(--green); font-size: 0.9rem; padding: 4px; }
+.upi-note { font-size: 0.8rem; color: var(--muted); }
+.upi-note strong { color: var(--black); }
+.member-payment-summary {
+  background: linear-gradient(135deg, #fffbf0, #fff8e0);
+  border: 1.5px solid var(--gold);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 20px;
+  font-size: 0.88rem;
+}
+.member-payment-summary strong { color: var(--gold-dark); }
+
+/* Active member card */
+.member-active-card {
+  text-align: center;
+  padding: 24px 0;
+}
+.mac-crown { font-size: 3rem; margin-bottom: 12px; }
+.member-active-card h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 900; margin-bottom: 10px; }
+.mac-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  color: #1a1200;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+}
+.mac-details {
+  background: var(--cream);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.mac-row { display: flex; justify-content: space-between; font-size: 0.88rem; }
+.mac-row span { color: var(--muted); }
+.mac-note { font-size: 0.82rem; color: var(--muted); }
+
+/* ── RESPONSIVE — 4 hero cards ── */
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 220px 160px;
+  }
+  .hero-card--main { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .hero-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 200px 140px 140px;
+  }
+  .hero-card--main { grid-column: 1 / -1; }
+  .hero-card--member, .hero-card--fresh { min-height: 130px; padding: 20px; }
 }

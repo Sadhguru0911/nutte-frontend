@@ -4,10 +4,24 @@
 
 const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
 const DELIVERY_CHARGE = 50;
+const MEMBERSHIP_PRICES = { monthly: 400, annual: 3999 };
 
 let cart = [];
 let selectedCategory = null;
 let selectedSubcategory = null;
+
+// Membership state
+let memberState = {
+  isMember: false,
+  status: null,        // 'active' | 'pending' | 'expired' | null
+  plan: null,          // 'monthly' | 'annual'
+  expiry: null,
+  name: null,
+  mobile: null
+};
+let selectedMemberPlan = null;   // 'monthly' | 'annual'
+let membershipAddedToCart = false;
+let membershipFeeAmount = 0;
 
 /* fallback images */
 const DEFAULT_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=800&auto=format&fit=crop";
@@ -35,11 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
   bindUI();
   loadCategories();
   initScrollAnimations();
-  // About modal close button
   const closeAboutBtn = document.getElementById('closeAboutBtn');
   if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
   const closeReelsBtn = document.getElementById('closeReelsBtn');
   if (closeReelsBtn) closeReelsBtn.addEventListener('click', closeReels);
+  const closeMembershipBtn = document.getElementById('closeMembershipBtn');
+  if (closeMembershipBtn) closeMembershipBtn.addEventListener('click', closeMembershipModal);
 });
 
 /* UI bind */
@@ -56,6 +71,7 @@ function bindUI() {
     if ($('customerModal').style.display !== 'none') closeCustomerModal();
     if ($('aboutModal') && $('aboutModal').style.display !== 'none') closeAbout();
     if ($('reelsModal') && $('reelsModal').style.display !== 'none') closeReels();
+    if ($('membershipModal') && $('membershipModal').style.display !== 'none') closeMembershipModal();
   });
 }
 
@@ -149,6 +165,9 @@ async function selectSubcategory(category, subcat) {
       const id = `prod_${sanitizeId(name)}_${i}`;
       const img = first.image || first.Image || DEFAULT_PRODUCT_IMAGE;
       const firstPrice = first.price || first['Price (INR)'] || 0;
+      const firstMemberPrice = first.member_price || first['Member Price (INR)'] || null;
+
+      const priceHTML = buildPriceHTML(firstPrice, firstMemberPrice, `price_${id}`);
 
       return `
         <div class="product-card" id="${id}" style="animation-delay:${i * 70}ms">
@@ -161,9 +180,10 @@ async function selectSubcategory(category, subcat) {
                 ${variants.map(v => {
                   const variant = v.variant || v['Variant/Weight'] || 'Default';
                   const price = v.price || v['Price (INR)'] || v.Price || 0;
+                  const memberPrice = v.member_price || v['Member Price (INR)'] || '';
                   const vimg = v.image || v.Image || '';
                   const desc = v.description || v['Product Description'] || '';
-                  return `<option value="${escapeHtml(variant)}" data-price="${price}" data-img="${escapeHtml(vimg)}" data-desc="${escapeHtml(desc)}">${escapeHtml(variant)} — ₹${price}</option>`;
+                  return `<option value="${escapeHtml(variant)}" data-price="${price}" data-member-price="${memberPrice}" data-img="${escapeHtml(vimg)}" data-desc="${escapeHtml(desc)}">${escapeHtml(variant)} — ₹${price}</option>`;
                 }).join('')}
               </select>
               <div class="qty-control">
@@ -174,7 +194,7 @@ async function selectSubcategory(category, subcat) {
             </div>
           </div>
           <div class="product-card-footer">
-            <div class="product-price" id="price_${id}">₹${firstPrice}</div>
+            <div id="price_${id}">${priceHTML}</div>
             <button class="add-btn" onclick="addToCartFromCard('${id}','${escapeHtml(name)}')">
               <i class="fas fa-cart-plus"></i> Add
             </button>
@@ -196,14 +216,29 @@ function updateProductDisplay(unique) {
   if (!select) return;
   const opt = select.options[select.selectedIndex];
   const price = opt.dataset.price;
+  const memberPrice = opt.dataset.memberPrice || '';
   const img = opt.dataset.img;
   const desc = opt.dataset.desc;
   const priceEl = $(`price_${unique}`);
-  if (priceEl) priceEl.textContent = `₹${price}`;
+  if (priceEl) priceEl.innerHTML = buildPriceHTML(price, memberPrice, `price_${unique}`);
   const imgEl = document.querySelector(`#${unique} img`);
   if (imgEl && img) imgEl.src = img;
   const descEl = document.querySelector(`#${unique} .product-desc`);
   if (descEl && desc !== undefined) descEl.textContent = desc;
+}
+
+/* Build price HTML — shows dual price or single */
+function buildPriceHTML(regularPrice, memberPrice, id) {
+  const reg = parseFloat(regularPrice) || 0;
+  const mem = parseFloat(memberPrice) || 0;
+  if (mem > 0 && mem < reg) {
+    // Always show both prices; if active member highlight member price
+    return `<div class="product-price-wrap">
+      <span class="product-price--regular">₹${reg}</span>
+      <span class="product-price--member">₹${mem} <span class="member-tag">⭐ Member</span></span>
+    </div>`;
+  }
+  return `<span class="product-price--single">₹${reg}</span>`;
 }
 
 /* quantity */
@@ -222,15 +257,28 @@ function addToCartFromCard(unique, productName) {
   if (!select || !qtyInput) return;
   const opt = select.options[select.selectedIndex];
   const variant = opt.value;
-  const price = parseFloat(opt.dataset.price) || 0;
-  const qty = parseInt(qtyInput.value || '1', 10);
+  const regularPrice = parseFloat(opt.dataset.price) || 0;
+  const memberPrice = parseFloat(opt.dataset.memberPrice) || 0;
 
+  // Use member price if active/pending member AND member price exists
+  const isActiveMember = memberState.status === 'active' || memberState.status === 'pending' || membershipAddedToCart;
+  const effectivePrice = (isActiveMember && memberPrice > 0 && memberPrice < regularPrice) ? memberPrice : regularPrice;
+
+  const qty = parseInt(qtyInput.value || '1', 10);
   const existing = cart.find(i => i.product_name === productName && i.variant === variant);
   if (existing) {
     existing.quantity += qty;
     existing.total_price = existing.quantity * existing.unit_price;
   } else {
-    cart.push({ product_name: productName, variant, quantity: qty, unit_price: price, total_price: qty * price });
+    cart.push({
+      product_name: productName,
+      variant,
+      quantity: qty,
+      unit_price: effectivePrice,
+      regular_price: regularPrice,
+      member_price: memberPrice || regularPrice,
+      total_price: qty * effectivePrice
+    });
   }
   updateCartCount();
   renderCart();
@@ -252,36 +300,78 @@ function renderCart() {
       <div class="empty-cart">
         <i class="fas fa-shopping-bag"></i>
         <p>Your cart is empty</p>
-        <small>Add some tasty items to get started</small>
+        <small>Add some items to get started</small>
       </div>`;
     footer.style.display = 'none';
-  } else {
-    container.innerHTML = cart.map((it, idx) => `
-      <div class="cart-item">
-        <div class="cart-item-top">
-          <div class="cart-item-name">${escapeHtml(it.product_name)}</div>
-          <button class="icon-btn" onclick="removeFromCart(${idx})" style="width:28px;height:28px;font-size:0.85rem">
-            <i class="fas fa-xmark"></i>
-          </button>
-        </div>
-        <div class="cart-item-meta">${escapeHtml(it.variant)}</div>
-        <div class="cart-item-bottom">
-          <div class="cart-qty-group">
-            <button onclick="updateCartQuantity(${idx}, ${it.quantity - 1})">−</button>
-            <span>${it.quantity}</span>
-            <button onclick="updateCartQuantity(${idx}, ${it.quantity + 1})">+</button>
-          </div>
-          <div class="cart-item-price">₹${it.total_price}</div>
-        </div>
-      </div>
-    `).join('');
-    footer.style.display = 'block';
-    const subtotal = cart.reduce((s, i) => s + i.total_price, 0);
-    const total = subtotal + DELIVERY_CHARGE;
-    $('cartSubtotal').textContent = subtotal;
-    $('cartTotal').textContent = total;
-    $('deliveryCharge').textContent = DELIVERY_CHARGE;
+    $('memberSavingsBanner').style.display = 'none';
+    $('renewalBanner').style.display = 'none';
+    return;
   }
+
+  container.innerHTML = cart.map((it, idx) => `
+    <div class="cart-item">
+      <div class="cart-item-top">
+        <div class="cart-item-name">${escapeHtml(it.product_name)}</div>
+        <button class="icon-btn" onclick="removeFromCart(${idx})" style="width:28px;height:28px;font-size:0.85rem">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div class="cart-item-meta">${escapeHtml(it.variant)}</div>
+      <div class="cart-item-bottom">
+        <div class="cart-qty-group">
+          <button onclick="updateCartQuantity(${idx}, ${it.quantity - 1})">−</button>
+          <span>${it.quantity}</span>
+          <button onclick="updateCartQuantity(${idx}, ${it.quantity + 1})">+</button>
+        </div>
+        <div class="cart-item-price">₹${it.total_price}</div>
+      </div>
+    </div>
+  `).join('');
+
+  footer.style.display = 'block';
+
+  // Calculate subtotal (excluding membership fee)
+  const productItems = cart.filter(i => !i._isMembershipFee);
+  const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
+
+  // Calculate potential member savings (for non-members)
+  const isActiveMember = memberState.status === 'active' || memberState.status === 'pending' || membershipAddedToCart;
+  const memberSavings = productItems.reduce((s, i) => {
+    if (i.member_price && i.regular_price && i.member_price < i.regular_price) {
+      return s + ((i.regular_price - i.member_price) * i.quantity);
+    }
+    return s;
+  }, 0);
+
+  // Show/hide banners
+  if (!isActiveMember && memberSavings > 0) {
+    if (memberState.status === 'expired') {
+      $('renewalBanner').style.display = 'block';
+      $('memberSavingsBanner').style.display = 'none';
+      $('renewSavingsAmount').textContent = `₹${memberSavings}`;
+    } else {
+      $('memberSavingsBanner').style.display = 'block';
+      $('renewalBanner').style.display = 'none';
+      $('savingsAmount').textContent = `₹${memberSavings}`;
+    }
+  } else {
+    $('memberSavingsBanner').style.display = 'none';
+    $('renewalBanner').style.display = 'none';
+  }
+
+  // Membership fee row
+  if (membershipAddedToCart && membershipFeeAmount > 0) {
+    $('membershipFeeRow').style.display = 'flex';
+    $('membershipFeeAmount').textContent = membershipFeeAmount;
+    $('membershipPlanLabel').textContent = selectedMemberPlan === 'annual' ? 'Annual' : 'Monthly';
+  } else {
+    $('membershipFeeRow').style.display = 'none';
+  }
+
+  const totalWithMembership = subtotal + membershipFeeAmount + DELIVERY_CHARGE;
+  $('cartSubtotal').textContent = subtotal;
+  $('cartTotal').textContent = totalWithMembership;
+  $('deliveryCharge').textContent = DELIVERY_CHARGE;
 }
 
 function removeFromCart(idx) {
@@ -344,13 +434,54 @@ async function lookupCustomerFromModal() {
       $('aptNumber').value = c.apt_number || '';
       $('community').value = c.community || '';
       $('deliveryInstructions').value = c.delivery_instructions || '';
+
+      // Check membership status from customer data
+      applyMembershipStatus(c, mobile);
     } else {
       $('mobileNumber').value = mobile;
-      $('customerForm').dataset.isNew = 'true'; // flag: new customer
+      $('customerForm').dataset.isNew = 'true';
     }
   } catch (e) {
     alert('Error looking up customer. Please try again.');
   }
+}
+
+/* Apply membership state from customer record */
+function applyMembershipStatus(customer, mobile) {
+  const status = (customer.membership_status || '').toLowerCase();
+  const plan = (customer.membership_plan || '').toLowerCase();
+  const expiry = customer.membership_expiry || null;
+
+  memberState = {
+    isMember: status === 'active',
+    status: status || null,
+    plan,
+    expiry,
+    name: customer.full_name,
+    mobile
+  };
+
+  // Update nav member button
+  const btn = $('memberLoginBtn');
+  if (status === 'active') {
+    btn.classList.add('is-member');
+    $('memberLoginLabel').textContent = '⭐ Member';
+  } else if (status === 'expired') {
+    btn.classList.remove('is-member');
+    $('memberLoginLabel').textContent = 'Renew';
+  }
+
+  // Re-render cart to apply correct prices
+  if (status === 'active' || status === 'pending') {
+    // Switch all cart items to member price
+    cart = cart.map(item => {
+      if (item.member_price && item.member_price < item.regular_price) {
+        return { ...item, unit_price: item.member_price, total_price: item.quantity * item.member_price };
+      }
+      return item;
+    });
+  }
+  renderCart();
 }
 
 /* order submit */
@@ -368,14 +499,18 @@ async function submitOrder(e) {
     return;
   }
 
-  const subtotal = cart.reduce((s, i) => s + i.total_price, 0);
+  const productItems = cart.filter(i => !i._isMembershipFee);
+  const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
   const order = {
     customer: { full_name: fullName, mobile_number: mobileNumber, email, apt_number: aptNumber, community },
-    cart,
+    cart: productItems,
     subtotal,
     delivery_charge: DELIVERY_CHARGE,
-    total_amount: subtotal + DELIVERY_CHARGE,
-    delivery_instructions: deliveryInstructions || ''
+    total_amount: subtotal + membershipFeeAmount + DELIVERY_CHARGE,
+    delivery_instructions: deliveryInstructions || '',
+    is_member: memberState.status === 'active' || memberState.status === 'pending' || membershipAddedToCart,
+    membership_plan: membershipAddedToCart ? selectedMemberPlan : null,
+    membership_fee: membershipAddedToCart ? membershipFeeAmount : 0
   };
 
   try {
@@ -519,4 +654,220 @@ function closeReels() {
 function scrollReels(direction) {
   const strip = $('reelsStrip');
   if (strip) strip.scrollBy({ left: direction * 260, behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════════════
+   MEMBERSHIP MODAL FUNCTIONS
+   ══════════════════════════════════════════ */
+
+function openMembershipModal() {
+  resetMembershipModal();
+  $('overlay').style.display = 'block';
+  $('membershipModal').style.display = 'flex';
+  $('membershipModal').setAttribute('aria-hidden', 'false');
+
+  // If already active member — go straight to step 3
+  if (memberState.status === 'active') {
+    showMemberStep(3);
+    $('memberActiveName').textContent = `Welcome back, ${memberState.name || 'Member'}!`;
+    $('memberActivePlan').textContent = memberState.plan === 'annual' ? 'Annual ₹3,999/yr' : 'Monthly ₹400/mo';
+    $('memberActiveExpiry').textContent = memberState.expiry ? formatDate(memberState.expiry) : '—';
+  }
+}
+
+function closeMembershipModal() {
+  $('overlay').style.display = 'none';
+  $('membershipModal').style.display = 'none';
+  $('membershipModal').setAttribute('aria-hidden', 'true');
+}
+
+/* Called from cart savings banner */
+function openMembershipInCart() {
+  closeSidebar();
+  openMembershipModal();
+}
+
+function closeSidebar() {
+  const sidebar = $('cartSidebar');
+  if (sidebar.classList.contains('open')) {
+    sidebar.classList.remove('open');
+    $('overlay').style.display = 'none';
+  }
+}
+
+/* Nav member login button */
+function openMemberLogin() {
+  if (memberState.status === 'active') {
+    openMembershipModal(); // shows active card
+  } else {
+    openMembershipModal(); // shows join flow
+  }
+}
+
+function resetMembershipModal() {
+  showMemberStep(1);
+  selectedMemberPlan = null;
+  document.querySelectorAll('.member-plan').forEach(p => p.classList.remove('selected'));
+  $('memberCustomerConfirm').style.display = 'none';
+  $('memberNewForm').style.display = 'none';
+  $('memberMobileRow').style.display = 'block';
+  $('memberMobile').value = '';
+  $('memberRRNumber').value = '';
+}
+
+function showMemberStep(n) {
+  [1, 2, 3].forEach(i => {
+    const el = $(`memberStep${i}`);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+  });
+}
+
+/* Plan selection */
+function selectPlan(plan) {
+  selectedMemberPlan = plan;
+  document.querySelectorAll('.member-plan').forEach(p => p.classList.remove('selected'));
+  $(`plan${plan.charAt(0).toUpperCase() + plan.slice(1)}`).classList.add('selected');
+}
+
+/* Lookup customer in membership modal */
+async function lookupMemberCustomer() {
+  const mobile = ($('memberMobile').value || '').trim();
+  if (!/^\d{10}$/.test(mobile)) { alert('Please enter a valid 10-digit mobile number'); return; }
+  if (!selectedMemberPlan) { alert('Please select a plan first'); return; }
+
+  try {
+    const res = await apiCall(`/customer/${mobile}`);
+    if (res.found) {
+      const c = res.customer;
+
+      // Already active member?
+      if ((c.membership_status || '').toLowerCase() === 'active') {
+        memberState = { isMember: true, status: 'active', plan: c.membership_plan, expiry: c.membership_expiry, name: c.full_name, mobile };
+        showMemberStep(3);
+        $('memberActiveName').textContent = `You're already a member, ${c.full_name}!`;
+        $('memberActivePlan').textContent = c.membership_plan === 'annual' ? 'Annual ₹3,999/yr' : 'Monthly ₹400/mo';
+        $('memberActiveExpiry').textContent = c.membership_expiry ? formatDate(c.membership_expiry) : '—';
+        return;
+      }
+
+      // Existing customer, not yet a member — confirm details
+      $('memberConfirmName').textContent = c.full_name;
+      $('memberConfirmDetails').textContent = `${c.community || ''} · ${c.apt_number || ''}`;
+      $('memberMobileRow').style.display = 'none';
+      $('memberCustomerConfirm').style.display = 'block';
+
+      // Store for payment step
+      $('memberCustomerConfirm').dataset.mobile = mobile;
+      $('memberCustomerConfirm').dataset.name = c.full_name;
+      $('memberCustomerConfirm').dataset.email = c.email || '';
+    } else {
+      // New customer — show form
+      $('memberMobileRow').style.display = 'none';
+      $('memberNewForm').style.display = 'block';
+      $('memberNewForm').dataset.mobile = mobile;
+    }
+  } catch(e) {
+    alert('Error looking up customer. Please try again.');
+  }
+}
+
+/* Proceed to payment step */
+function goToMemberPayment() {
+  if (!selectedMemberPlan) { alert('Please select a plan first'); return; }
+
+  const amount = MEMBERSHIP_PRICES[selectedMemberPlan];
+  const planLabel = selectedMemberPlan === 'annual' ? 'Annual — ₹3,999/year' : 'Monthly — ₹400/month';
+
+  $('paymentPlanLabel').textContent = planLabel;
+  $('paymentAmount').textContent = `₹${amount}`;
+  $('upiExactAmount').textContent = `₹${amount}`;
+
+  showMemberStep(2);
+}
+
+/* Submit membership (standalone — not bundled with order) */
+async function submitMembership() {
+  const rrNumber = ($('memberRRNumber').value || '').trim();
+  if (!rrNumber) { alert('Please enter your UPI Transaction ID / RR Number'); return; }
+
+  // Get customer details from whichever path we came through
+  let mobile, name, email, apt, community;
+  const confirmCard = $('memberCustomerConfirm');
+  const newForm = $('memberNewForm');
+
+  if (confirmCard.style.display !== 'none') {
+    mobile = confirmCard.dataset.mobile;
+    name = confirmCard.dataset.name;
+    email = confirmCard.dataset.email;
+  } else if (newForm.style.display !== 'none') {
+    mobile = newForm.dataset.mobile;
+    name = ($('memberFullName').value || '').trim();
+    email = ($('memberEmail').value || '').trim();
+    apt = ($('memberApt').value || '').trim();
+    community = ($('memberCommunity').value || '').trim();
+    if (!name || !email) { alert('Please fill your name and email'); return; }
+  }
+
+  const amount = MEMBERSHIP_PRICES[selectedMemberPlan];
+
+  try {
+    const resp = await apiCall('/join-member', {
+      method: 'POST',
+      body: JSON.stringify({
+        mobile_number: mobile,
+        full_name: name,
+        email,
+        apt_number: apt || '',
+        community: community || '',
+        plan: selectedMemberPlan,
+        amount_paid: amount,
+        rr_number: rrNumber
+      })
+    });
+
+    if (resp.success) {
+      alert(`✅ Membership request submitted! We'll activate your membership after verifying payment. Thank you!`);
+      closeMembershipModal();
+    } else {
+      alert('Could not submit membership: ' + (resp.message || 'Please try again'));
+    }
+  } catch(e) {
+    alert('Error submitting membership. Please try again.');
+  }
+}
+
+/* Add membership fee to cart and switch prices */
+function addMembershipToCart(plan) {
+  if (membershipAddedToCart) return; // already added
+
+  selectedMemberPlan = plan;
+  membershipFeeAmount = MEMBERSHIP_PRICES[plan];
+  membershipAddedToCart = true;
+
+  // Switch all cart items to member prices
+  cart = cart.map(item => {
+    if (item.member_price && item.member_price < item.regular_price) {
+      return { ...item, unit_price: item.member_price, total_price: item.quantity * item.member_price };
+    }
+    return item;
+  });
+
+  renderCart();
+  showCartToast(`🌟 Member pricing applied! ₹${membershipFeeAmount} membership fee added.`);
+}
+
+/* Copy UPI ID */
+function copyUPI() {
+  navigator.clipboard.writeText('Mab.037213027680043@axisbank').then(() => {
+    showCartToast('UPI ID copied!');
+  });
+}
+
+/* Format date helper */
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch(e) { return dateStr; }
 }
