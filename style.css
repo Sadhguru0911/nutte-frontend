@@ -133,22 +133,22 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* Single row: left col (3 stacked) + big brand card right */
 .hero-grid {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  grid-template-rows: 380px;
-  gap: 12px;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: 480px;
+  gap: 14px;
 }
 
 /* Left column wrapper — About small, Reels bigger, Membership medium */
 .hero-col-small {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   height: 100%;
 }
-.hero-col-small .hero-card--about  { flex: 0 0 28%; }
-.hero-col-small .hero-card--reels  { flex: 0 0 42%; }
+.hero-col-small .hero-card--about  { flex: 0 0 26%; }
+.hero-col-small .hero-card--reels  { flex: 0 0 44%; }
 .hero-col-small .hero-card--member { flex: 1; }
-.hero-col-small .hero-card { padding: 18px 16px; min-height: 0; }
+.hero-col-small .hero-card { padding: 24px 22px; min-height: 0; }
 
 .hero-card {
   border-radius: 20px;
@@ -163,30 +163,36 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .hero-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.13); }
 
-.hero-card--about  { background: #d4ccf0; color: #1a1060; } /* lavender like stevia about */
-.hero-card--fresh  { background: var(--green);  color: var(--white); }
-.hero-card--reels  { } /* inherits fresh */
+.hero-card--about  { background: #c8c4f0; color: #1a1060; }
+.hero-card--fresh  { background: #e8395a; color: #fff; }  /* hot pink for reels */
+.hero-card--reels  { }
 .hero-card--member {
-  background: linear-gradient(160deg, #b8860b, #f5c842 60%, #d4a017);
-  color: #1a1200;
+  background: linear-gradient(160deg, #a87000, #f0c040 55%, #c89020);
+  color: #2a1800;
 }
-.hero-card--member .hero-label { color: rgba(26,18,0,0.6); }
-.hero-card--main   { background: var(--black);  color: var(--white); }
+.hero-card--member .hero-label { color: rgba(42,24,0,0.6); }
+.hero-card--main   { background: var(--black); color: var(--white); }
 
-/* PINK brand card — like steviaplease */
+/* DEEP GREEN brand card — CommunitE signature */
 .hero-card--brand {
-  background: #ff3e8a;
+  background: #0d3320;
   color: #fff;
-  padding: 36px 42px;
+  padding: 44px 52px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-.hero-card--brand .hero-brand-tagline span { color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); }
-.hero-card--brand .hero-brand-tagline em   { color: #fff; font-weight: 800; }
-.hero-card--brand .hero-brand-sub { color: rgba(255,255,255,0.6); }
-.hero-card--brand .hero-deco--circle { background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); }
-.hero-cta--brand { background: #fff; color: #ff3e8a; }
+.hero-card--brand .hero-brand-tagline span {
+  color: rgba(200,245,106,0.7);
+  background: rgba(200,245,106,0.1);
+  border: 1px solid rgba(200,245,106,0.2);
+}
+.hero-card--brand .hero-brand-tagline em { color: #c8f56a; font-weight: 800; }
+.hero-card--brand .hero-title { color: #fff; }
+.hero-card--brand .hero-brand-sub { color: rgba(255,255,255,0.55); }
+.hero-card--brand .hero-deco--circle {
+  background: radial-gradient(circle, rgba(200,245,106,0.12) 0%, transparent 70%);
+}
 
 /* Small card internals */
 .hero-label {
@@ -220,54 +226,37 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-brand-tagline {
   display: flex;
   flex-direction: row;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 .hero-brand-tagline span {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.35);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  background: rgba(255,255,255,0.06);
   border-radius: 999px;
-  padding: 3px 10px;
+  padding: 5px 14px;
 }
 .hero-brand-tagline em {
   font-style: normal;
-  color: var(--accent);
-  font-weight: 700;
+  font-weight: 800;
 }
 .hero-brand-name { position: relative; z-index: 2; }
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(3rem, 5.5vw, 5rem);
+  font-size: clamp(3.6rem, 6.5vw, 6rem);
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 0.92;
   letter-spacing: -0.04em;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 .hero-brand-sub {
-  font-size: 0.88rem;
-  opacity: 0.45;
+  font-size: 1rem;
   line-height: 1.6;
 }
 .hero-cta--brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--accent);
-  color: var(--black);
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 10px 20px;
-  border-radius: 999px;
-  width: fit-content;
-  position: relative;
-  z-index: 2;
-  transition: gap 0.2s;
+  display: none; /* removed per request */
 }
-.hero-cta--brand:hover { gap: 14px; }
 
 /* keep old classes for compat */
 .hero-stat { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
@@ -1355,300 +1344,35 @@ main {
 ════════════════════════════════════════════════════ */
 
 /* ── TABLET (≤960px) ── */
+
+/* ── RESPONSIVE ── */
 @media (max-width: 960px) {
-
-  /* Nav */
-  .nav-tagline { display: none; }
-  .nav-inner { padding: 0 20px; gap: 12px; }
-  .member-login-btn { padding: 7px 12px; font-size: 0.78rem; }
-
-  /* Hero — stack left column horizontally, brand below */
-  .hero { padding: 20px 20px 0; }
-  .hero-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    gap: 10px;
-  }
-  .hero-col-small {
-    flex-direction: row;
-    height: 130px;
-  }
-  .hero-col-small .hero-card { padding: 14px 12px; }
-  .hero-card--brand { min-height: 220px; padding: 28px 32px; }
-  .hero-title { font-size: clamp(2.4rem, 6vw, 3.6rem); }
-
-  /* Layout */
-  main { padding: 36px 20px 60px; }
-  .card-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-  .product-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-
-  /* Membership plans side by side still fine */
-  .member-plans { grid-template-columns: 1fr 1fr; }
-}
-
-/* ── MOBILE (≤600px) ── */
-@media (max-width: 600px) {
-
-  /* Nav — tighter */
-  .nav-inner { padding: 0 14px; height: 56px; gap: 8px; }
-  .nav-logo { height: 30px; width: 30px; }
-  .nav-name { font-size: 1rem; }
-  .member-login-btn span { display: none; }
-  .member-login-btn { padding: 7px 10px; }
-  .cart-btn { padding: 8px 12px; font-size: 0.82rem; }
-  .back-btn { padding: 5px 10px; font-size: 0.78rem; }
-
-  /* Hero */
-  .hero { padding: 12px 14px 0; }
-  .hero-grid { gap: 8px; }
-  .hero-col-small { height: 110px; gap: 8px; }
-  .hero-col-small .hero-card { padding: 12px 10px; }
-  .hero-stat-sm { font-size: 1.4rem; }
-  .hero-stat-label { font-size: 0.65rem; }
-  .hero-label { font-size: 0.62rem; }
-  .hero-icon-sm { font-size: 1.4rem; }
-  .hero-card-arrow { width: 22px; height: 22px; font-size: 0.62rem; top: 10px; right: 10px; }
-  .hero-card--brand { min-height: 200px; padding: 22px 20px; }
-  .hero-title { font-size: 2.4rem; }
-  .hero-brand-sub { font-size: 0.8rem; }
-  .hero-brand-tagline { gap: 4px; }
-  .hero-brand-tagline span { font-size: 0.62rem; padding: 2px 8px; }
-  .hero-cta--brand { font-size: 0.82rem; padding: 9px 16px; }
-
-  /* Main */
-  main { padding: 28px 14px 80px; }
-  .section-title { font-size: 1.2rem; }
-
-  /* Grids — 2 col for categories/subcats, 1 col for products */
-  .card-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .card-grid--sub { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .product-grid { grid-template-columns: 1fr; gap: 12px; }
-
-  /* Product card horizontal layout on mobile */
-  .product-card {
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    grid-template-rows: auto auto;
-    border-radius: 16px;
-  }
-  .product-img-wrap {
-    grid-row: 1 / 3;
-    border-radius: 16px 0 0 16px;
-    aspect-ratio: unset;
-    min-height: 130px;
-  }
-  .product-img-wrap img { border-radius: 16px 0 0 16px; }
-  .product-card-body { padding: 12px 12px 6px; }
-  .product-title { font-size: 0.88rem; }
-  .product-desc { display: none; }
-  .product-card-footer { padding: 6px 12px 12px; align-items: center; }
-
-  /* Cart sidebar — bottom sheet */
-  .cart-sidebar {
-    width: 100%;
-    right: 0;
-    left: 0;
-    border-left: none;
-    border-top: 1px solid var(--border);
-    border-radius: 20px 20px 0 0;
-    top: auto;
-    bottom: -100%;
-    height: 88vh;
-    transition: bottom 0.4s var(--ease-spring);
-    right: unset;
-  }
-  .cart-sidebar.open { bottom: 0; }
-  .cart-content { padding: 16px 18px; }
-  .cart-footer { padding: 16px 18px; }
-  .cart-header { padding: 16px 18px; }
-
-  /* Modals — full screen on mobile */
-  .modal { padding: 0; align-items: flex-end; }
-  .modal-box {
-    border-radius: 24px 24px 0 0;
-    max-height: 92vh;
-    max-width: 100%;
-  }
-  .modal-header { padding: 16px 18px 14px; }
-  .modal-body { padding: 16px 18px 24px; }
-  .modal-box--about { max-width: 100%; }
-  .modal-box--reels { max-width: 100%; }
-  .modal-box--membership { max-width: 100%; }
-
-  /* Forms */
-  .form-grid { grid-template-columns: 1fr; gap: 12px; }
-  .member-plans { grid-template-columns: 1fr; }
-
-  /* About modal */
-  .about-body { padding: 0 16px 24px; }
-  .about-stats { flex-direction: row; justify-content: space-around; }
-  .about-cards { grid-template-columns: 1fr; }
-  .about-contact-links { flex-direction: column; gap: 8px; }
-
-  /* Membership */
-  .member-plans { gap: 10px; }
-  .upi-qr-img { width: 150px; height: 150px; }
-
-  /* Footer */
-  .site-footer { padding: 24px 16px; }
-
-  /* Payment step */
-  .payment-step-actions { flex-direction: column; }
-  .payment-step-actions .btn-primary { width: 100%; }
-}
-
-/* ── EXTRA SMALL (≤380px) ── */
-@media (max-width: 380px) {
-  .hero-col-small { height: 95px; }
-  .hero-stat-sm { font-size: 1.2rem; }
-  .hero-title { font-size: 2rem; }
-  .card-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .product-card { grid-template-columns: 100px 1fr; }
-  .product-img-wrap { min-height: 110px; }
-  .nav-name { display: none; }
-}
-
-/* ── ABOUT CARD MASCOT ── */
-.hero-card--about { overflow: visible !important; }
-.about-mascot {
-  position: absolute;
-  bottom: -10px;
-  right: -8px;
-  width: 70px;
-  height: 70px;
-  transform: translateY(20px) rotate(-15deg) scale(0.7);
-  opacity: 0;
-  transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
-  z-index: 10;
-  pointer-events: none;
-}
-.hero-card--about:hover .about-mascot {
-  transform: translateY(-8px) rotate(8deg) scale(1.15);
-  opacity: 1;
-}
-.mascot-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.25));
-  animation: mascotWiggle 2.5s ease-in-out infinite;
-  animation-play-state: paused;
-}
-.hero-card--about:hover .mascot-img {
-  animation-play-state: running;
-}
-@keyframes mascotWiggle {
-  0%,100% { transform: rotate(0deg) scale(1); }
-  25%      { transform: rotate(-8deg) scale(1.05); }
-  75%      { transform: rotate(8deg) scale(1.05); }
-}
-
-/* ── CONVEYOR BELT ── */
-.conveyor-section {
-  padding: 32px 0 0;
-  overflow: hidden;
-  position: relative;
-}
-.conveyor-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 0 32px;
-  margin-bottom: 14px;
-}
-.conveyor-outer {
-  overflow: hidden;
-  width: 100%;
-  cursor: grab;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.conveyor-outer:active { cursor: grabbing; }
-.conveyor-track {
-  display: flex;
-  gap: 14px;
-  width: max-content;
-  padding: 0 32px 24px;
-  animation: conveyorScroll 28s linear infinite;
-}
-.conveyor-track:hover { animation-play-state: paused; }
-@keyframes conveyorScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.conveyor-item {
-  flex-shrink: 0;
-  width: 180px;
-  height: 180px;
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.3s var(--ease-spring), box-shadow 0.25s;
-}
-.conveyor-item:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-.conveyor-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.4s ease;
-}
-.conveyor-item:hover img { transform: scale(1.08); }
-.conveyor-item-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 20px 12px 10px;
-  text-align: center;
-}
-
-/* Category section — hidden until conveyor item clicked */
-#categorySection { display: none; }
-
-/* ── MOBILE RESPONSIVE UPDATES ── */
-@media (max-width: 960px) {
-  .hero-grid { grid-template-columns: 175px 1fr; grid-template-rows: 360px; }
-  .hero-col-small .hero-card--about  { flex: 0 0 26%; }
-  .hero-col-small .hero-card--reels  { flex: 0 0 44%; }
+  .hero-grid { grid-template-columns: 220px 1fr; grid-template-rows: 420px; }
+  .hero-card--brand { padding: 32px 36px; }
+  .hero-title { font-size: clamp(2.8rem, 6vw, 4.2rem); }
   .conveyor-label { padding: 0 20px; }
-  .conveyor-track { padding: 0 20px 20px; }
-  .conveyor-item { width: 155px; height: 155px; }
+  .conveyor-track { padding: 0 20px 20px; gap: 12px; }
+  .conveyor-item { width: 210px; height: 210px; }
 }
 
 @media (max-width: 600px) {
   .hero { padding: 12px 12px 0; }
-  .hero-grid {
-    grid-template-columns: 140px 1fr;
-    grid-template-rows: 320px;
-    gap: 8px;
-  }
+  .hero-grid { grid-template-columns: 140px 1fr; grid-template-rows: 340px; gap: 8px; }
   .hero-col-small { gap: 8px; }
-  .hero-col-small .hero-card { padding: 12px 10px; }
-  .hero-col-small .hero-card--about  { flex: 0 0 26%; }
-  .hero-col-small .hero-card--reels  { flex: 0 0 44%; }
+  .hero-col-small .hero-card { padding: 14px 12px; }
   .hero-card--brand { padding: 22px 20px; }
   .hero-title { font-size: 2.2rem; }
-  .hero-brand-sub { font-size: 0.78rem; }
-  .hero-brand-tagline span { font-size: 0.6rem; padding: 2px 7px; }
-  .hero-cta--brand { font-size: 0.78rem; padding: 8px 14px; }
-  .hero-stat-sm { font-size: 1.3rem; }
-  .hero-label { font-size: 0.6rem; }
-  .hero-icon-sm { font-size: 1.3rem; }
+  .hero-brand-sub { font-size: 0.82rem; }
+  .hero-brand-tagline { gap: 5px; }
+  .hero-brand-tagline span { font-size: 0.62rem; padding: 3px 9px; }
+  .hero-stat-sm { font-size: 1.5rem; }
+  .hero-label { font-size: 0.62rem; }
+  .hero-icon-sm { font-size: 1.4rem; }
   .about-mascot { width: 55px; height: 55px; right: -4px; }
-  .conveyor-item { width: 130px; height: 130px; border-radius: 16px; }
-  .conveyor-label { padding: 0 14px; }
-  .conveyor-track { padding: 0 14px 16px; gap: 10px; }
+  .conveyor-track { padding: 0 12px 16px; gap: 10px; }
+  .conveyor-label { padding: 0 12px; margin-bottom: 10px; }
+  .conveyor-item { width: 150px; height: 150px; border-radius: 18px; }
+  .conveyor-item-label { font-size: 0.75rem; }
   .nav-inner { padding: 0 14px; height: 56px; gap: 8px; }
   .nav-logo { height: 30px; width: 30px; }
   .nav-name { font-size: 1rem; }
@@ -1688,8 +1412,10 @@ main {
 }
 
 @media (max-width: 380px) {
-  .hero-grid { grid-template-columns: 120px 1fr; grid-template-rows: 290px; }
+  .hero-grid { grid-template-columns: 118px 1fr; grid-template-rows: 300px; }
   .hero-title { font-size: 1.9rem; }
-  .conveyor-item { width: 110px; height: 110px; }
+  .conveyor-item { width: 125px; height: 125px; }
   .nav-name { display: none; }
 }
+}
+
