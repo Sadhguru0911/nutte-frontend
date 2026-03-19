@@ -165,13 +165,22 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.13); }
 
 .hero-card--about  { background: #c8c4f0; color: #1a1060; }
-.hero-card--fresh  { background: #e8395a; color: #fff; }  /* hot pink for reels */
+.hero-card--fresh  { background: #ffb6c1; color: #fff; }  /* baby pink, bright white text */
+.hero-card--fresh .hero-label,
+.hero-card--fresh .hero-stat-label,
+.hero-card--fresh .hero-icon-sm,
+.hero-card--fresh .hero-card-arrow {
+  text-shadow: 0 1px 4px rgba(180,40,80,0.4);
+  color: #fff;
+}
 .hero-card--reels  { }
 .hero-card--member {
   background: linear-gradient(160deg, #a87000, #f0c040 55%, #c89020);
-  color: #2a1800;
+  color: #4a0080;  /* purple bold text on gold */
 }
-.hero-card--member .hero-label { color: rgba(42,24,0,0.6); }
+.hero-card--member .hero-label { color: #6a00b0; font-weight: 700; }
+.hero-card--member .hero-stat-sm { color: #3a006a; font-weight: 900; }
+.hero-card--member .hero-stat-label { color: #5a0090; font-weight: 700; }
 .hero-card--main   { background: var(--black); color: var(--white); }
 
 /* DEEP GREEN brand card — CommunitE signature */
@@ -1323,78 +1332,6 @@ main {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-5px); }
 }
-
-/* ── CONVEYOR BELT ── */
-.conveyor-section {
-  padding: 28px 0 0;
-  overflow: hidden;
-  width: 100%;
-}
-.conveyor-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 0 32px;
-  margin-bottom: 14px;
-}
-.conveyor-outer {
-  overflow: hidden;
-  width: 100%;
-  cursor: grab;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.conveyor-outer:active { cursor: grabbing; }
-.conveyor-track {
-  display: flex;
-  gap: 16px;
-  width: max-content;
-  padding: 0 32px 28px;
-  animation: conveyorScroll 35s linear infinite;
-}
-.conveyor-track:hover { animation-play-state: paused; }
-@keyframes conveyorScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.conveyor-item {
-  flex-shrink: 0;
-  width: 260px;
-  height: 260px;
-  border-radius: 24px;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.3s var(--ease-spring), box-shadow 0.25s;
-}
-.conveyor-item:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 24px 48px rgba(0,0,0,0.18);
-}
-.conveyor-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.4s ease;
-}
-.conveyor-item:hover img { transform: scale(1.08); }
-.conveyor-item-label {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 32px 16px 14px;
-  text-align: center;
-  letter-spacing: 0.02em;
-}
-
-/* Category grid hidden until conveyor item clicked */
-#categorySection { display: none; }
 .ripple-canvas {
   position: absolute;
   inset: 0;
