@@ -106,43 +106,12 @@ async function loadCategories() {
     `).join('');
     container.querySelectorAll('.category-card').forEach(el => { observeCard(el); initRipple(el); });
 
-    // Also populate conveyor belt — duplicate items for seamless loop
+    // Build conveyor belt
     buildConveyor(cats);
   } catch (e) {
     console.error("loadCategories", e);
     $('categoryContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Failed to load categories. Please try again.</div>`;
   }
-}
-
-/* Build conveyor belt — duplicates items for seamless infinite scroll */
-function buildConveyor(cats) {
-  const track = $('conveyorTrack');
-  if (!track) return;
-
-  // Duplicate for seamless loop
-  const items = [...cats, ...cats].map(c => `
-    <div class="conveyor-item" onclick="openCategoryFromConveyor('${escapeHtml(c.name)}')">
-      <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" />
-      <div class="conveyor-item-label">${escapeHtml(c.name)}</div>
-    </div>
-  `).join('');
-
-  track.innerHTML = items;
-
-  // Drag-to-scroll
-  let isDragging = false, startX = 0, scrollLeft = 0;
-  const outer = $('conveyorOuter');
-  outer.addEventListener('mousedown', e => { isDragging = true; startX = e.pageX - outer.offsetLeft; scrollLeft = outer.scrollLeft; outer.style.animationPlayState = 'paused'; });
-  outer.addEventListener('mouseleave', () => { isDragging = false; });
-  outer.addEventListener('mouseup', () => { isDragging = false; });
-  outer.addEventListener('mousemove', e => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - outer.offsetLeft; outer.scrollLeft = scrollLeft - (x - startX); });
-}
-
-function openCategoryFromConveyor(categoryName) {
-  // Show the category grid section and scroll to subcategories
-  const catSection = $('categorySection');
-  if (catSection) catSection.style.display = 'block';
-  selectCategory(categoryName);
 }
 
 /* subcategories */
@@ -647,6 +616,49 @@ async function submitOrderWithPayment() {
   }
 }
 
+/* ── CONVEYOR BELT ── */
+function buildConveyor(cats) {
+  const track = $('conveyorTrack');
+  if (!track || !cats.length) return;
+
+  // Duplicate items for seamless infinite loop
+  const html = [...cats, ...cats].map(c => `
+    <div class="conveyor-item" onclick="openCategoryFromConveyor('${escapeHtml(c.name)}')">
+      <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" />
+      <div class="conveyor-item-label">${escapeHtml(c.name)}</div>
+    </div>
+  `).join('');
+  track.innerHTML = html;
+
+  // Drag to scroll
+  const outer = $('conveyorOuter');
+  if (!outer) return;
+  let isDragging = false, startX = 0, scrollLeft = 0;
+  outer.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.pageX - outer.offsetLeft;
+    scrollLeft = outer.scrollLeft;
+  });
+  outer.addEventListener('mouseleave', () => isDragging = false);
+  outer.addEventListener('mouseup', () => isDragging = false);
+  outer.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    e.preventDefault();
+    outer.scrollLeft = scrollLeft - (e.pageX - outer.offsetLeft - startX);
+  });
+}
+
+/* Conveyor item click — go straight to subcategories, skip category grid */
+function openCategoryFromConveyor(categoryName) {
+  // Hide conveyor, show back button, go straight to subcategories
+  $('conveyorSection') && ($('conveyorSection').style.display = 'none');
+  const conveyorEl = document.querySelector('.conveyor-section');
+  if (conveyorEl) conveyorEl.style.display = 'none';
+  selectCategory(categoryName);
+  // Mark back button to return to conveyor
+  $('backToCategoriesBtn').dataset.returnTo = 'conveyor';
+}
+
 /* navigation */
 function goBackToCategories() {
   selectedCategory = null;
@@ -654,7 +666,15 @@ function goBackToCategories() {
   $('subcategorySection').style.display = 'none';
   $('productSection').style.display = 'none';
   $('backToCategoriesBtn').style.display = 'none';
-  scrollToSection('categorySection');
+
+  // Return to conveyor belt (not category grid)
+  const conveyorEl = document.querySelector('.conveyor-section');
+  if (conveyorEl) conveyorEl.style.display = 'block';
+  $('categorySection').style.display = 'none';
+
+  // Scroll back to top of conveyor
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  delete $('backToCategoriesBtn').dataset.returnTo;
 }
 
 /* scroll-triggered card animations */
