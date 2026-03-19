@@ -41,38 +41,49 @@
   <section class="hero">
     <div class="hero-grid">
 
-      <!-- Main Card -->
-      <div class="hero-card hero-card--main" onclick="scrollToSection('categorySection')">
-        <div class="hero-card-inner">
-          <p class="hero-label">Welcome to</p>
-          <h1 class="hero-title">CommunitE</h1>
-          <p class="hero-sub">Bulk prices. Community powered. Doorstep delivered.</p>
-          <p class="hero-tagline-small">Trust sahi. Quality sahi. Price bhi sahi.</p>
-          <span class="hero-cta">Shop Now <i class="fas fa-arrow-right"></i></span>
+      <!-- LEFT COL: 3 small stacked cards -->
+      <div class="hero-col-small">
+        <div class="hero-card hero-card--about ripple-card" onclick="openAbout()">
+          <p class="hero-label">About</p>
+          <div class="hero-card-bottom">
+            <p class="hero-stat-sm">450+</p>
+            <p class="hero-stat-label">Members</p>
+          </div>
+          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
+          <canvas class="ripple-canvas"></canvas>
         </div>
+        <div class="hero-card hero-card--fresh ripple-card" onclick="openReels()">
+          <p class="hero-label">Reels</p>
+          <div class="hero-card-bottom">
+            <i class="fab fa-instagram hero-icon-sm"></i>
+          </div>
+          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+        <div class="hero-card hero-card--member ripple-card" onclick="openMembershipModal()">
+          <p class="hero-label">Membership</p>
+          <div class="hero-card-bottom">
+            <p class="hero-stat-sm">⭐</p>
+            <p class="hero-stat-label">From ₹400</p>
+          </div>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- RIGHT: Big brand card -->
+      <div class="hero-card hero-card--main hero-card--brand ripple-card" onclick="scrollToSection('categorySection')">
+        <div class="hero-brand-tagline">
+          <span>Trust <em>sahi.</em></span>
+          <span>Quality <em>sahi.</em></span>
+          <span>Price bhi <em>sahi.</em></span>
+        </div>
+        <div class="hero-brand-name">
+          <h1 class="hero-title">CommunitE</h1>
+          <p class="hero-brand-sub">Bulk prices. Community powered.<br>Doorstep delivered.</p>
+        </div>
+        <span class="hero-cta hero-cta--brand">Shop Now <i class="fas fa-arrow-right"></i></span>
         <div class="hero-deco hero-deco--circle"></div>
-      </div>
-
-      <!-- About Card -->
-      <div class="hero-card hero-card--about" onclick="openAbout()">
-        <p class="hero-label">About us</p>
-        <p class="hero-stat">450+</p>
-        <p class="hero-stat-label">Community Members</p>
-      </div>
-
-      <!-- Membership Card -->
-      <div class="hero-card hero-card--member" onclick="openMembershipModal()">
-        <p class="hero-label">Unlock savings</p>
-        <p class="hero-stat">⭐</p>
-        <p class="hero-stat-label">Join Membership</p>
-        <p class="hero-member-hint">From ₹400/mo</p>
-      </div>
-
-      <!-- Reels Card -->
-      <div class="hero-card hero-card--fresh" onclick="openReels()">
-        <p class="hero-label">Watch</p>
-        <p class="hero-stat">Reels</p>
-        <i class="fab fa-instagram hero-icon"></i>
+        <canvas class="ripple-canvas"></canvas>
       </div>
 
     </div>

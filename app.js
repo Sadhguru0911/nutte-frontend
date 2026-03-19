@@ -94,12 +94,13 @@ async function loadCategories() {
 
     const container = $('categoryContainer');
     container.innerHTML = cats.map((c, i) => `
-      <div class="category-card" style="animation-delay:${i * 70}ms" onclick="selectCategory('${escapeHtml(c.name)}')">
+      <div class="category-card ripple-card" style="animation-delay:${i * 70}ms" onclick="selectCategory('${escapeHtml(c.name)}')">
         <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" />
         <div class="category-card-title">${escapeHtml(c.name)}</div>
+        <canvas class="ripple-canvas"></canvas>
       </div>
     `).join('');
-    container.querySelectorAll('.category-card').forEach(el => observeCard(el));
+    container.querySelectorAll('.category-card').forEach(el => { observeCard(el); initRipple(el); });
   } catch (e) {
     console.error("loadCategories", e);
     $('categoryContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Failed to load categories. Please try again.</div>`;
@@ -123,13 +124,14 @@ async function selectCategory(category) {
       const name = typeof s === 'string' ? s : s.name;
       const img = typeof s === 'string' ? DEFAULT_SUBCATEGORY_IMAGE : (s.image || DEFAULT_SUBCATEGORY_IMAGE);
       return `
-        <div class="subcat-card" style="animation-delay:${i * 70}ms" onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(name)}')">
+        <div class="subcat-card ripple-card" style="animation-delay:${i * 70}ms" onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(name)}')">
           <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
           <div class="subcat-title">${escapeHtml(name)}</div>
+          <canvas class="ripple-canvas"></canvas>
         </div>
       `;
     }).join('');
-    container.querySelectorAll('.subcat-card').forEach(el => observeCard(el));
+    container.querySelectorAll('.subcat-card').forEach(el => { observeCard(el); initRipple(el); });
     scrollToSection('subcategorySection');
   } catch (e) {
     console.error("selectCategory", e);
@@ -169,8 +171,11 @@ async function selectSubcategory(category, subcat) {
       const priceHTML = buildPriceHTML(firstPrice, firstMemberPrice, `price_${id}`);
 
       return `
-        <div class="product-card" id="${id}" style="animation-delay:${i * 70}ms">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
+        <div class="product-card ripple-card" id="${id}" style="animation-delay:${i * 70}ms">
+          <div class="product-img-wrap">
+            <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
+            <canvas class="ripple-canvas"></canvas>
+          </div>
           <div class="product-card-body">
             <div class="product-title">${escapeHtml(name)}</div>
             <div class="product-desc">${escapeHtml(first.description || first['Product Description'] || '')}</div>
@@ -201,7 +206,7 @@ async function selectSubcategory(category, subcat) {
         </div>
       `;
     }).join('');
-    container.querySelectorAll('.product-card').forEach(el => observeCard(el));
+    container.querySelectorAll('.product-card').forEach(el => { observeCard(el); initRipple(el); });
     scrollToSection('productSection');
   } catch (e) {
     console.error("selectSubcategory", e);
@@ -927,3 +932,145 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   } catch(e) { return dateStr; }
 }
+
+/* ═══════════════════════════════════════════════════
+   WATER RIPPLE ENGINE
+   Canvas-based 2D wave simulation — no WebGL needed,
+   runs on CPU with ImageData for broad compatibility.
+   Each ripple-card gets its own isolated simulation.
+═══════════════════════════════════════════════════ */
+
+function initRipple(card) {
+  const canvas = card.querySelector('.ripple-canvas');
+  if (!canvas || canvas._rippleInit) return;
+  canvas._rippleInit = true;
+
+  const ctx = canvas.getContext('2d');
+  let W, H, cur, prev, rippling = false, animId;
+
+  function resize() {
+    W = canvas.width  = card.offsetWidth;
+    H = canvas.height = card.offsetHeight;
+    cur  = new Float32Array(W * H);
+    prev = new Float32Array(W * H);
+  }
+
+  resize();
+  new ResizeObserver(resize).observe(card);
+
+  /* Drop a ripple at (x,y) with radius r and strength s */
+  function drop(x, y, r, s) {
+    const px = Math.floor(x), py = Math.floor(y);
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (dx*dx + dy*dy <= r*r) {
+          const nx = px+dx, ny = py+dy;
+          if (nx>=0 && nx<W && ny>=0 && ny<H)
+            cur[ny*W+nx] += s;
+        }
+      }
+    }
+  }
+
+  /* Wave propagation step */
+  function step() {
+    for (let y = 1; y < H-1; y++) {
+      for (let x = 1; x < W-1; x++) {
+        const i = y*W+x;
+        cur[i] = (
+          prev[(y-1)*W+x] + prev[(y+1)*W+x] +
+          prev[y*W+(x-1)] + prev[y*W+(x+1)]
+        ) * 0.5 - cur[i];
+        cur[i] *= 0.985; // damping
+      }
+    }
+    [cur, prev] = [prev, cur];
+  }
+
+  /* Render distortion onto canvas */
+  function render() {
+    const img = ctx.createImageData(W, H);
+    const d   = img.data;
+    let hasEnergy = false;
+
+    for (let y = 1; y < H-1; y++) {
+      for (let x = 1; x < W-1; x++) {
+        const i   = y*W+x;
+        const val = prev[i];
+        if (Math.abs(val) > 0.01) hasEnergy = true;
+
+        // Displacement vector from wave gradient
+        const dx = Math.floor(prev[y*W+(x+1)] - prev[y*W+(x-1)]);
+        const dy = Math.floor(prev[(y+1)*W+x] - prev[(y-1)*W+x]);
+
+        // Source pixel with displacement (clamped)
+        const sx = Math.min(W-1, Math.max(0, x + dx));
+        const sy = Math.min(H-1, Math.max(0, y + dy));
+
+        const pi = (y*W+x)*4;
+        const si = (sy*W+sx)*4;
+
+        // Ripple overlay — semi-transparent white shimmer
+        const shimmer = Math.min(255, Math.abs(val) * 3);
+        d[pi]   = shimmer;
+        d[pi+1] = shimmer;
+        d[pi+2] = shimmer;
+        d[pi+3] = Math.min(80, shimmer * 0.8);
+      }
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.putImageData(img, 0, 0);
+
+    if (!hasEnergy) {
+      rippling = false;
+      cancelAnimationFrame(animId);
+    } else {
+      animId = requestAnimationFrame(loop);
+    }
+  }
+
+  function loop() { step(); render(); }
+
+  function startRipple() {
+    if (!rippling) {
+      rippling = true;
+      animId = requestAnimationFrame(loop);
+    }
+  }
+
+  /* Mouse / touch events */
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    drop(e.clientX - r.left, e.clientY - r.top, 6, 180);
+    startRipple();
+  });
+
+  card.addEventListener('mouseenter', e => {
+    const r = card.getBoundingClientRect();
+    drop(e.clientX - r.left, e.clientY - r.top, 10, 220);
+    startRipple();
+  });
+
+  card.addEventListener('click', e => {
+    const r = card.getBoundingClientRect();
+    drop(e.clientX - r.left, e.clientY - r.top, 18, 400);
+    startRipple();
+  });
+
+  card.addEventListener('touchmove', e => {
+    const r = card.getBoundingClientRect();
+    const t = e.touches[0];
+    drop(t.clientX - r.left, t.clientY - r.top, 8, 200);
+    startRipple();
+  }, { passive: true });
+}
+
+/* Init ripple on all hero cards after DOM is ready */
+function initHeroRipples() {
+  document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initHeroRipples, 100);
+});
