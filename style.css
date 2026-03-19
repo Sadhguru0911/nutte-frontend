@@ -125,17 +125,18 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* ── HERO ── */
 .hero {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 40px 32px 0;
+  max-width: 100%;
+  padding: 24px 32px 0;
 }
 
 /* Single row: left col (3 stacked) + big brand card right */
 .hero-grid {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  grid-template-rows: 480px;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: 500px;
   gap: 14px;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 /* Left column wrapper — About small, Reels bigger, Membership medium */
@@ -270,8 +271,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 
 /* ── FLUID BLOB ANIMATIONS ── */
-
-/* Blob base — sits behind card content */
+/* Blob base — sits behind card content, clipped by card */
 .hero-card::before,
 .hero-card::after {
   content: '';
@@ -284,36 +284,39 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* Large slow blob */
 .hero-card::before {
-  width: 320px;
-  height: 320px;
-  top: -80px;
-  right: -80px;
+  width: 240px;
+  height: 240px;
+  top: -60px;
+  right: -60px;
   animation: blob1 9s ease-in-out infinite;
 }
 
 /* Small fast blob */
 .hero-card::after {
-  width: 180px;
-  height: 180px;
-  bottom: -40px;
-  left: -40px;
+  width: 140px;
+  height: 140px;
+  bottom: -30px;
+  left: -30px;
   animation: blob2 7s ease-in-out infinite;
-  opacity: 0.12;
+  opacity: 0.10;
 }
 
-/* Main card — accent coloured blobs */
-.hero-card--main::before { background: var(--accent); }
-.hero-card--main::after  { background: var(--accent); animation-delay: -3s; }
+/* Brand card blobs */
+.hero-card--brand::before { background: #c8f56a; }
+.hero-card--brand::after  { background: #c8f56a; animation-delay: -3s; }
 
-/* About card — dark blobs */
-.hero-card--about::before { background: #000; opacity: 0.08; }
-.hero-card--about::after  { background: #000; opacity: 0.06; animation-delay: -2s; }
+/* About card blobs */
+.hero-card--about::before { background: #5a4fcf; opacity: 0.12; }
+.hero-card--about::after  { background: #5a4fcf; opacity: 0.08; animation-delay: -2s; }
 
-/* Fresh/Reels card — white blobs */
-.hero-card--fresh::before { background: #fff; opacity: 0.15; }
-.hero-card--fresh::after  { background: #fff; opacity: 0.1; animation-delay: -4s; }
+/* Reels card blobs */
+.hero-card--fresh::before { background: #fff; opacity: 0.12; }
+.hero-card--fresh::after  { background: #fff; opacity: 0.08; animation-delay: -4s; }
 
-/* Blob morph keyframes */
+/* Member card blobs */
+.hero-card--member::before { background: #fff; opacity: 0.15; }
+.hero-card--member::after  { background: #fff; opacity: 0.1; animation-delay: -3s; }
+
 @keyframes blob1 {
   0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1) rotate(0deg); }
   25%      { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: scale(1.05) rotate(8deg); }
@@ -327,36 +330,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   66%      { border-radius: 30% 70% 50% 50% / 50% 70% 30% 60%; transform: scale(0.92) rotate(7deg); }
 }
 
-/* Card image zoom on hover — fluid feel */
-.hero-card:hover::before { animation-play-state: paused; opacity: 0.28; transition: opacity 0.4s; }
-.hero-card:hover::after  { animation-play-state: paused; opacity: 0.18; transition: opacity 0.4s; }
-
-/* Make sure text stays above blobs */
-.hero-card-inner,
-.hero-label,
-.hero-title,
-.hero-sub,
-.hero-cta,
-.hero-stat,
-.hero-stat-label,
-.hero-icon { position: relative; z-index: 2; }
-
 /* Hero entrance animation */
 .hero-card { opacity: 0; transform: translateY(24px); animation: fadeUp 0.7s var(--ease-spring) forwards; }
-.hero-card:nth-child(1) { animation-delay: 0.05s; }
-.hero-card:nth-child(2) { animation-delay: 0.15s; }
-.hero-card:nth-child(3) { animation-delay: 0.25s; }
-.hero-card:nth-child(4) { animation-delay: 0.35s; }
+.hero-col-small .hero-card:nth-child(1) { animation-delay: 0.05s; }
+.hero-col-small .hero-card:nth-child(2) { animation-delay: 0.15s; }
+.hero-col-small .hero-card:nth-child(3) { animation-delay: 0.25s; }
+.hero-card--brand { animation-delay: 0.1s; }
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-/* Subtle float on category cards after they appear */
-.category-card.card-animated { animation: cardFloat 4s ease-in-out infinite; }
-.category-card.card-animated:nth-child(2n) { animation-delay: -1.5s; }
-.category-card.card-animated:nth-child(3n) { animation-delay: -3s; }
-@keyframes cardFloat {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-5px); }
-}
 
 /* ── MAIN ── */
 main {
@@ -1257,8 +1237,44 @@ main {
 .mac-row span { color: var(--muted); }
 .mac-note { font-size: 0.82rem; color: var(--muted); }
 
-/* ── RESPONSIVE — 4 hero cards ── */
-  .hero-card--member, .hero-card--fresh { min-height: 130px; padding: 20px; }
+/* ── ABOUT CARD MASCOT ── */
+.hero-card--about {
+  overflow: visible !important; /* allow mascot to escape card bounds */
+}
+/* Clip blob animations inside about card via pseudo-element containment */
+.hero-card--about::before,
+.hero-card--about::after {
+  clip-path: inset(0 0 0 0 round 20px);
+}
+.about-mascot {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 80px;
+  height: 80px;
+  transform: translateY(30px) rotate(-20deg) scale(0.6);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+.hero-card--about:hover .about-mascot {
+  transform: translateY(-16px) rotate(10deg) scale(1.2);
+  opacity: 1;
+}
+.mascot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));
+  animation: mascotWiggle 2s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.hero-card--about:hover .mascot-img { animation-play-state: running; }
+@keyframes mascotWiggle {
+  0%,100% { transform: rotate(0deg); }
+  30%      { transform: rotate(-10deg) scale(1.05); }
+  70%      { transform: rotate(10deg) scale(1.05); }
 }
 
 /* ── ORDER PAYMENT STEP ── */
@@ -1299,7 +1315,86 @@ main {
   flex: 1;
 }
 
-/* ── RIPPLE CANVAS ── */
+/* ── CATEGORY FLOAT ── */
+.category-card.card-animated { animation: cardFloat 4s ease-in-out infinite; }
+.category-card.card-animated:nth-child(2n) { animation-delay: -1.5s; }
+.category-card.card-animated:nth-child(3n) { animation-delay: -3s; }
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+
+/* ── CONVEYOR BELT ── */
+.conveyor-section {
+  padding: 28px 0 0;
+  overflow: hidden;
+  width: 100%;
+}
+.conveyor-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 32px;
+  margin-bottom: 14px;
+}
+.conveyor-outer {
+  overflow: hidden;
+  width: 100%;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.conveyor-outer:active { cursor: grabbing; }
+.conveyor-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  padding: 0 32px 28px;
+  animation: conveyorScroll 35s linear infinite;
+}
+.conveyor-track:hover { animation-play-state: paused; }
+@keyframes conveyorScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.conveyor-item {
+  flex-shrink: 0;
+  width: 260px;
+  height: 260px;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.25s;
+}
+.conveyor-item:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.18);
+}
+.conveyor-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.conveyor-item:hover img { transform: scale(1.08); }
+.conveyor-item-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 32px 16px 14px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* Category grid hidden until conveyor item clicked */
+#categorySection { display: none; }
 .ripple-canvas {
   position: absolute;
   inset: 0;
