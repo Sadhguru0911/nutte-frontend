@@ -89,11 +89,84 @@
     </div>
   </section>
 
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid">
+
+      <!-- LEFT COL: About (small) + Reels (bigger) stacked -->
+      <div class="hero-col-small">
+
+        <!-- About — tiny card with mascot pop-out on hover -->
+        <div class="hero-card hero-card--about ripple-card" onclick="openAbout()">
+          <p class="hero-label">About</p>
+          <div class="hero-card-bottom">
+            <p class="hero-stat-sm">450+</p>
+            <p class="hero-stat-label">Members</p>
+          </div>
+          <!-- Mascot — the NuttE logo bounces out on hover -->
+          <div class="about-mascot">
+            <img src="assets/NuttE_edited.png" alt="NuttE mascot" class="mascot-img" />
+          </div>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+
+        <!-- Reels — bigger card -->
+        <div class="hero-card hero-card--fresh hero-card--reels ripple-card" onclick="openReels()">
+          <p class="hero-label">Watch us</p>
+          <div class="hero-card-bottom">
+            <i class="fab fa-instagram hero-icon-sm"></i>
+            <p class="hero-stat-label">Our Reels</p>
+          </div>
+          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+
+        <!-- Membership — medium card -->
+        <div class="hero-card hero-card--member ripple-card" onclick="openMembershipModal()">
+          <p class="hero-label">Membership</p>
+          <div class="hero-card-bottom">
+            <p class="hero-stat-sm">⭐</p>
+            <p class="hero-stat-label">From ₹400/mo</p>
+          </div>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Big brand card — PINK like steviaplease -->
+      <div class="hero-card hero-card--brand ripple-card" onclick="scrollToSection('categorySection')">
+        <div class="hero-brand-tagline">
+          <span>Trust <em>sahi.</em></span>
+          <span>Quality <em>sahi.</em></span>
+          <span>Price bhi <em>sahi.</em></span>
+        </div>
+        <div class="hero-brand-name">
+          <h1 class="hero-title">CommunitE</h1>
+          <p class="hero-brand-sub">Bulk prices. Community powered.<br>Doorstep delivered.</p>
+        </div>
+        <span class="hero-cta hero-cta--brand">Shop Now <i class="fas fa-arrow-right"></i></span>
+        <div class="hero-deco hero-deco--circle"></div>
+        <canvas class="ripple-canvas"></canvas>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CATEGORY CONVEYOR BELT -->
+  <section class="conveyor-section">
+    <div class="conveyor-label">Shop by category</div>
+    <div class="conveyor-outer" id="conveyorOuter">
+      <div class="conveyor-track" id="conveyorTrack">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </section>
+
   <!-- MAIN CONTENT -->
   <main>
 
-    <!-- Categories -->
-    <section id="categorySection" class="catalog-section">
+    <!-- Categories (grid — shown after conveyor click) -->
+    <section id="categorySection" class="catalog-section" style="display:none">
       <div class="section-header">
         <h2 class="section-title">Shop by category</h2>
         <div class="section-line"></div>

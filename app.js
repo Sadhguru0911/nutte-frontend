@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeReelsBtn) closeReelsBtn.addEventListener('click', closeReels);
   const closeMembershipBtn = document.getElementById('closeMembershipBtn');
   if (closeMembershipBtn) closeMembershipBtn.addEventListener('click', closeMembershipModal);
+  // Init ripple on hero cards
+  setTimeout(() => {
+    document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
+  }, 200);
 });
 
 /* UI bind */
@@ -101,10 +105,44 @@ async function loadCategories() {
       </div>
     `).join('');
     container.querySelectorAll('.category-card').forEach(el => { observeCard(el); initRipple(el); });
+
+    // Also populate conveyor belt — duplicate items for seamless loop
+    buildConveyor(cats);
   } catch (e) {
     console.error("loadCategories", e);
     $('categoryContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Failed to load categories. Please try again.</div>`;
   }
+}
+
+/* Build conveyor belt — duplicates items for seamless infinite scroll */
+function buildConveyor(cats) {
+  const track = $('conveyorTrack');
+  if (!track) return;
+
+  // Duplicate for seamless loop
+  const items = [...cats, ...cats].map(c => `
+    <div class="conveyor-item" onclick="openCategoryFromConveyor('${escapeHtml(c.name)}')">
+      <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" />
+      <div class="conveyor-item-label">${escapeHtml(c.name)}</div>
+    </div>
+  `).join('');
+
+  track.innerHTML = items;
+
+  // Drag-to-scroll
+  let isDragging = false, startX = 0, scrollLeft = 0;
+  const outer = $('conveyorOuter');
+  outer.addEventListener('mousedown', e => { isDragging = true; startX = e.pageX - outer.offsetLeft; scrollLeft = outer.scrollLeft; outer.style.animationPlayState = 'paused'; });
+  outer.addEventListener('mouseleave', () => { isDragging = false; });
+  outer.addEventListener('mouseup', () => { isDragging = false; });
+  outer.addEventListener('mousemove', e => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - outer.offsetLeft; outer.scrollLeft = scrollLeft - (x - startX); });
+}
+
+function openCategoryFromConveyor(categoryName) {
+  // Show the category grid section and scroll to subcategories
+  const catSection = $('categorySection');
+  if (catSection) catSection.style.display = 'block';
+  selectCategory(categoryName);
 }
 
 /* subcategories */
@@ -1066,11 +1104,7 @@ function initRipple(card) {
   }, { passive: true });
 }
 
-/* Init ripple on all hero cards after DOM is ready */
-function initHeroRipples() {
-  document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
+/* Init ripple on dynamically added cards */
+function initCardRipples(container) {
+  container.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(initHeroRipples, 100);
-});
