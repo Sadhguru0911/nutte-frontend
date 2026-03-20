@@ -168,13 +168,19 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-card--fresh  { background: #e8395a; }
 .hero-card--reels  { }
 .hero-card--member {
-  background: linear-gradient(160deg, #a87000, #f0c040 55%, #c89020);
+  background: linear-gradient(135deg, #b8860b 0%, #f5c842 45%, #e8a800 75%, #b8860b 100%);
+  background-size: 200% 200%;
+  animation: goldShimmer 3s ease-in-out infinite;
 }
-.hero-card--main   { background: var(--black); color: var(--white); }
+@keyframes goldShimmer {
+  0%,100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.hero-card--main { background: var(--black); color: var(--white); }
 
-/* DEEP GREEN brand card — CommunitE signature */
+/* PURPLE brand card with GOLD CommunitE title */
 .hero-card--brand {
-  background: #0d3320;
+  background: #2d1b69;
   color: #fff;
   padding: 44px 52px;
   display: flex;
@@ -182,43 +188,77 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   justify-content: space-between;
 }
 .hero-card--brand .hero-brand-tagline span {
-  color: rgba(200,245,106,0.7);
-  background: rgba(200,245,106,0.1);
-  border: 1px solid rgba(200,245,106,0.2);
+  color: rgba(245,195,60,0.8);
+  background: rgba(245,195,60,0.1);
+  border: 1px solid rgba(245,195,60,0.25);
 }
-.hero-card--brand .hero-brand-tagline em { color: #c8f56a; font-weight: 800; }
-.hero-card--brand .hero-title { color: #fff; }
-.hero-card--brand .hero-brand-sub { color: rgba(255,255,255,0.55); }
+.hero-card--brand .hero-brand-tagline em { color: #f5c33c; font-weight: 800; }
+.hero-card--brand .hero-title {
+  color: #f5c33c;
+  text-shadow: 0 2px 20px rgba(245,195,60,0.3);
+}
+.hero-card--brand .hero-brand-sub { color: rgba(255,255,255,0.6); }
 .hero-card--brand .hero-deco--circle {
-  background: radial-gradient(circle, rgba(200,245,106,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(245,195,60,0.15) 0%, transparent 70%);
 }
 
-/* Small card internals */
+/* ── LEFT CARD FONTS — more prominent ── */
 .hero-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 1;
+  position: relative;
+  z-index: 2;
 }
-.hero-card-bottom { display: flex; flex-direction: column; gap: 3px; }
+.hero-card-bottom { display: flex; flex-direction: column; gap: 4px; position: relative; z-index: 2; }
 .hero-stat-sm {
   font-family: 'Playfair Display', serif;
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.03em;
 }
-.hero-stat-label { font-size: 0.72rem; font-weight: 500; opacity: 0.6; }
-.hero-icon-sm { font-size: 1.8rem; opacity: 0.8; }
-.hero-member-hint {
-  font-size: 0.68rem;
-  font-weight: 600;
-  background: rgba(0,0,0,0.12);
+.hero-stat-label { font-size: 0.8rem; font-weight: 700; opacity: 0.85; }
+.hero-icon-sm { font-size: 2rem; opacity: 0.9; }
+
+/* Membership card — stand-out badge + animated star */
+.hero-member-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(0,0,0,0.12);
   border-radius: 999px;
-  padding: 2px 8px;
-  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #2a1800;
+  margin-bottom: 4px;
   width: fit-content;
+  position: relative;
+  z-index: 2;
+}
+.hero-member-star {
+  display: inline-block;
+  font-size: 1.6rem;
+  animation: starPulse 1.8s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+}
+@keyframes starPulse {
+  0%,100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+  50%      { transform: scale(1.2) rotate(15deg); filter: brightness(1.3); }
+}
+.hero-member-hint {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #2a1800;
+  opacity: 1;
+  position: relative;
+  z-index: 2;
 }
 
 /* Brand card internals */
@@ -299,9 +339,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   opacity: 0.10;
 }
 
-/* Brand card blobs */
-.hero-card--brand::before { background: #c8f56a; }
-.hero-card--brand::after  { background: #c8f56a; animation-delay: -3s; }
+/* Brand card blobs — gold on purple */
+.hero-card--brand::before { background: #f5c33c; opacity: 0.15; }
+.hero-card--brand::after  { background: #f5c33c; opacity: 0.08; animation-delay: -3s; }
 
 /* About card blobs */
 .hero-card--about::before { background: #5a4fcf; opacity: 0.12; }
@@ -1446,10 +1486,12 @@ main {
 .hero-card--fresh .hero-card-arrow { background: rgba(0,0,0,0.15); color: #000; }
 
 /* Gold membership — bold black text */
-.hero-card--member { color: #000 !important; }
-.hero-card--member .hero-label { color: #000; opacity: 1; font-weight: 800; letter-spacing: 0.15em; }
-.hero-card--member .hero-stat-sm { color: #000; font-weight: 900; }
-.hero-card--member .hero-stat-label { color: #000; opacity: 0.85; font-weight: 700; }
+.hero-card--member { color: #1a0a00 !important; }
+.hero-card--member .hero-label { color: #1a0a00; opacity: 1; font-weight: 800; letter-spacing: 0.15em; }
+.hero-card--member .hero-stat-sm { color: #1a0a00; font-weight: 900; }
+.hero-card--member .hero-stat-label { color: #1a0a00; opacity: 0.85; font-weight: 700; }
+.hero-card--member .hero-member-badge { color: #1a0a00; }
+.hero-card--member .hero-member-hint { color: #1a0a00; }
 
 /* ── RESPONSIVE UPDATE ── */
 
