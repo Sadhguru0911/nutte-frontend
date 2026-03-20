@@ -146,10 +146,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   gap: 12px;
   height: 100%;
 }
-.hero-col-small .hero-card--about  { flex: 0 0 26%; }
-.hero-col-small .hero-card--reels  { flex: 0 0 44%; }
-.hero-col-small .hero-card--member { flex: 1; }
-.hero-col-small .hero-card { padding: 24px 22px; min-height: 0; }
+.hero-col-small .hero-card--about  { flex: 0 0 22%; }
+.hero-col-small .hero-card--reels  { flex: 0 0 40%; }
+.hero-col-small .hero-card--member { flex: 1; min-height: 0; overflow: visible; }
+.hero-col-small .hero-card { padding: 20px 22px; min-height: 0; }
 
 .hero-card {
   border-radius: 20px;
@@ -204,9 +204,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* ── LEFT CARD FONTS — more prominent ── */
 .hero-label {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   opacity: 1;
   position: relative;
@@ -215,13 +215,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-card-bottom { display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 2; }
 .hero-stat-sm {
   font-family: 'Playfair Display', serif;
-  font-size: 3rem;
+  font-size: 3.6rem;
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.03em;
 }
-.hero-stat-label { font-size: 0.95rem; font-weight: 700; opacity: 0.9; }
-.hero-icon-sm { font-size: 2.6rem; opacity: 0.95; }
+.hero-stat-label { font-size: 1rem; font-weight: 700; opacity: 0.9; }
+.hero-icon-sm { font-size: 3rem; opacity: 0.95; }
 
 /* Membership card — stand-out badge + animated star */
 .hero-member-badge {
@@ -232,33 +232,35 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border: 1px solid rgba(0,0,0,0.12);
   border-radius: 999px;
   padding: 4px 12px;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   color: #2a1800;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   width: fit-content;
   position: relative;
   z-index: 2;
 }
 .hero-member-star {
   display: inline-block;
-  font-size: 2.2rem;
+  font-size: 2.6rem;
   animation: starPulse 1.8s ease-in-out infinite;
   position: relative;
   z-index: 2;
+  line-height: 1;
 }
 @keyframes starPulse {
   0%,100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
   50%      { transform: scale(1.2) rotate(15deg); filter: brightness(1.3); }
 }
 .hero-member-hint {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #2a1800;
   opacity: 1;
   position: relative;
   z-index: 2;
+  margin-top: 4px;
 }
 
 /* Brand card internals */
@@ -1468,11 +1470,13 @@ main {
 #categorySection { display: none; }
 
 /* ── FIX: blob overflow on About card ── */
-/* Use clip-path on the pseudo-elements to keep blobs inside card bounds */
 .hero-card--about::before,
 .hero-card--about::after {
   clip-path: inset(0 round 20px);
+  overflow: hidden;
 }
+/* Prevent the blob from painting outside the card visually */
+.hero-col-small { overflow: hidden; border-radius: 22px 0 0 22px; }
 
 /* ── FIX: Font colors on Reels (baby pink) and Membership (gold) ── */
 .hero-card--fresh,
