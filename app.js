@@ -33,6 +33,8 @@ const $ = id => document.getElementById(id);
 const escapeHtml = s => (s || "").toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function sanitizeId(s) { return (s || '').replace(/[^a-z0-9]/gi, '_').toLowerCase(); }
 function scrollToSection(id) { const el = $(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+/* Encode category/subcategory names for URLs — preserves / so Flask path: routing works */
+function encodeCategory(s) { return (s || '').split('/').map(part => encodeURIComponent(part)).join('/'); }
 
 /* API */
 async function apiCall(endpoint, options = {}) {
@@ -123,7 +125,7 @@ async function selectCategory(category) {
   $('subcategoryTitle').innerText = category;
   $('backToCategoriesBtn').style.display = 'inline-flex';
   try {
-    const res = await apiCall(`/subcategories/${encodeURIComponent(category)}`);
+    const res = await apiCall(`/subcategories/${encodeCategory(category)}`);
     let subs = res.subcategories || [];
     if (Array.isArray(res)) subs = res;
     const container = $('subcategoryContainer');
@@ -152,7 +154,7 @@ async function selectSubcategory(category, subcat) {
   $('productSection').style.display = 'block';
   $('productTitle').innerText = subcat;
   try {
-    const res = await apiCall(`/products/${encodeURIComponent(category)}/${encodeURIComponent(subcat)}`);
+    const res = await apiCall(`/products/${encodeCategory(category)}/${encodeCategory(subcat)}`);
     const products = res.products || (Array.isArray(res) ? res : []);
     if (products.length === 0) {
       $('productContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">No products found.</div>`;
