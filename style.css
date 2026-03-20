@@ -133,22 +133,22 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-grid {
   display: grid;
   grid-template-columns: 280px 1fr;
-  grid-template-rows: 500px;
+  grid-template-rows: 360px;
   gap: 14px;
-  margin: 0; /* left aligned */
+  margin: 0;
 }
 
-/* Left column wrapper — About small, Reels bigger, Membership medium */
+/* Left column wrapper — all 3 cards equal height */
 .hero-col-small {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   height: 100%;
 }
-.hero-col-small .hero-card--about  { flex: 0 0 22%; }
-.hero-col-small .hero-card--reels  { flex: 0 0 40%; }
+.hero-col-small .hero-card--about  { flex: 1; }
+.hero-col-small .hero-card--reels  { flex: 1; }
 .hero-col-small .hero-card--member { flex: 1; min-height: 0; overflow: visible; }
-.hero-col-small .hero-card { padding: 20px 22px; min-height: 0; }
+.hero-col-small .hero-card { padding: 18px 20px; min-height: 0; }
 
 .hero-card {
   border-radius: 20px;
@@ -1435,8 +1435,8 @@ main {
 }
 .conveyor-item {
   flex-shrink: 0;
-  width: 240px;
-  height: 240px;
+  width: 360px;
+  height: 360px;
   border-radius: 22px;
   overflow: hidden;
   position: relative;
@@ -1507,17 +1507,17 @@ main {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 960px) {
-  .hero-grid { grid-template-columns: 220px 1fr; grid-template-rows: 420px; }
-  .hero-card--brand { padding: 32px 36px; }
+  .hero-grid { grid-template-columns: 220px 1fr; grid-template-rows: 300px; }
+  .hero-card--brand { padding: 28px 32px; }
   .hero-title { font-size: clamp(2.8rem, 6vw, 4.2rem); }
   .conveyor-label { padding: 0 20px; }
   .conveyor-track { padding: 0 20px 20px; gap: 12px; }
-  .conveyor-item { width: 210px; height: 210px; }
+  .conveyor-item { width: 300px; height: 300px; }
 }
 
 @media (max-width: 600px) {
   .hero { padding: 12px 12px 0; }
-  .hero-grid { grid-template-columns: 140px 1fr; grid-template-rows: 340px; gap: 8px; }
+  .hero-grid { grid-template-columns: 140px 1fr; grid-template-rows: 280px; gap: 8px; }
   .hero-col-small { gap: 8px; }
   .hero-col-small .hero-card { padding: 14px 12px; }
   .hero-card--brand { padding: 22px 20px; }
@@ -1531,7 +1531,7 @@ main {
   .about-mascot { width: 55px; height: 55px; right: -4px; }
   .conveyor-track { padding: 0 12px 16px; gap: 10px; }
   .conveyor-label { padding: 0 12px; margin-bottom: 10px; }
-  .conveyor-item { width: 150px; height: 150px; border-radius: 18px; }
+  .conveyor-item { width: 200px; height: 200px; border-radius: 18px; }
   .conveyor-item-label { font-size: 0.75rem; }
   .nav-inner { padding: 0 14px; height: 56px; gap: 8px; }
   .nav-logo { height: 30px; width: 30px; }
