@@ -27,7 +27,7 @@
         <span class="nav-tagline">Collective Commerce</span>
         <button id="memberLoginBtn" class="member-login-btn" onclick="openMemberLogin()">
           <i class="fas fa-crown"></i>
-          <span id="memberLoginLabel">Member Login</span>
+          <span id="memberLoginLabel">Join Membership</span>
         </button>
         <button id="openCartBtn" class="cart-btn">
           <i class="fas fa-bag-shopping"></i>
@@ -66,7 +66,7 @@
           <p class="hero-label">Join &amp; Save</p>
           <div class="hero-member-badge">⚡ Members save up to 15%</div>
           <div class="hero-card-bottom">
-            <span class="hero-member-star">⭐</span>
+            <span class="hero-member-star" id="memberStar">⭐</span>
             <p class="hero-member-hint">From ₹400/mo</p>
           </div>
           <canvas class="ripple-canvas"></canvas>
@@ -100,6 +100,14 @@
     </div>
   </section>
 
+  <!-- FOOTER — visible immediately below conveyor -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">CommunitE</div>
+      <p class="footer-sub">Collective commerce — bulk prices, community powered, doorstep delivered.</p>
+    </div>
+  </footer>
+
   <!-- MAIN CONTENT -->
   <main>
 
@@ -131,14 +139,6 @@
     </section>
 
   </main>
-
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-brand">CommunitE</div>
-      <p class="footer-sub">Collective commerce — bulk prices, community powered, doorstep delivered.</p>
-    </div>
-  </footer>
 
   <!-- CART SIDEBAR -->
   <aside id="cartSidebar" class="cart-sidebar" aria-hidden="true">
