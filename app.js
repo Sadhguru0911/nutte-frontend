@@ -61,6 +61,31 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
   }, 200);
+
+  // ── SILENT PRICE REFRESH ON TAB FOCUS ──
+  // When customer switches back to this tab, silently reload products
+  // so they always see current prices without manual refresh
+  let lastRefresh = Date.now();
+  const MIN_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes minimum between refreshes
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const timeSinceRefresh = Date.now() - lastRefresh;
+      if (timeSinceRefresh > MIN_REFRESH_INTERVAL) {
+        silentRefreshProducts();
+        lastRefresh = Date.now();
+      }
+    }
+  });
+
+  // Also refresh if window regains focus (e.g. switching from another app)
+  window.addEventListener('focus', () => {
+    const timeSinceRefresh = Date.now() - lastRefresh;
+    if (timeSinceRefresh > MIN_REFRESH_INTERVAL) {
+      silentRefreshProducts();
+      lastRefresh = Date.now();
+    }
+  });
 });
 
 /* UI bind */
@@ -615,6 +640,42 @@ async function submitOrderWithPayment() {
     }
   } catch (e) {
     alert('Error submitting order. Please try again.');
+  }
+}
+
+/* Silent background product refresh — no visible loading spinner */
+async function silentRefreshProducts() {
+  try {
+    const data = await apiCall('/categories');
+    const cats = data.categories || [];
+    if (!cats.length) return;
+
+    // Rebuild conveyor with fresh data
+    buildConveyor(cats);
+
+    // If user is currently on subcategory page, refresh silently
+    if (selectedCategory && $('subcategorySection').style.display !== 'none') {
+      const subData = await apiCall(`/subcategories/${encodeCategory(selectedCategory)}`);
+      const subs = subData.subcategories || [];
+      const container = $('subcategoryContainer');
+      container.innerHTML = subs.map((s, i) => `
+        <div class="subcat-card ripple-card" style="animation-delay:${i * 70}ms"
+             onclick="selectSubcategory('${escapeHtml(selectedCategory)}','${escapeHtml(s.name)}')">
+          <img src="${escapeHtml(s.image)}" alt="${escapeHtml(s.name)}" loading="lazy" />
+          <div class="subcat-title">${escapeHtml(s.name)}</div>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+      `).join('');
+      container.querySelectorAll('.subcat-card').forEach(el => { observeCard(el); initRipple(el); });
+    }
+
+    // If user is on product page, refresh prices silently
+    if (selectedCategory && selectedSubcategory && $('productSection').style.display !== 'none') {
+      await loadProducts(selectedCategory, selectedSubcategory);
+    }
+
+  } catch (e) {
+    console.warn('Silent refresh failed (non-critical):', e);
   }
 }
 
