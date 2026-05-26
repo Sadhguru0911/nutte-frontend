@@ -135,6 +135,9 @@ async function loadCategories() {
 
     // Build conveyor belt
     buildConveyor(cats);
+
+    // Build search index silently in background
+    setTimeout(() => buildSearchIndex(cats), 1000);
   } catch (e) {
     console.error("loadCategories", e);
     $('categoryContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Failed to load categories. Please try again.</div>`;
@@ -711,15 +714,110 @@ function buildConveyor(cats) {
   });
 }
 
-/* Conveyor item click — go straight to subcategories, skip category grid */
+/* Conveyor item click — go straight to subcategories */
 function openCategoryFromConveyor(categoryName) {
-  // Hide conveyor, show back button, go straight to subcategories
-  $('conveyorSection') && ($('conveyorSection').style.display = 'none');
   const conveyorEl = document.querySelector('.conveyor-section');
   if (conveyorEl) conveyorEl.style.display = 'none';
+  const conveyorHeader = document.querySelector('.conveyor-header');
+  if (conveyorHeader) conveyorHeader.style.display = 'none';
+  $('backToCategoriesBtn').style.display = 'flex';
   selectCategory(categoryName);
-  // Mark back button to return to conveyor
-  $('backToCategoriesBtn').dataset.returnTo = 'conveyor';
+}
+
+/* ── PRODUCT SEARCH ── */
+let allProductsCache = [];  // flat list of all products for search
+
+// Called after categories load — build search index in background
+async function buildSearchIndex(cats) {
+  allProductsCache = [];
+  for (const cat of cats) {
+    try {
+      const subData = await apiCall(`/subcategories/${encodeCategory(cat.name)}`);
+      for (const sub of (subData.subcategories || [])) {
+        const prodData = await apiCall(`/products/${encodeCategory(cat.name)}/${encodeCategory(sub.name)}`);
+        for (const p of (prodData.products || [])) {
+          allProductsCache.push({
+            product_name: p.product_name,
+            category: cat.name,
+            subcategory: sub.name,
+            price: p.price,
+            member_price: p.member_price || null
+          });
+        }
+      }
+    } catch(e) { /* silent */ }
+  }
+}
+
+function toggleSearch() {
+  const bar = $('searchBar');
+  const isVisible = bar.style.display !== 'none';
+  bar.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) {
+    $('searchInput').focus();
+    // Bind search input
+    $('searchInput').oninput = handleSearch;
+  } else {
+    clearSearch();
+  }
+}
+
+function handleSearch() {
+  const query = ($('searchInput').value || '').trim().toLowerCase();
+  const clearBtn = $('searchClear');
+  const resultsBox = $('searchResults');
+
+  clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+
+  if (query.length < 3) {
+    resultsBox.style.display = 'none';
+    return;
+  }
+
+  // Filter products whose name contains the query
+  const matches = allProductsCache.filter(p =>
+    p.product_name.toLowerCase().includes(query)
+  );
+
+  // Deduplicate by product name
+  const seen = new Set();
+  const unique = matches.filter(p => {
+    if (seen.has(p.product_name)) return false;
+    seen.add(p.product_name);
+    return true;
+  });
+
+  if (unique.length === 0) {
+    resultsBox.innerHTML = `<div class="search-no-results">No products found for "${escapeHtml(query)}"</div>`;
+  } else {
+    resultsBox.innerHTML = unique.slice(0, 12).map(p => `
+      <div class="search-result-item" onclick="openProductFromSearch('${escapeHtml(p.category)}','${escapeHtml(p.subcategory)}')">
+        <div>
+          <div class="search-result-name">${escapeHtml(p.product_name)}</div>
+          <div class="search-result-cat">${escapeHtml(p.category)} › ${escapeHtml(p.subcategory)}</div>
+        </div>
+        <div class="search-result-price">₹${p.price}</div>
+      </div>
+    `).join('');
+  }
+  resultsBox.style.display = 'block';
+}
+
+function clearSearch() {
+  $('searchInput').value = '';
+  $('searchResults').style.display = 'none';
+  $('searchClear').style.display = 'none';
+}
+
+async function openProductFromSearch(category, subcategory) {
+  clearSearch();
+  $('searchBar').style.display = 'none';
+  // Navigate to the subcategory
+  const conveyorEl = document.querySelector('.conveyor-section');
+  if (conveyorEl) conveyorEl.style.display = 'none';
+  document.querySelector('.conveyor-header').style.display = 'none';
+  $('backToCategoriesBtn').style.display = 'flex';
+  await selectSubcategory(category, subcategory);
 }
 
 /* navigation */
@@ -730,14 +828,13 @@ function goBackToCategories() {
   $('productSection').style.display = 'none';
   $('backToCategoriesBtn').style.display = 'none';
 
-  // Return to conveyor belt (not category grid)
+  // Show conveyor and header again
   const conveyorEl = document.querySelector('.conveyor-section');
   if (conveyorEl) conveyorEl.style.display = 'block';
+  const conveyorHeader = document.querySelector('.conveyor-header');
+  if (conveyorHeader) conveyorHeader.style.display = 'flex';
   $('categorySection').style.display = 'none';
-
-  // Scroll back to top of conveyor
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  delete $('backToCategoriesBtn').dataset.returnTo;
 }
 
 /* scroll-triggered card animations */

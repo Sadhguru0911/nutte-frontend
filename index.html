@@ -21,9 +21,6 @@
         <span class="nav-name">CommunitE</span>
       </a>
       <div class="nav-links">
-        <button id="backToCategoriesBtn" class="nav-link back-btn" style="display:none">
-          <i class="fas fa-arrow-left"></i> Back
-        </button>
         <span class="nav-tagline">Collective Commerce</span>
         <button id="memberLoginBtn" class="member-login-btn" onclick="openMemberLogin()">
           <i class="fas fa-crown"></i>
@@ -92,9 +89,29 @@
     </div>
   </section>
 
-  <!-- CATEGORY CONVEYOR BELT -->
-  <section class="conveyor-section">
+  <!-- FLOATING BACK BUTTON -->
+  <button id="backToCategoriesBtn" class="floating-back-btn" style="display:none" onclick="goBackToCategories()">
+    <i class="fas fa-arrow-left"></i> Back
+  </button>
+
+  <!-- FLOATING SEARCH -->
+  <div id="searchBar" class="search-bar-float" style="display:none">
+    <div class="search-bar-inner">
+      <i class="fas fa-search search-icon"></i>
+      <input id="searchInput" class="search-input" type="text" placeholder="Search products (min 3 letters)..." autocomplete="off" />
+      <button class="search-clear" id="searchClear" style="display:none" onclick="clearSearch()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div id="searchResults" class="search-results" style="display:none"></div>
+  </div>
+
+  <!-- CONVEYOR SECTION HEADER with search -->
+  <div class="conveyor-header">
     <div class="conveyor-label">Shop by category</div>
+    <button class="search-trigger-btn" onclick="toggleSearch()">
+      <i class="fas fa-search"></i> Search products
+    </button>
+  </div>
+  <section class="conveyor-section">
     <div class="conveyor-outer" id="conveyorOuter">
       <div class="conveyor-track" id="conveyorTrack"></div>
     </div>
@@ -171,6 +188,10 @@
     </div>
 
     <div id="cartFooter" class="cart-footer" style="display:none">
+      <div class="cart-delivery-note">
+        <i class="fas fa-truck"></i>
+        We deliver within 10kms of Sarjapur Road. Delivery beyond 10kms will be at actual charges.
+      </div>
       <div class="cart-summary">
         <div class="cart-row"><span>Subtotal</span><span>₹<span id="cartSubtotal">0</span></span></div>
         <div id="membershipFeeRow" class="cart-row cart-row--membership" style="display:none">
@@ -282,7 +303,7 @@
         <div class="about-stats">
           <div class="about-stat"><span class="about-stat-num">450+</span><span class="about-stat-label">Members</span></div>
           <div class="about-stat"><span class="about-stat-num">20+</span><span class="about-stat-label">Societies</span></div>
-          <div class="about-stat"><span class="about-stat-num">₹50</span><span class="about-stat-label">Per Order</span></div>
+          <div class="about-stat"><span class="about-stat-num">Upto 40%</span><span class="about-stat-label">Off Retail Prices</span></div>
         </div>
         <div class="about-cards">
           <div class="about-card about-card--mission">
@@ -309,8 +330,8 @@
           <h4 class="about-section-title">What We Offer</h4>
           <div class="about-products">
             <span>Dry Fruits</span><span>Dates</span><span>Whole Spices</span>
-            <span>Cold-Pressed Oils</span><span>A2 Ghee</span><span>Honey</span>
-            <span>Peanut Butter</span><span>Millets, Rice &amp; Atta</span><span>Snacks</span>
+            <span>Millets, Rice &amp; Atta</span><span>Snacks</span><span>Tea &amp; Coffee</span>
+            <span>Gift Boxes</span><span>Exotic Nuts</span><span>Seeds</span>
           </div>
         </div>
         <div class="about-contact">
@@ -318,8 +339,7 @@
           <p class="about-contact-name">Sameer Gupta <span>Founder &amp; Managing Director</span></p>
           <div class="about-contact-links">
             <a href="tel:+918951048013" class="about-contact-item"><i class="fas fa-phone"></i> +91 89510 48013</a>
-            <a href="/cdn-cgi/l/email-protection#5e2d3f333b3b2c702d3970392b2e2a3f1e39333f3732703d3133" class="about-contact-item"><i class="fas fa-envelope"></i> <span class="__cf_email__" data-cfemail="3a495b575f5f4814495d145d4f4a4e5b7a5d575b535614595557">[email&#160;protected]</span></a>
-            <a href="https://instagram.com/dryfruits_communitE" target="_blank" class="about-contact-item"><i class="fab fa-instagram"></i> @dryfruits_communitE</a>
+            <a href="https://instagram.com/dryfruits_communitE" target="_blank" rel="noopener" class="about-contact-item about-contact-item--insta"><i class="fab fa-instagram"></i> @dryfruits_communitE</a>
           </div>
         </div>
       </div>
@@ -373,7 +393,7 @@
               <div class="plan-desc">Pay month to month, cancel anytime</div>
             </div>
             <div class="member-plan member-plan--featured" id="planAnnual" onclick="selectPlan('annual')">
-              <div class="plan-save-tag">Save ₹801/year</div>
+              <div class="plan-save-tag">Save ₹801/yr</div>
               <div class="plan-badge-label">Annual</div>
               <div class="plan-price">₹3,999<span>/year</span></div>
               <div class="plan-desc">Best value — 2 months free!</div>
