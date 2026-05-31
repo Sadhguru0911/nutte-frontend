@@ -809,13 +809,15 @@ function clearSearch() {
   $('searchClear').style.display = 'none';
 }
 
+function toggleSearch() { /* search bar is always visible now — no-op */ }
+
 async function openProductFromSearch(category, subcategory) {
   clearSearch();
-  $('searchBar').style.display = 'none';
   // Navigate to the subcategory
   const conveyorEl = document.querySelector('.conveyor-section');
   if (conveyorEl) conveyorEl.style.display = 'none';
-  document.querySelector('.conveyor-header').style.display = 'none';
+  const conveyorHeader = document.querySelector('.conveyor-header');
+  if (conveyorHeader) conveyorHeader.style.display = 'none';
   $('backToCategoriesBtn').style.display = 'flex';
   await selectSubcategory(category, subcategory);
 }

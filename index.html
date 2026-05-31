@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="style.css" />
-  <script src="app.js" defer></script>
+  <link rel="stylesheet" href="style.css?v=28" />
+  <script src="app.js?v=28" defer></script>
 </head>
 <body>
 
@@ -91,25 +91,25 @@
 
   <!-- FLOATING BACK BUTTON -->
   <button id="backToCategoriesBtn" class="floating-back-btn" style="display:none" onclick="goBackToCategories()">
-    <i class="fas fa-arrow-left"></i> Back
+    <i class="fas fa-arrow-left"></i> Back to Categories
   </button>
 
-  <!-- FLOATING SEARCH -->
-  <div id="searchBar" class="search-bar-float" style="display:none">
-    <div class="search-bar-inner">
-      <i class="fas fa-search search-icon"></i>
-      <input id="searchInput" class="search-input" type="text" placeholder="Search products (min 3 letters)..." autocomplete="off" />
-      <button class="search-clear" id="searchClear" style="display:none" onclick="clearSearch()"><i class="fas fa-xmark"></i></button>
-    </div>
-    <div id="searchResults" class="search-results" style="display:none"></div>
-  </div>
-
-  <!-- CONVEYOR SECTION HEADER with search -->
+  <!-- CONVEYOR SECTION HEADER with always-visible search -->
   <div class="conveyor-header">
     <div class="conveyor-label">Shop by category</div>
-    <button class="search-trigger-btn" onclick="toggleSearch()">
-      <i class="fas fa-search"></i> Search products
-    </button>
+    <div class="search-always-bar">
+      <div class="search-always-inner">
+        <i class="fas fa-search search-icon"></i>
+        <input id="searchInput" class="search-input" type="text"
+          placeholder="Search Products — e.g. type 'Wal' for Walnuts"
+          autocomplete="off" oninput="handleSearch()" />
+        <button class="search-clear" id="searchClear" style="display:none" onclick="clearSearch()">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div class="search-hint">💡 Type at least 3 letters to search — e.g. "Wal" shows all Walnut products</div>
+      <div id="searchResults" class="search-results" style="display:none"></div>
+    </div>
   </div>
   <section class="conveyor-section">
     <div class="conveyor-outer" id="conveyorOuter">
