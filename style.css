@@ -242,18 +242,18 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .hero-member-star {
   display: inline-block;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   position: relative;
-  z-index: 2;
+  z-index: 5;
   animation: starFlyIn 1s cubic-bezier(0.34,1.56,0.64,1) forwards,
              starPulse 2s ease-in-out 1.2s infinite;
   opacity: 0;
   transform: translateY(-120px) scale(0.3) rotate(-180deg);
-  /* CSS star shape — renders identically on all devices */
   background: #f5c33c;
   clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  filter: drop-shadow(0 2px 6px rgba(180,130,0,0.5));
+  /* Ensure not clipped by any parent */
+  overflow: visible;
 }
 @keyframes starFlyIn {
   0%   { opacity: 0; transform: translateY(-120px) scale(0.3) rotate(-180deg); }
@@ -262,8 +262,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
 }
 @keyframes starPulse {
-  0%,100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 2px 6px rgba(180,130,0,0.5)); }
-  50%      { transform: scale(1.2) rotate(15deg); filter: drop-shadow(0 0 14px rgba(245,195,60,0.9)) brightness(1.2); }
+  0%,100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.25) rotate(18deg); background: #ffe066; }
 }
 .hero-member-hint {
   font-size: 1rem;
@@ -1497,7 +1497,8 @@ main {
   overflow: hidden;
 }
 /* Prevent the blob from painting outside the card visually */
-.hero-col-small { overflow: hidden; border-radius: 22px 0 0 22px; }
+/* hero-col-small must NOT clip overflow — star needs to escape member card */
+.hero-col-small { overflow: visible; }
 
 /* ── FIX: Font colors on Reels (baby pink) and Membership (gold) ── */
 .hero-card--fresh,
@@ -1611,35 +1612,44 @@ main {
 
 
 /* ── 1. FLOATING BACK BUTTON ── */
+button.floating-back-btn,
 .floating-back-btn {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
-  background: var(--green);
-  color: var(--white);
-  border: none;
-  border-radius: 999px;
-  padding: 14px 32px;
-  font-size: 0.95rem;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 28px rgba(26,92,58,0.45);
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-  white-space: nowrap;
+  position: fixed !important;
+  bottom: 32px !important;
+  right: 32px !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 9999 !important;
+  background: var(--green) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 15px 28px !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  font-family: inherit !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-shadow: 0 8px 32px rgba(26,92,58,0.55) !important;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s !important;
+  white-space: nowrap !important;
 }
+button.floating-back-btn:hover,
 .floating-back-btn:hover {
-  background: #0f3d22;
-  transform: translateX(-50%) translateY(-3px);
-  box-shadow: 0 14px 36px rgba(26,92,58,0.55);
+  background: #0f3d22 !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 14px 40px rgba(26,92,58,0.65) !important;
 }
 @media (max-width: 600px) {
-  .floating-back-btn { bottom: 16px; padding: 12px 24px; font-size: 0.88rem; }
+  button.floating-back-btn,
+  .floating-back-btn {
+    bottom: 20px !important;
+    right: 16px !important;
+    padding: 12px 22px !important;
+    font-size: 0.88rem !important;
+  }
 }
 
 /* ── 2. SEARCH BAR — always visible traditional search ── */
