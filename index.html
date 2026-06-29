@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="style.css?v=29" />
-  <script src="app.js?v=29" defer></script>
+  <link rel="stylesheet" href="style.css?v=30" />
+  <script src="app.js?v=30" defer></script>
 </head>
 <body>
 
@@ -38,7 +38,7 @@
   <section class="hero">
     <div class="hero-grid">
 
-      <!-- LEFT COL: About (small) + Reels (bigger) + Membership stacked -->
+      <!-- LEFT COL -->
       <div class="hero-col-small">
 
         <div class="hero-card hero-card--about ripple-card" onclick="openAbout()">
@@ -59,20 +59,24 @@
           <canvas class="ripple-canvas"></canvas>
         </div>
 
-        <div class="hero-card hero-card--member ripple-card" onclick="openMembershipModal()">
-          <p class="hero-label">Join &amp; Save</p>
-          <div class="hero-member-badge">⚡ Members save up to 40%</div>
-          <div class="hero-card-bottom">
-            <span class="hero-member-star" id="memberStar">🌟</span>
-            <p class="hero-member-hint">From ₹400/mo</p>
+        <!-- Membership card — star lives OUTSIDE the card to avoid clipping -->
+        <div class="hero-member-wrap">
+          <div class="hero-card hero-card--member ripple-card" onclick="openMembershipModal()">
+            <p class="hero-label">Join &amp; Save</p>
+            <div class="hero-member-badge">⚡ Members save up to 40%</div>
+            <div class="hero-card-bottom">
+              <p class="hero-member-hint">From ₹400/mo</p>
+            </div>
+            <canvas class="ripple-canvas"></canvas>
           </div>
-          <canvas class="ripple-canvas"></canvas>
+          <!-- Star outside card so overflow:hidden doesn't clip it -->
+          <span class="hero-member-star" id="memberStar"></span>
         </div>
 
       </div>
 
-      <!-- RIGHT: Big pink brand card -->
-      <div class="hero-card hero-card--brand ripple-card" onclick="scrollToSection('categorySection')">
+      <!-- RIGHT: Big brand card -->
+      <div class="hero-card hero-card--brand ripple-card" onclick="scrollToSection('shopSection')">
         <div class="hero-brand-tagline">
           <span>Trust <em>sahi.</em></span>
           <span>Quality <em>sahi.</em></span>
@@ -91,13 +95,14 @@
 
   <!-- FLOATING BACK BUTTON -->
   <button id="backToCategoriesBtn" class="floating-back-btn" style="display:none" onclick="goBackToCategories()">
-    <i class="fas fa-arrow-left"></i> Back to Categories
+    <i class="fas fa-arrow-left"></i> Back
   </button>
 
-  <!-- CONVEYOR SECTION HEADER with always-visible search -->
-  <div class="conveyor-header">
-    <div class="conveyor-label">Shop by category</div>
-    <div class="search-always-bar">
+  <!-- SHOP SECTION — Search + Categories + Subcategories + Products -->
+  <section id="shopSection" class="shop-section">
+
+    <!-- Search bar — TOP, full width -->
+    <div class="shop-search">
       <div class="search-always-inner">
         <i class="fas fa-search search-icon"></i>
         <input id="searchInput" class="search-input" type="text"
@@ -107,55 +112,37 @@
           <i class="fas fa-xmark"></i>
         </button>
       </div>
-      <div class="search-hint">💡 Type at least 3 letters to search — e.g. "Wal" shows all Walnut products</div>
+      <div class="search-hint">💡 Type at least 3 letters — e.g. "Wal" shows all Walnut products</div>
       <div id="searchResults" class="search-results" style="display:none"></div>
     </div>
-  </div>
-  <section class="conveyor-section">
-    <div class="conveyor-outer" id="conveyorOuter">
-      <div class="conveyor-track" id="conveyorTrack"></div>
+
+    <!-- Categories grid — always visible -->
+    <div id="categorySection" class="shop-categories">
+      <h2 class="shop-section-label">Shop by category</h2>
+      <div id="categoryContainer" class="category-grid"></div>
     </div>
+
+    <!-- Subcategories — appear below categories when one is selected -->
+    <div id="subcategorySection" class="shop-subcategories" style="display:none">
+      <h2 class="shop-section-label" id="subcategoryTitle"></h2>
+      <div id="subcategoryContainer" class="subcategory-strip"></div>
+    </div>
+
+    <!-- Products — appear below subcategories -->
+    <div id="productSection" class="shop-products" style="display:none">
+      <h2 class="shop-section-label" id="productTitle"></h2>
+      <div id="productContainer" class="product-grid"></div>
+    </div>
+
   </section>
 
-  <!-- FOOTER — visible immediately below conveyor -->
+  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">CommunitE</div>
       <p class="footer-sub">Collective commerce — bulk prices, community powered, doorstep delivered.</p>
     </div>
   </footer>
-
-  <!-- MAIN CONTENT -->
-  <main>
-
-    <!-- Categories grid — shown only when navigating back -->
-    <section id="categorySection" class="catalog-section" style="display:none">
-      <div class="section-header">
-        <h2 class="section-title">Shop by category</h2>
-        <div class="section-line"></div>
-      </div>
-      <div id="categoryContainer" class="card-grid"></div>
-    </section>
-
-    <!-- Subcategories -->
-    <section id="subcategorySection" class="catalog-section" style="display:none">
-      <div class="section-header">
-        <h2 class="section-title" id="subcategoryTitle"></h2>
-        <div class="section-line"></div>
-      </div>
-      <div id="subcategoryContainer" class="card-grid card-grid--sub"></div>
-    </section>
-
-    <!-- Products -->
-    <section id="productSection" class="catalog-section" style="display:none">
-      <div class="section-header">
-        <h2 class="section-title" id="productTitle"></h2>
-        <div class="section-line"></div>
-      </div>
-      <div id="productContainer" class="product-grid"></div>
-    </section>
-
-  </main>
 
   <!-- CART SIDEBAR -->
   <aside id="cartSidebar" class="cart-sidebar" aria-hidden="true">
@@ -253,8 +240,6 @@
             Continue to Payment <i class="fas fa-arrow-right"></i>
           </button>
         </form>
-
-        <!-- PAYMENT STEP -->
         <div id="paymentStep" style="display:none">
           <div class="order-amount-summary">
             <div class="oas-row"><span>Products</span><span>₹<span id="oasSubtotal">0</span></span></div>
@@ -321,8 +306,8 @@
           <h4 class="about-section-title">Our Values</h4>
           <div class="about-values">
             <div class="about-value"><i class="fas fa-handshake"></i><span><strong>Trust sahi</strong> — Transparent sourcing, honest pricing, always.</span></div>
-            <div class="about-value"><i class="fas fa-star"></i><span><strong>Quality sahi</strong> — Every product meets the highest standards, no compromises.</span></div>
-            <div class="about-value"><i class="fas fa-tag"></i><span><strong>Price bhi sahi</strong> — Collective buying means real savings on every order.</span></div>
+            <div class="about-value"><i class="fas fa-star"></i><span><strong>Quality sahi</strong> — Every product meets the highest standards.</span></div>
+            <div class="about-value"><i class="fas fa-tag"></i><span><strong>Price bhi sahi</strong> — Collective buying means real savings.</span></div>
             <div class="about-value"><i class="fas fa-heart"></i><span><strong>Community first</strong> — We exist because of our members, for our members.</span></div>
           </div>
         </div>
@@ -374,7 +359,6 @@
         <button id="closeMembershipBtn" class="icon-btn" aria-label="Close"><i class="fas fa-xmark"></i></button>
       </div>
       <div class="modal-body membership-body">
-
         <div id="memberStep1" class="member-step">
           <div class="member-benefits">
             <h3 class="member-benefits-title">Why join CommunitE Membership?</h3>
@@ -423,7 +407,6 @@
             <button class="btn-primary btn-block" style="margin-top:16px" onclick="goToMemberPayment()">Continue to Payment <i class="fas fa-arrow-right"></i></button>
           </div>
         </div>
-
         <div id="memberStep2" class="member-step" style="display:none">
           <div class="member-payment-summary">
             <p>Plan: <strong id="paymentPlanLabel"></strong></p>
@@ -445,7 +428,6 @@
           </div>
           <button class="btn-primary btn-block" style="margin-top:12px" onclick="submitMembership()">Submit Membership <i class="fas fa-check"></i></button>
         </div>
-
         <div id="memberStep3" class="member-step" style="display:none">
           <div class="member-active-card">
             <div class="mac-crown">👑</div>
@@ -455,4 +437,12 @@
               <div class="mac-row"><span>Plan</span><strong id="memberActivePlan"></strong></div>
               <div class="mac-row"><span>Valid until</span><strong id="memberActiveExpiry"></strong></div>
             </div>
-            <p class="mac-note">Yo
+            <p class="mac-note">You're enjoying exclusive member pricing on all products 🎉</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

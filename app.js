@@ -93,7 +93,6 @@ function bindUI() {
   $('openCartBtn').addEventListener('click', toggleCart);
   $('closeCartBtn').addEventListener('click', toggleCart);
   $('checkoutBtn').addEventListener('click', proceedToCheckout);
-  $('backToCategoriesBtn').addEventListener('click', goBackToCategories);
   $('lookupBtn').addEventListener('click', lookupCustomerFromModal);
   $('closeCustomerModalBtn').addEventListener('click', closeCustomerModal);
   $('overlay').addEventListener('click', () => {
@@ -125,62 +124,77 @@ async function loadCategories() {
 
     const container = $('categoryContainer');
     container.innerHTML = cats.map((c, i) => `
-      <div class="category-card ripple-card" style="animation-delay:${i * 70}ms" onclick="selectCategory('${escapeHtml(c.name)}')">
+      <div class="category-grid-item" style="animation-delay:${i * 50}ms"
+           onclick="selectCategory('${escapeHtml(c.name)}', this)">
         <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" />
-        <div class="category-card-title">${escapeHtml(c.name)}</div>
-        <canvas class="ripple-canvas"></canvas>
+        <div class="category-grid-label">${escapeHtml(c.name)}</div>
       </div>
     `).join('');
-    container.querySelectorAll('.category-card').forEach(el => { observeCard(el); initRipple(el); });
-
-    // Build conveyor belt
-    buildConveyor(cats);
 
     // Build search index silently in background
-    setTimeout(() => buildSearchIndex(cats), 1000);
+    setTimeout(() => buildSearchIndex(cats), 800);
   } catch (e) {
     console.error("loadCategories", e);
     $('categoryContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Failed to load categories. Please try again.</div>`;
   }
 }
 
-/* subcategories */
-async function selectCategory(category) {
+/* subcategories — pill strip */
+async function selectCategory(category, el) {
   selectedCategory = category;
   selectedSubcategory = null;
-  $('subcategorySection').style.display = 'block';
+
+  // Highlight active category
+  document.querySelectorAll('.category-grid-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  // Show back button
+  $('backToCategoriesBtn').style.display = 'flex';
+
+  // Hide products, show subcategory section
   $('productSection').style.display = 'none';
   $('subcategoryTitle').innerText = category;
-  $('backToCategoriesBtn').style.display = 'inline-flex';
+  $('subcategorySection').style.display = 'block';
+  $('subcategoryContainer').innerHTML = `<div class="subcat-pill" style="opacity:0.5">Loading...</div>`;
+
+  // Scroll to subcategories smoothly
+  setTimeout(() => $('subcategorySection').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
   try {
     const res = await apiCall(`/subcategories/${encodeCategory(category)}`);
     let subs = res.subcategories || [];
     if (Array.isArray(res)) subs = res;
+
     const container = $('subcategoryContainer');
-    container.innerHTML = subs.map((s, i) => {
+    container.innerHTML = subs.map((s) => {
       const name = typeof s === 'string' ? s : s.name;
-      const img = typeof s === 'string' ? DEFAULT_SUBCATEGORY_IMAGE : (s.image || DEFAULT_SUBCATEGORY_IMAGE);
+      const img  = typeof s === 'string' ? '' : (s.image || '');
       return `
-        <div class="subcat-card ripple-card" style="animation-delay:${i * 70}ms" onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(name)}')">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
-          <div class="subcat-title">${escapeHtml(name)}</div>
-          <canvas class="ripple-canvas"></canvas>
+        <div class="subcat-pill" onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(name)}', this)">
+          ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />` : ''}
+          ${escapeHtml(name)}
         </div>
       `;
     }).join('');
-    container.querySelectorAll('.subcat-card').forEach(el => { observeCard(el); initRipple(el); });
-    scrollToSection('subcategorySection');
   } catch (e) {
     console.error("selectCategory", e);
-    $('subcategoryContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">No subcategories found</div>`;
+    $('subcategoryContainer').innerHTML = `<div style="padding:10px;color:var(--muted)">No subcategories found</div>`;
   }
 }
 
 /* products */
-async function selectSubcategory(category, subcat) {
+async function selectSubcategory(category, subcat, el) {
   selectedSubcategory = subcat;
+
+  // Highlight active pill
+  document.querySelectorAll('.subcat-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+
   $('productSection').style.display = 'block';
   $('productTitle').innerText = subcat;
+  $('productContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Loading products...</div>`;
+
+  setTimeout(() => $('productSection').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   try {
     const res = await apiCall(`/products/${encodeCategory(category)}/${encodeCategory(subcat)}`);
     const products = res.products || (Array.isArray(res) ? res : []);
@@ -646,37 +660,20 @@ async function submitOrderWithPayment() {
   }
 }
 
-/* Silent background product refresh — no visible loading spinner */
 async function silentRefreshProducts() {
   try {
     const data = await apiCall('/categories');
-    const cats = data.categories || [];
+    const cats = (data.categories || data || []).map(c =>
+      typeof c === 'string' ? { name: c, image: DEFAULT_CATEGORY_IMAGE } : { name: c.name, image: c.image || DEFAULT_CATEGORY_IMAGE }
+    );
     if (!cats.length) return;
-
-    // Rebuild conveyor with fresh data
-    buildConveyor(cats);
-
-    // If user is currently on subcategory page, refresh silently
-    if (selectedCategory && $('subcategorySection').style.display !== 'none') {
-      const subData = await apiCall(`/subcategories/${encodeCategory(selectedCategory)}`);
-      const subs = subData.subcategories || [];
-      const container = $('subcategoryContainer');
-      container.innerHTML = subs.map((s, i) => `
-        <div class="subcat-card ripple-card" style="animation-delay:${i * 70}ms"
-             onclick="selectSubcategory('${escapeHtml(selectedCategory)}','${escapeHtml(s.name)}')">
-          <img src="${escapeHtml(s.image)}" alt="${escapeHtml(s.name)}" loading="lazy" />
-          <div class="subcat-title">${escapeHtml(s.name)}</div>
-          <canvas class="ripple-canvas"></canvas>
-        </div>
-      `).join('');
-      container.querySelectorAll('.subcat-card').forEach(el => { observeCard(el); initRipple(el); });
-    }
 
     // If user is on product page, refresh prices silently
     if (selectedCategory && selectedSubcategory && $('productSection').style.display !== 'none') {
-      await loadProducts(selectedCategory, selectedSubcategory);
+      const res = await apiCall(`/products/${encodeCategory(selectedCategory)}/${encodeCategory(selectedSubcategory)}`);
+      const products = res.products || (Array.isArray(res) ? res : []);
+      if (products.length > 0) renderProducts(products);
     }
-
   } catch (e) {
     console.warn('Silent refresh failed (non-critical):', e);
   }
@@ -714,14 +711,10 @@ function buildConveyor(cats) {
   });
 }
 
-/* Conveyor item click — go straight to subcategories */
+/* Category click — show back button */
 function openCategoryFromConveyor(categoryName) {
-  const conveyorEl = document.querySelector('.conveyor-section');
-  if (conveyorEl) conveyorEl.style.display = 'none';
-  const conveyorHeader = document.querySelector('.conveyor-header');
-  if (conveyorHeader) conveyorHeader.style.display = 'none';
   $('backToCategoriesBtn').style.display = 'flex';
-  selectCategory(categoryName);
+  selectCategory(categoryName, null);
 }
 
 /* ── PRODUCT SEARCH ── */
@@ -809,34 +802,32 @@ function clearSearch() {
   $('searchClear').style.display = 'none';
 }
 
-function toggleSearch() { /* search bar is always visible now — no-op */ }
+function toggleSearch() { /* search always visible */ }
 
 async function openProductFromSearch(category, subcategory) {
   clearSearch();
-  // Navigate to the subcategory
-  const conveyorEl = document.querySelector('.conveyor-section');
-  if (conveyorEl) conveyorEl.style.display = 'none';
-  const conveyorHeader = document.querySelector('.conveyor-header');
-  if (conveyorHeader) conveyorHeader.style.display = 'none';
   $('backToCategoriesBtn').style.display = 'flex';
-  await selectSubcategory(category, subcategory);
+  await selectCategory(category, null);
+  await selectSubcategory(category, subcategory, null);
 }
 
 /* navigation */
 function goBackToCategories() {
   selectedCategory = null;
   selectedSubcategory = null;
+
+  // Clear active states
+  document.querySelectorAll('.category-grid-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.subcat-pill').forEach(p => p.classList.remove('active'));
+
+  // Hide subcategories and products
   $('subcategorySection').style.display = 'none';
   $('productSection').style.display = 'none';
   $('backToCategoriesBtn').style.display = 'none';
 
-  // Show conveyor and header again
-  const conveyorEl = document.querySelector('.conveyor-section');
-  if (conveyorEl) conveyorEl.style.display = 'block';
-  const conveyorHeader = document.querySelector('.conveyor-header');
-  if (conveyorHeader) conveyorHeader.style.display = 'flex';
-  $('categorySection').style.display = 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Scroll back to category grid
+  const shopEl = $('shopSection');
+  if (shopEl) shopEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* scroll-triggered card animations */
