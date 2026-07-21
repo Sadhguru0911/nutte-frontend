@@ -131,8 +131,8 @@ async function loadCategories() {
       </div>
     `).join('');
 
-    // Build search index silently in background
-    setTimeout(() => buildSearchIndex(cats), 800);
+    // Build search index silently in background (single request now)
+    setTimeout(() => buildSearchIndex(), 300);
   } catch (e) {
     console.error("loadCategories", e);
     $('categoryContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Failed to load categories. Please try again.</div>`;
@@ -720,38 +720,24 @@ function openCategoryFromConveyor(categoryName) {
 /* ── PRODUCT SEARCH ── */
 let allProductsCache = [];  // flat list of all products for search
 
-// Called after categories load — build search index in background
-async function buildSearchIndex(cats) {
-  allProductsCache = [];
-  for (const cat of cats) {
-    try {
-      const subData = await apiCall(`/subcategories/${encodeCategory(cat.name)}`);
-      for (const sub of (subData.subcategories || [])) {
-        const prodData = await apiCall(`/products/${encodeCategory(cat.name)}/${encodeCategory(sub.name)}`);
-        for (const p of (prodData.products || [])) {
-          allProductsCache.push({
-            product_name: p.product_name,
-            category: cat.name,
-            subcategory: sub.name,
-            price: p.price,
-            member_price: p.member_price || null
-          });
-        }
-      }
-    } catch(e) { /* silent */ }
-  }
-}
-
-function toggleSearch() {
-  const bar = $('searchBar');
-  const isVisible = bar.style.display !== 'none';
-  bar.style.display = isVisible ? 'none' : 'block';
-  if (!isVisible) {
-    $('searchInput').focus();
-    // Bind search input
-    $('searchInput').oninput = handleSearch;
-  } else {
-    clearSearch();
+// Called after categories load — build search index with a single bulk call.
+// (Previously this fired one request per category and one per subcategory,
+// which could be dozens of sequential round-trips and made both search and
+// ordinary category/product browsing feel stuck for minutes.)
+async function buildSearchIndex() {
+  try {
+    const res = await apiCall('/all-products');
+    const products = res.products || [];
+    allProductsCache = products.map(p => ({
+      product_name: p.product_name,
+      category: p.category,
+      subcategory: p.sub_category,
+      price: p.price,
+      member_price: p.member_price || null
+    }));
+  } catch (e) {
+    console.warn('Search index build failed (non-critical):', e);
+    allProductsCache = [];
   }
 }
 
@@ -801,8 +787,6 @@ function clearSearch() {
   $('searchResults').style.display = 'none';
   $('searchClear').style.display = 'none';
 }
-
-function toggleSearch() { /* search always visible */ }
 
 async function openProductFromSearch(category, subcategory) {
   clearSearch();

@@ -38,7 +38,22 @@
   <section class="hero">
     <div class="hero-grid">
 
-      <!-- LEFT COL -->
+      <!-- TOP: Big brand card -->
+      <div class="hero-card hero-card--brand ripple-card" onclick="scrollToSection('shopSection')">
+        <div class="hero-brand-tagline">
+          <span>Trust <em>sahi.</em></span>
+          <span>Quality <em>sahi.</em></span>
+          <span>Price bhi <em>sahi.</em></span>
+        </div>
+        <div class="hero-brand-name">
+          <h1 class="hero-title">CommunitE</h1>
+          <p class="hero-brand-sub">Bulk prices. Community powered.<br>Doorstep delivered.</p>
+        </div>
+        <div class="hero-deco hero-deco--circle"></div>
+        <canvas class="ripple-canvas"></canvas>
+      </div>
+
+      <!-- BELOW: About, Join & Save, Watch us — in a row -->
       <div class="hero-col-small">
 
         <div class="hero-card hero-card--about ripple-card" onclick="openAbout()">
@@ -46,16 +61,6 @@
           <div class="about-mascot">
             <img src="assets/NuttE_edited.png" alt="NuttE mascot" class="mascot-img" />
           </div>
-          <canvas class="ripple-canvas"></canvas>
-        </div>
-
-        <div class="hero-card hero-card--fresh hero-card--reels ripple-card" onclick="openReels()">
-          <p class="hero-label">Watch us</p>
-          <div class="hero-card-bottom">
-            <i class="fab fa-instagram hero-icon-sm"></i>
-            <p class="hero-stat-label">Our Reels</p>
-          </div>
-          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
           <canvas class="ripple-canvas"></canvas>
         </div>
 
@@ -73,21 +78,16 @@
           <span class="hero-member-star" id="memberStar"></span>
         </div>
 
-      </div>
+        <div class="hero-card hero-card--fresh hero-card--reels ripple-card" onclick="openReels()">
+          <p class="hero-label">Watch us</p>
+          <div class="hero-card-bottom">
+            <i class="fab fa-instagram hero-icon-sm"></i>
+            <p class="hero-stat-label">Our Reels</p>
+          </div>
+          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
 
-      <!-- RIGHT: Big brand card -->
-      <div class="hero-card hero-card--brand ripple-card" onclick="scrollToSection('shopSection')">
-        <div class="hero-brand-tagline">
-          <span>Trust <em>sahi.</em></span>
-          <span>Quality <em>sahi.</em></span>
-          <span>Price bhi <em>sahi.</em></span>
-        </div>
-        <div class="hero-brand-name">
-          <h1 class="hero-title">CommunitE</h1>
-          <p class="hero-brand-sub">Bulk prices. Community powered.<br>Doorstep delivered.</p>
-        </div>
-        <div class="hero-deco hero-deco--circle"></div>
-        <canvas class="ripple-canvas"></canvas>
       </div>
 
     </div>
