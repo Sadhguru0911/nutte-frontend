@@ -764,6 +764,17 @@ main {
 }
 .icon-btn i { pointer-events: none; font-size: 1rem; }
 
+/* Plain × glyph used for all close/remove buttons instead of a Font Awesome
+   icon — those icons weren't reliably rendering (blank circles), and a
+   close/remove control is important enough to not depend on a 3rd-party
+   icon script loading + scanning the DOM in time. */
+.icon-x {
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 400;
+  pointer-events: none;
+}
+
 /* ── FOOTER ── */
 .site-footer {
   border-top: 1px solid var(--border);
@@ -1114,17 +1125,37 @@ main {
 /* ── MEMBER SAVINGS BANNER (cart) ── */
 .member-savings-banner,
 .renewal-banner {
+  position: relative;
   margin: 0 16px 12px;
   border-radius: 14px;
   overflow: hidden;
 }
+.banner-close-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.banner-close-btn:hover { background: rgba(255,255,255,0.4); }
+.banner-close-btn .icon-x { font-size: 1rem; }
 .member-savings-banner { background: linear-gradient(135deg, #1a5c3a, #2d8a5e); color: #fff; }
 .renewal-banner { background: linear-gradient(135deg, #7a4400, #b86000); color: #fff; }
 .msb-inner {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 12px 34px 12px 14px;
 }
 .msb-icon { font-size: 1.4rem; flex-shrink: 0; }
 .msb-text { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 0.82rem; }
@@ -1226,11 +1257,21 @@ main {
 .upi-qr-img {
   width: 180px;
   height: 180px;
-  object-fit: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 12px;
   border: 2px solid var(--border);
-  margin-bottom: 16px;
+  margin: 0 auto 16px;
   background: #fff;
+  overflow: hidden;
+}
+.upi-pay-app-btn {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .upi-id-box {
   display: flex;
@@ -1538,23 +1579,25 @@ main {
 }
 
 @media (max-width: 600px) {
-  .hero { padding: 12px 12px 0; }
-  .hero-grid { gap: 8px; }
-  .hero-col-small { gap: 8px; }
-  .hero-col-small .hero-card { padding: 10px 10px; }
-  .hero-card--brand { padding: 22px 20px; }
-  .hero-title { font-size: 2.2rem; }
-  .hero-brand-sub { font-size: 0.82rem; }
+  .hero { padding: 8px 10px 0; }
+  .hero-grid { gap: 6px; }
+  .hero-col-small { gap: 6px; }
+  .hero-col-small .hero-card { padding: 8px 10px; }
+  .hero-card--brand { padding: 18px 18px; }
+  .hero-title { font-size: 2rem; }
+  .hero-brand-sub { font-size: 0.78rem; }
   .hero-brand-tagline { gap: 5px; }
-  .hero-brand-tagline span { font-size: 0.62rem; padding: 3px 9px; }
+  .hero-brand-tagline span { font-size: 0.6rem; padding: 3px 8px; }
   .hero-stat-sm { font-size: 1.8rem; }
-  .hero-member-star { width: 36px; height: 36px; }
-  .hero-member-badge { font-size: 0.6rem; padding: 2px 7px; }
-  .hero-member-hint { font-size: 0.7rem; }
-  .hero-label { font-size: 0.6rem; letter-spacing: 0.08em; }
-  .hero-stat-label { font-size: 0.72rem; }
-  .hero-icon-sm { font-size: 1.4rem; }
-  .about-mascot { width: 55px; height: 55px; right: -4px; }
+  .hero-member-star { width: 32px; height: 32px; }
+  .hero-member-badge { font-size: 0.56rem; padding: 2px 6px; white-space: normal; line-height: 1.3; }
+  .hero-member-hint { font-size: 0.62rem; }
+  .hero-label { font-size: 0.56rem; letter-spacing: 0.06em; }
+  /* Small cards become one compact line: icon + label side by side */
+  .hero-card-bottom { flex-direction: row; align-items: center; gap: 6px; }
+  .hero-stat-label { font-size: 0.62rem; }
+  .hero-icon-sm { font-size: 1.1rem; }
+  .about-mascot { width: 42px; height: 42px; right: -4px; }
   .conveyor-track { padding: 0 12px 16px; gap: 10px; }
   .conveyor-label { padding: 0 12px; margin-bottom: 10px; }
   .conveyor-item { width: 200px; height: 200px; border-radius: 18px; }
@@ -1650,6 +1693,70 @@ button.floating-back-btn:hover,
   }
 }
 
+/* ── FLOATING CART BAR ── */
+.floating-cart-bar {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9997;
+  background: var(--black);
+  color: #fff;
+  border-radius: 16px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.28);
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeUp 0.3s ease;
+}
+.floating-cart-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 38px rgba(0,0,0,0.34);
+}
+.floating-cart-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+.floating-cart-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* When the cart bar is showing, lift the back button above it so the two
+   floating controls stack instead of overlapping */
+body.has-floating-cart .floating-back-btn {
+  bottom: 96px !important;
+}
+
+/* Hide floating controls entirely while a modal/sidebar overlay is open —
+   they're not relevant mid-checkout and would otherwise collide with the
+   modal's own buttons */
+body.overlay-open .floating-back-btn,
+body.overlay-open .floating-cart-bar {
+  display: none !important;
+}
+
+@media (max-width: 600px) {
+  .floating-cart-bar { left: 10px; right: 10px; bottom: 12px; padding: 12px 16px; }
+  .floating-cart-info { font-size: 0.85rem; }
+  .floating-cart-cta { padding: 7px 12px; font-size: 0.78rem; }
+  body.has-floating-cart .floating-back-btn { bottom: 76px !important; }
+}
+
 /* ── 2. SEARCH BAR — always visible traditional search ── */
 .conveyor-header {
   display: flex;
@@ -1700,6 +1807,7 @@ button.floating-back-btn:hover,
   transition: color 0.15s;
 }
 .search-clear:hover { color: var(--black); }
+.search-clear .icon-x { font-size: 1rem; }
 .search-hint {
   font-size: 0.72rem;
   color: var(--muted);
@@ -1910,41 +2018,10 @@ button.floating-back-btn:hover,
   border-top: 2px solid var(--border);
   animation: fadeUp 0.3s ease forwards;
 }
-.subcategory-strip {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.subcat-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  border: 2px solid var(--border);
-  border-radius: 999px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: border-color 0.2s, background 0.2s, transform 0.15s;
-  white-space: nowrap;
-}
-.subcat-pill:hover {
-  border-color: var(--green);
-  background: #f0faf4;
-  transform: translateY(-1px);
-}
-.subcat-pill.active {
-  background: var(--green);
-  color: #fff;
-  border-color: var(--green);
-}
-.subcat-pill img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
+/* Subcategories now reuse .category-grid-item (same look as categories),
+   just in a slightly denser grid so the hierarchy still reads visually. */
+.category-grid--sub {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
 }
 
 /* ── PRODUCTS ── */
@@ -1987,11 +2064,10 @@ button.floating-back-btn:hover,
   .category-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
 }
 @media (max-width: 600px) {
-  .shop-section { padding: 16px 14px 80px; }
+  .shop-section { padding: 10px 14px 80px; }
+  .shop-search { margin-bottom: 14px; }
   .category-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .category-grid-label { font-size: 0.72rem; padding: 6px 6px; }
-  .subcategory-strip { gap: 8px; }
-  .subcat-pill { font-size: 0.78rem; padding: 7px 12px; }
-  .subcat-pill img { width: 22px; height: 22px; }
+  .category-grid--sub { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .shop-section-label { font-size: 1rem; }
 }

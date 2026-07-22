@@ -8,8 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="style.css?v=30" />
-  <script src="app.js?v=30" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="style.css?v=31" />
+  <script src="app.js?v=31" defer></script>
 </head>
 <body>
 
@@ -98,6 +99,15 @@
     <i class="fas fa-arrow-left"></i> Back
   </button>
 
+  <!-- FLOATING CART BAR — appears once the cart has items -->
+  <div id="floatingCartBar" class="floating-cart-bar" style="display:none" onclick="toggleCart()">
+    <div class="floating-cart-info">
+      <i class="fas fa-shopping-bag"></i>
+      <span><span id="floatingCartCount">0</span> items · ₹<span id="floatingCartTotal">0</span></span>
+    </div>
+    <div class="floating-cart-cta">View Cart <i class="fas fa-arrow-right"></i></div>
+  </div>
+
   <!-- SHOP SECTION — Search + Categories + Subcategories + Products -->
   <section id="shopSection" class="shop-section">
 
@@ -109,7 +119,7 @@
           placeholder="Search Products — e.g. type 'Wal' for Walnuts"
           autocomplete="off" oninput="handleSearch()" />
         <button class="search-clear" id="searchClear" style="display:none" onclick="clearSearch()">
-          <i class="fas fa-xmark"></i>
+          <span class="icon-x" aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="search-hint">💡 Type at least 3 letters — e.g. "Wal" shows all Walnut products</div>
@@ -125,7 +135,7 @@
     <!-- Subcategories — appear below categories when one is selected -->
     <div id="subcategorySection" class="shop-subcategories" style="display:none">
       <h2 class="shop-section-label" id="subcategoryTitle"></h2>
-      <div id="subcategoryContainer" class="subcategory-strip"></div>
+      <div id="subcategoryContainer" class="category-grid category-grid--sub"></div>
     </div>
 
     <!-- Products — appear below subcategories -->
@@ -148,11 +158,14 @@
   <aside id="cartSidebar" class="cart-sidebar" aria-hidden="true">
     <div class="cart-header">
       <h3 class="cart-title">Your Cart</h3>
-      <button id="closeCartBtn" class="icon-btn" aria-label="Close cart"><i class="fas fa-xmark"></i></button>
+      <button id="closeCartBtn" class="icon-btn" aria-label="Close cart"><span class="icon-x" aria-hidden="true">&times;</span></button>
     </div>
     <div id="cartContent" class="cart-content"></div>
 
     <div id="memberSavingsBanner" class="member-savings-banner" style="display:none">
+      <button class="banner-close-btn" onclick="dismissBanner('memberSavingsBanner')" aria-label="Dismiss">
+        <span class="icon-x" aria-hidden="true">&times;</span>
+      </button>
       <div class="msb-inner">
         <span class="msb-icon">⭐</span>
         <div class="msb-text">
@@ -164,6 +177,9 @@
     </div>
 
     <div id="renewalBanner" class="renewal-banner" style="display:none">
+      <button class="banner-close-btn" onclick="dismissBanner('renewalBanner')" aria-label="Dismiss">
+        <span class="icon-x" aria-hidden="true">&times;</span>
+      </button>
       <div class="msb-inner">
         <span class="msb-icon">⚠️</span>
         <div class="msb-text">
@@ -199,7 +215,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <h2 class="modal-title">Customer Details</h2>
-        <button id="closeCustomerModalBtn" class="icon-btn" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        <button id="closeCustomerModalBtn" class="icon-btn" aria-label="Close"><span class="icon-x" aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
         <div id="mobileLookupRow" class="lookup-row">
@@ -251,8 +267,11 @@
             <div class="oas-total"><span>Pay exactly</span><strong>₹<span id="oasTotal">0</span></strong></div>
           </div>
           <div class="upi-payment-box">
-            <p class="upi-instruction">Scan QR or use UPI ID to pay the amount above</p>
-            <img src="assets/upi_qr.jpg" alt="UPI QR Code" class="upi-qr-img" />
+            <p class="upi-instruction">Scan QR or tap below to pay the amount above</p>
+            <div id="upiQrContainer" class="upi-qr-img"></div>
+            <a id="upiPayAppBtn" class="btn-primary btn-block upi-pay-app-btn" href="#" target="_blank" rel="noopener">
+              <i class="fas fa-mobile-screen-button"></i> Pay ₹<span id="upiPayAmount">0</span> via UPI App
+            </a>
             <div class="upi-id-box">
               <span class="upi-id-label">UPI ID</span>
               <span class="upi-id-value">Mab.037213027680043@axisbank</span>
@@ -278,7 +297,7 @@
     <div class="modal-box modal-box--about">
       <div class="modal-header">
         <h2 class="modal-title">About Us</h2>
-        <button id="closeAboutBtn" class="icon-btn" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        <button id="closeAboutBtn" class="icon-btn" aria-label="Close"><span class="icon-x" aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body about-body">
         <div class="about-hero">
@@ -336,7 +355,7 @@
     <div class="modal-box modal-box--reels">
       <div class="modal-header">
         <h2 class="modal-title"><i class="fab fa-instagram" style="color:var(--green);margin-right:8px"></i>Our Reels</h2>
-        <button id="closeReelsBtn" class="icon-btn" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        <button id="closeReelsBtn" class="icon-btn" aria-label="Close"><span class="icon-x" aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body reels-body">
         <p class="reels-intro">Follow us <a href="https://instagram.com/dryfruits_communitE" target="_blank" class="reels-handle">@dryfruits_communitE</a> for the latest!</p>
@@ -356,7 +375,7 @@
     <div class="modal-box modal-box--membership">
       <div class="modal-header">
         <h2 class="modal-title"><i class="fas fa-crown" style="color:var(--gold);margin-right:8px"></i>CommunitE Membership</h2>
-        <button id="closeMembershipBtn" class="icon-btn" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        <button id="closeMembershipBtn" class="icon-btn" aria-label="Close"><span class="icon-x" aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body membership-body">
         <div id="memberStep1" class="member-step">
@@ -413,8 +432,11 @@
             <p>Amount: <strong id="paymentAmount"></strong></p>
           </div>
           <div class="upi-payment-box">
-            <p class="upi-instruction">Scan the QR code or use the UPI ID below to pay</p>
-            <img src="assets/upi_qr.jpg" alt="UPI QR Code" class="upi-qr-img" />
+            <p class="upi-instruction">Scan the QR code or tap below to pay</p>
+            <div id="memberUpiQrContainer" class="upi-qr-img"></div>
+            <a id="memberUpiPayAppBtn" class="btn-primary btn-block upi-pay-app-btn" href="#" target="_blank" rel="noopener">
+              <i class="fas fa-mobile-screen-button"></i> Pay via UPI App
+            </a>
             <div class="upi-id-box">
               <span class="upi-id-label">UPI ID</span>
               <span class="upi-id-value">Mab.037213027680043@axisbank</span>

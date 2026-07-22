@@ -6,7 +6,13 @@ const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
 const DELIVERY_CHARGE = 50;
 const MEMBERSHIP_PRICES = { monthly: 400, annual: 3999 };
 
+/* UPI — used to build a dynamic pay link/QR so the amount is pre-filled
+   instead of the customer having to type it in manually. */
+const UPI_VPA = "Mab.037213027680043@axisbank";
+const UPI_PAYEE_NAME = "CommunitE";
+
 let cart = [];
+let dismissedBanners = new Set(); // banner ids the user has closed for this cart session
 let selectedCategory = null;
 let selectedSubcategory = null;
 
@@ -86,6 +92,25 @@ document.addEventListener('DOMContentLoaded', () => {
       lastRefresh = Date.now();
     }
   });
+
+  // ── OVERLAY WATCHER ──
+  // Every modal/sidebar (cart, customer details, about, reels, membership)
+  // shows/hides the same shared #overlay element. Watch it once here so the
+  // floating back button and floating cart bar automatically get out of the
+  // way whenever any of them is open, instead of needing to be updated in
+  // every individual open/close function.
+  const overlayEl = $('overlay');
+  if (overlayEl) {
+    const syncOverlayState = () => {
+      const isOpen = overlayEl.style.display !== 'none';
+      document.body.classList.toggle('overlay-open', isOpen);
+    };
+    new MutationObserver(syncOverlayState).observe(overlayEl, { attributes: true, attributeFilter: ['style'] });
+    syncOverlayState();
+  }
+
+  // Floating cart bar should reflect any cart state already present on load
+  updateFloatingCartBar();
 });
 
 /* UI bind */
@@ -145,7 +170,7 @@ async function selectCategory(category, el) {
   selectedSubcategory = null;
 
   // Highlight active category
-  document.querySelectorAll('.category-grid-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('#categoryContainer .category-grid-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
 
   // Show back button
@@ -155,7 +180,7 @@ async function selectCategory(category, el) {
   $('productSection').style.display = 'none';
   $('subcategoryTitle').innerText = category;
   $('subcategorySection').style.display = 'block';
-  $('subcategoryContainer').innerHTML = `<div class="subcat-pill" style="opacity:0.5">Loading...</div>`;
+  $('subcategoryContainer').innerHTML = `<div style="padding:10px;color:var(--muted)">Loading...</div>`;
 
   // Scroll to subcategories smoothly
   setTimeout(() => $('subcategorySection').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -166,13 +191,14 @@ async function selectCategory(category, el) {
     if (Array.isArray(res)) subs = res;
 
     const container = $('subcategoryContainer');
-    container.innerHTML = subs.map((s) => {
+    container.innerHTML = subs.map((s, i) => {
       const name = typeof s === 'string' ? s : s.name;
-      const img  = typeof s === 'string' ? '' : (s.image || '');
+      const img  = (typeof s === 'string' ? '' : s.image) || DEFAULT_CATEGORY_IMAGE;
       return `
-        <div class="subcat-pill" onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(name)}', this)">
-          ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />` : ''}
-          ${escapeHtml(name)}
+        <div class="category-grid-item" style="animation-delay:${i * 50}ms"
+             onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(name)}', this)">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
+          <div class="category-grid-label">${escapeHtml(name)}</div>
         </div>
       `;
     }).join('');
@@ -186,8 +212,8 @@ async function selectCategory(category, el) {
 async function selectSubcategory(category, subcat, el) {
   selectedSubcategory = subcat;
 
-  // Highlight active pill
-  document.querySelectorAll('.subcat-pill').forEach(p => p.classList.remove('active'));
+  // Highlight active card
+  document.querySelectorAll('#subcategoryContainer .category-grid-item').forEach(p => p.classList.remove('active'));
   if (el) el.classList.add('active');
 
   $('productSection').style.display = 'block';
@@ -343,6 +369,14 @@ function addToCartFromCard(unique, productName) {
 function updateCartCount() {
   const total = cart.reduce((s, i) => s + i.quantity, 0);
   $('cartCount').textContent = total;
+  updateFloatingCartBar();
+}
+
+/* Dismiss a cart banner — stays hidden until the cart is emptied again */
+function dismissBanner(id) {
+  dismissedBanners.add(id);
+  const el = $(id);
+  if (el) el.style.display = 'none';
 }
 
 /* render cart */
@@ -360,6 +394,7 @@ function renderCart() {
     footer.style.display = 'none';
     $('memberSavingsBanner').style.display = 'none';
     $('renewalBanner').style.display = 'none';
+    dismissedBanners.clear(); // fresh cart, banners can show again
     return;
   }
 
@@ -368,7 +403,7 @@ function renderCart() {
       <div class="cart-item-top">
         <div class="cart-item-name">${escapeHtml(it.product_name)}</div>
         <button class="icon-btn" onclick="removeFromCart(${idx})" style="width:28px;height:28px;font-size:0.85rem">
-          <i class="fas fa-xmark"></i>
+          <span class="icon-x" aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="cart-item-meta">${escapeHtml(it.variant)}</div>
@@ -398,14 +433,14 @@ function renderCart() {
     return s;
   }, 0);
 
-  // Show/hide banners
+  // Show/hide banners (unless the user already dismissed them for this cart)
   if (!isActiveMember && memberSavings > 0) {
     if (memberState.status === 'expired') {
-      $('renewalBanner').style.display = 'block';
+      $('renewalBanner').style.display = dismissedBanners.has('renewalBanner') ? 'none' : 'block';
       $('memberSavingsBanner').style.display = 'none';
       $('renewSavingsAmount').textContent = `₹${memberSavings}`;
     } else {
-      $('memberSavingsBanner').style.display = 'block';
+      $('memberSavingsBanner').style.display = dismissedBanners.has('memberSavingsBanner') ? 'none' : 'block';
       $('renewalBanner').style.display = 'none';
       $('savingsAmount').textContent = `₹${memberSavings}`;
     }
@@ -443,6 +478,24 @@ function updateCartQuantity(idx, qty) {
   renderCart();
 }
 
+/* Floating bottom cart bar — mirrors the nav cart count/total */
+function updateFloatingCartBar() {
+  const bar = $('floatingCartBar');
+  if (!bar) return;
+  const total = cart.reduce((s, i) => s + i.quantity, 0);
+  if (total === 0) {
+    bar.style.display = 'none';
+    document.body.classList.remove('has-floating-cart');
+    return;
+  }
+  const productItems = cart.filter(i => !i._isMembershipFee);
+  const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
+  $('floatingCartCount').textContent = total;
+  $('floatingCartTotal').textContent = subtotal;
+  bar.style.display = 'flex';
+  document.body.classList.add('has-floating-cart');
+}
+
 /* toggle cart */
 function toggleCart() {
   const sidebar = $('cartSidebar');
@@ -460,6 +513,16 @@ function proceedToCheckout() {
   openCustomerModal();
 }
 
+/* Remember the customer's mobile number across visits so returning
+   customers don't have to type it every time. */
+const SAVED_MOBILE_KEY = 'communite_customer_mobile';
+function getSavedMobile() {
+  try { return localStorage.getItem(SAVED_MOBILE_KEY) || ''; } catch (e) { return ''; }
+}
+function saveMobile(mobile) {
+  try { localStorage.setItem(SAVED_MOBILE_KEY, mobile); } catch (e) { /* storage unavailable — non-critical */ }
+}
+
 function openCustomerModal() {
   $('overlay').style.display = 'block';
   $('customerModal').style.display = 'flex';
@@ -467,6 +530,13 @@ function openCustomerModal() {
   $('mobileLookupRow').style.display = 'block';
   $('customerForm').style.display = 'none';
   $('paymentStep').style.display = 'none';
+
+  // Returning customer convenience — prefill + auto-run the lookup
+  const savedMobile = getSavedMobile();
+  if (savedMobile) {
+    $('lookupMobile').value = savedMobile;
+    lookupCustomerFromModal();
+  }
 }
 
 function closeCustomerModal() {
@@ -478,6 +548,7 @@ function closeCustomerModal() {
 async function lookupCustomerFromModal() {
   const mobile = ($('lookupMobile').value || '').trim();
   if (!/^\d{10}$/.test(mobile)) { alert('Please enter a valid 10-digit mobile number'); return; }
+  saveMobile(mobile);
   try {
     const res = await apiCall(`/customer/${mobile}`);
     $('mobileLookupRow').style.display = 'none';
@@ -572,6 +643,8 @@ function goToPaymentStep() {
   $('customerForm').style.display = 'none';
   $('paymentStep').style.display = 'block';
   $('orderRRNumber').value = '';
+
+  renderUpiQr('upiQrContainer', 'upiPayAppBtn', total, 'CommunitE Order');
 }
 
 /* Step 2 → Step 1: back to details */
@@ -801,8 +874,8 @@ function goBackToCategories() {
   selectedSubcategory = null;
 
   // Clear active states
-  document.querySelectorAll('.category-grid-item').forEach(i => i.classList.remove('active'));
-  document.querySelectorAll('.subcat-pill').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#categoryContainer .category-grid-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('#subcategoryContainer .category-grid-item').forEach(p => p.classList.remove('active'));
 
   // Hide subcategories and products
   $('subcategorySection').style.display = 'none';
@@ -1039,6 +1112,8 @@ function goToMemberPayment() {
   $('upiExactAmount').textContent = `₹${amount}`;
 
   showMemberStep(2);
+
+  renderUpiQr('memberUpiQrContainer', 'memberUpiPayAppBtn', amount, `CommunitE ${planLabel} Membership`);
 }
 
 /* Submit membership (standalone — not bundled with order) */
@@ -1112,9 +1187,33 @@ function addMembershipToCart(plan) {
   showCartToast(`🌟 Member pricing applied! ₹${membershipFeeAmount} membership fee added.`);
 }
 
+/* Build a upi://pay deep link with the amount pre-filled, render it as a
+   QR code into `containerId`, and point the "Pay via UPI App" button at it.
+   note: 'note' becomes the transaction note shown in the customer's UPI app. */
+function renderUpiQr(containerId, btnId, amount, note) {
+  const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_VPA)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note || 'CommunitE Order')}`;
+
+  const container = $(containerId);
+  if (container) {
+    container.innerHTML = '';
+    if (window.QRCode) {
+      new QRCode(container, { text: upiLink, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
+    } else {
+      // QR library failed to load — fall back to a plain link so payment isn't blocked
+      container.innerHTML = `<a href="${upiLink}" style="font-size:0.8rem;padding:8px;display:block;">Tap to pay ₹${amount}</a>`;
+    }
+  }
+
+  const btn = $(btnId);
+  if (btn) btn.href = upiLink;
+
+  const amountLabel = $('upiPayAmount');
+  if (amountLabel) amountLabel.textContent = amount;
+}
+
 /* Copy UPI ID */
 function copyUPI() {
-  navigator.clipboard.writeText('Mab.037213027680043@axisbank').then(() => {
+  navigator.clipboard.writeText(UPI_VPA).then(() => {
     showCartToast('UPI ID copied!');
   });
 }
