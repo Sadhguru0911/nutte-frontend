@@ -284,7 +284,7 @@
           </div>
           <div class="payment-step-actions">
             <button class="btn-secondary" onclick="backToDetailsStep()"><i class="fas fa-arrow-left"></i> Back</button>
-            <button class="btn-primary" onclick="submitOrderWithPayment()">Confirm Order <i class="fas fa-check"></i></button>
+            <button id="confirmOrderBtn" class="btn-primary" onclick="submitOrderWithPayment()">Confirm Order <i class="fas fa-check"></i></button>
           </div>
         </div>
         <div id="lookupResult" style="display:none"></div>
@@ -462,6 +462,33 @@
             <p class="mac-note">You're enjoying exclusive member pricing on all products 🎉</p>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS MODAL -->
+  <div id="orderSuccessModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--success">
+      <div class="order-success-body">
+        <div class="order-success-mascot">
+          <img src="assets/NuttE_edited.png" alt="NuttE mascot" />
+        </div>
+        <h2 class="order-success-title">Thank you for your order!</h2>
+        <p class="order-success-sub">We'll verify your payment and process it shortly.</p>
+
+        <div class="order-success-details">
+          <div class="osd-row"><span>Order ID</span><strong id="successOrderId">—</strong></div>
+          <div class="osd-row"><span>Delivery Date</span><strong id="successDeliveryDate">—</strong></div>
+        </div>
+
+        <p class="order-success-email">
+          <i class="fas fa-envelope"></i> A confirmation email with your order details has been sent to
+          <strong id="successEmail">—</strong>
+        </p>
+
+        <button class="btn-primary btn-block" onclick="closeOrderSuccessModal()">
+          Great, thanks! <i class="fas fa-check"></i>
+        </button>
       </div>
     </div>
   </div>

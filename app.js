@@ -126,6 +126,7 @@ function bindUI() {
     if ($('aboutModal') && $('aboutModal').style.display !== 'none') closeAbout();
     if ($('reelsModal') && $('reelsModal').style.display !== 'none') closeReels();
     if ($('membershipModal') && $('membershipModal').style.display !== 'none') closeMembershipModal();
+    if ($('orderSuccessModal') && $('orderSuccessModal').style.display !== 'none') closeOrderSuccessModal();
   });
 }
 
@@ -654,7 +655,10 @@ function backToDetailsStep() {
 }
 
 /* Final submit with RR number */
+let isSubmittingOrder = false; // guards against duplicate orders from double-clicks / slow taps
 async function submitOrderWithPayment() {
+  if (isSubmittingOrder) return;
+
   const rrNumber = ($('orderRRNumber').value || '').trim();
   if (!rrNumber) {
     alert('Please enter your UPI Transaction ID / RR Number after making the payment');
@@ -683,6 +687,12 @@ async function submitOrderWithPayment() {
     membership_plan: membershipAddedToCart ? selectedMemberPlan : null,
     membership_fee: membershipAddedToCart ? membershipFeeAmount : 0
   };
+
+  isSubmittingOrder = true;
+  const btn = $('confirmOrderBtn');
+  const originalBtnHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
 
   try {
     const resp = await apiCall('/submit-order', { method: 'POST', body: JSON.stringify(order) });
@@ -717,20 +727,44 @@ async function submitOrderWithPayment() {
           console.warn('Membership save failed (non-critical):', memErr);
         }
       }
-      alert(`✅ Order confirmed! Order ID: ${resp.order_id}\n\nWe'll verify your payment and process your order shortly.`);
       cart = [];
       membershipAddedToCart = false;
       membershipFeeAmount = 0;
       selectedMemberPlan = null;
       updateCartCount();
       renderCart();
-      closeCustomerModal();
+      $('customerModal').style.display = 'none'; // overlay stays up for the success modal
+      showOrderSuccessModal({
+        orderId: resp.order_id,
+        deliveryDate: formatDate(resp.delivery_date),
+        email
+      });
     } else {
       alert('Could not submit order: ' + (resp.message || 'Unknown error'));
     }
   } catch (e) {
     alert('Error submitting order. Please try again.');
+  } finally {
+    isSubmittingOrder = false;
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHtml;
   }
+}
+
+/* Order success modal — mascot, order id, delivery date, email confirmation */
+function showOrderSuccessModal({ orderId, deliveryDate, email }) {
+  $('successOrderId').textContent = orderId || '—';
+  $('successDeliveryDate').textContent = deliveryDate || '—';
+  $('successEmail').textContent = email || '—';
+  $('overlay').style.display = 'block';
+  $('orderSuccessModal').style.display = 'flex';
+  $('orderSuccessModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeOrderSuccessModal() {
+  $('overlay').style.display = 'none';
+  $('orderSuccessModal').style.display = 'none';
+  $('orderSuccessModal').setAttribute('aria-hidden', 'true');
 }
 
 async function silentRefreshProducts() {

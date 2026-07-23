@@ -1188,6 +1188,60 @@ main {
 
 /* ── MEMBERSHIP MODAL ── */
 .modal-box--membership { max-width: 520px; }
+
+/* ── ORDER SUCCESS MODAL ── */
+.modal-box--success { max-width: 440px; }
+.order-success-body {
+  padding: 36px 28px 28px;
+  text-align: center;
+}
+.order-success-mascot {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 14px;
+}
+.order-success-mascot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: mascotWiggle 2s ease-in-out infinite;
+}
+.order-success-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.order-success-sub {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.order-success-details {
+  background: var(--cream);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+.osd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 6px 0;
+}
+.osd-row + .osd-row { border-top: 1px solid var(--border); }
+.osd-row span { color: var(--muted); }
+.osd-row strong { color: var(--black); }
+.order-success-email {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+.order-success-email i { color: var(--green); margin-right: 4px; }
+.order-success-email strong { color: var(--black); font-weight: 700; }
 .membership-body { padding: 24px; }
 
 .member-benefits { background: var(--cream); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
