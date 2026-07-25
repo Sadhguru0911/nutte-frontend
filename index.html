@@ -22,17 +22,21 @@
         <span class="nav-name">CommunitE</span>
       </a>
       <div class="nav-links">
-        <span class="nav-tagline">Collective Commerce</span>
+        <span class="nav-tagline" onclick="openAbout()" style="cursor:pointer">About Us</span>
+        <button id="tambolaNavBtn" class="account-nav-btn" onclick="openTambolaModal()">
+          <span class="nav-emoji">🎲</span>
+          <span>Tambola</span>
+        </button>
         <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
-          <i class="fas fa-user"></i>
+          <span class="nav-emoji">👤</span>
           <span id="accountNavLabel">Login</span>
         </button>
         <button id="memberLoginBtn" class="member-login-btn" onclick="openMemberLogin()">
-          <i class="fas fa-crown"></i>
+          <span class="nav-emoji">👑</span>
           <span id="memberLoginLabel">Join Membership</span>
         </button>
         <button id="openCartBtn" class="cart-btn">
-          <i class="fas fa-bag-shopping"></i>
+          <span class="nav-emoji">🛍️</span>
           <span id="cartCount" class="cart-count">0</span>
         </button>
       </div>
@@ -61,11 +65,13 @@
       <!-- BELOW: About, Join & Save, Watch us — in a row -->
       <div class="hero-col-small">
 
-        <div class="hero-card hero-card--about ripple-card" onclick="openAbout()">
-          <p class="hero-label">About</p>
-          <div class="about-mascot">
-            <img src="assets/NuttE_edited.png" alt="NuttE mascot" class="mascot-img" />
+        <div class="hero-card hero-card--about ripple-card" onclick="openTambolaModal()">
+          <p class="hero-label">Play Tambola</p>
+          <div class="hero-card-bottom">
+            <span class="hero-icon-sm" style="font-size:1.4rem">🎲</span>
+            <p class="hero-stat-label">Tickets &amp; Live Caller</p>
           </div>
+          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
           <canvas class="ripple-canvas"></canvas>
         </div>
 
@@ -466,6 +472,53 @@
             <p class="mac-note">You're enjoying exclusive member pricing on all products 🎉</p>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAMBOLA MODAL -->
+  <div id="tambolaModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--tambola">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fas fa-dice" style="color:var(--green);margin-right:8px"></i>Tambola</h2>
+        <button id="closeTambolaBtn" class="icon-btn" aria-label="Close" onclick="closeTambolaModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="tambola-tabs">
+          <button id="tambolaTabTicketsBtn" class="tambola-tab active" onclick="switchTambolaTab('tickets')">Generate Tickets</button>
+          <button id="tambolaTabCallerBtn" class="tambola-tab" onclick="switchTambolaTab('caller')">Number Caller</button>
+        </div>
+
+        <!-- TICKET GENERATOR PANEL -->
+        <div id="tambolaTicketsPanel" class="tambola-panel">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="field-label">Number of tickets</label>
+              <input id="ticketCount" class="field-input" type="number" min="1" max="12" value="6" />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Player names (optional, comma separated)</label>
+              <input id="ticketNames" class="field-input" type="text" placeholder="Priya, Rahul, Amma..." />
+            </div>
+          </div>
+          <button class="btn-primary btn-block" onclick="generateTambolaTickets()">Generate Tickets <i class="fas fa-shuffle"></i></button>
+          <p class="tambola-note">Each ticket follows standard Tambola rules — 15 numbers per ticket, 5 per row, arranged by column.</p>
+          <div id="ticketsOutput" class="tickets-output"></div>
+        </div>
+
+        <!-- NUMBER CALLER PANEL -->
+        <div id="tambolaCallerPanel" class="tambola-panel" style="display:none">
+          <div class="caller-number-display" id="callerCurrentNumber">—</div>
+          <p class="caller-status" id="callerStatus">0 of 90 numbers called</p>
+          <div class="caller-actions">
+            <button id="callNextBtn" class="btn-primary" onclick="callNextNumber()">Call Next Number</button>
+            <button class="btn-secondary" onclick="undoLastCall()">Undo Last</button>
+            <button class="btn-secondary" onclick="newCallerGame()">New Game</button>
+          </div>
+          <div id="callerBoard" class="caller-board"></div>
+        </div>
+
       </div>
     </div>
   </div>

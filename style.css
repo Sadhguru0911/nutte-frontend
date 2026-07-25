@@ -1105,9 +1105,49 @@ main {
   margin-right: 8px;
 }
 .account-nav-btn:hover { background: #f2f0ea; transform: scale(1.03); }
+.nav-emoji { font-size: 1rem; line-height: 1; }
 
 /* Profile modal */
 .modal-box--profile { max-width: 440px; }
+
+/* Tambola modal */
+.modal-box--tambola { max-width: 620px; max-height: 85vh; overflow-y: auto; }
+.tambola-tabs { display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1px solid #eae7e0; }
+.tambola-tab {
+  background: none; border: none; padding: 10px 6px; font-size: 0.9rem; font-weight: 600;
+  color: var(--muted, #888); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tambola-tab.active { color: var(--green, #2d8a5e); border-bottom-color: var(--green, #2d8a5e); }
+.tambola-note { font-size: 0.78rem; color: var(--muted, #888); margin: 8px 0 16px; }
+
+.tickets-output { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.ticket-card {
+  border: 1px solid #e2e0da; border-radius: 8px; padding: 10px; background: #fff;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.ticket-card canvas { max-width: 100%; height: auto; }
+.ticket-card-actions { display: flex; gap: 8px; width: 100%; }
+.ticket-card-actions button { flex: 1; font-size: 0.78rem; padding: 7px; }
+
+.caller-number-display {
+  width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--green, #2d8a5e);
+  display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 800;
+  color: var(--green, #2d8a5e); margin: 0 auto 8px;
+}
+.caller-status { text-align: center; color: var(--muted, #888); font-size: 0.85rem; margin-bottom: 14px; }
+.caller-actions { display: flex; gap: 8px; margin-bottom: 18px; }
+.caller-actions button { flex: 1; }
+.caller-board { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.caller-cell {
+  aspect-ratio: 1; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center;
+  justify-content: center; font-size: 0.75rem; color: #999; background: #fafaf8;
+}
+.caller-cell.called { background: var(--green, #2d8a5e); color: #fff; border-color: var(--green, #2d8a5e); font-weight: 700; }
+
+@media (max-width: 600px) {
+  .caller-board { grid-template-columns: repeat(9, 1fr); }
+  .caller-number-display { width: 96px; height: 96px; font-size: 2rem; }
+}
 .profile-empty-note { color: var(--muted, #777); font-size: 0.9rem; line-height: 1.5; }
 .profile-member-badge {
   display: flex;

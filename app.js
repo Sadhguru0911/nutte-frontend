@@ -133,6 +133,7 @@ function bindUI() {
     if ($('orderSuccessModal') && $('orderSuccessModal').style.display !== 'none') closeOrderSuccessModal();
     if ($('membershipSuccessModal') && $('membershipSuccessModal').style.display !== 'none') closeMembershipSuccessModal();
     if ($('profileModal') && $('profileModal').style.display !== 'none') closeProfileModal();
+    if ($('tambolaModal') && $('tambolaModal').style.display !== 'none') closeTambolaModal();
   });
 }
 
@@ -1605,4 +1606,217 @@ function initRipple(card) {
 /* Init ripple on dynamically added cards */
 function initCardRipples(container) {
   container.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
+}
+
+/* ============ TAMBOLA: TICKET GENERATOR + NUMBER CALLER ============ */
+
+function openTambolaModal() {
+  $('overlay').style.display = 'block';
+  $('tambolaModal').style.display = 'flex';
+  $('tambolaModal').setAttribute('aria-hidden', 'false');
+  if (!callerBoardBuilt) buildCallerBoard();
+}
+
+function closeTambolaModal() {
+  $('overlay').style.display = 'none';
+  $('tambolaModal').style.display = 'none';
+  $('tambolaModal').setAttribute('aria-hidden', 'true');
+}
+
+function switchTambolaTab(tab) {
+  const isTickets = tab === 'tickets';
+  $('tambolaTicketsPanel').style.display = isTickets ? 'block' : 'none';
+  $('tambolaCallerPanel').style.display = isTickets ? 'none' : 'block';
+  $('tambolaTabTicketsBtn').classList.toggle('active', isTickets);
+  $('tambolaTabCallerBtn').classList.toggle('active', !isTickets);
+}
+
+/* ---------- Ticket generation ---------- */
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* Builds one valid 3x9 Tambola ticket: 15 numbers total, 5 per row,
+   numbers bounded by column decade (col0:1-9, col1:10-19 ... col8:80-90).
+   Retries on the rare infeasible random layout. */
+function generateOneTicket() {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    try {
+      // 1) how many numbers per column (1-3 each, summing to 15)
+      const colCounts = new Array(9).fill(1);
+      let remaining = 15 - 9;
+      while (remaining > 0) {
+        const c = Math.floor(Math.random() * 9);
+        if (colCounts[c] < 3) { colCounts[c]++; remaining--; }
+      }
+
+      // 2) assign each column's count to distinct rows, respecting each row's capacity of 5
+      const rowCap = [5, 5, 5];
+      const grid = [new Array(9).fill(false), new Array(9).fill(false), new Array(9).fill(false)];
+      const colOrder = shuffleArray([...Array(9).keys()]);
+
+      for (const c of colOrder) {
+        const k = colCounts[c];
+        const availableRows = [0, 1, 2].filter(r => rowCap[r] > 0);
+        if (availableRows.length < k) throw new Error('retry');
+        const chosen = shuffleArray([...availableRows]).slice(0, k);
+        chosen.forEach(r => { grid[r][c] = true; rowCap[r]--; });
+      }
+      if (rowCap[0] !== 0 || rowCap[1] !== 0 || rowCap[2] !== 0) throw new Error('retry');
+
+      // 3) fill in actual numbers per column range
+      const ticket = [new Array(9).fill(null), new Array(9).fill(null), new Array(9).fill(null)];
+      for (let c = 0; c < 9; c++) {
+        const lo = c === 0 ? 1 : c * 10;
+        const hi = c === 8 ? 90 : c * 10 + 9;
+        const pool = [];
+        for (let n = lo; n <= hi; n++) pool.push(n);
+        shuffleArray(pool);
+        const rowsForCol = [0, 1, 2].filter(r => grid[r][c]);
+        const picks = pool.slice(0, rowsForCol.length).sort((a, b) => a - b);
+        rowsForCol.forEach((r, i) => { ticket[r][c] = picks[i]; });
+      }
+      return ticket;
+    } catch (e) { continue; }
+  }
+  return null; // extremely unlikely after 50 attempts
+}
+
+function renderTicketCanvas(ticket, label) {
+  const cellSize = 46;
+  const padTop = 40;
+  const canvas = document.createElement('canvas');
+  canvas.width = cellSize * 9 + 4;
+  canvas.height = cellSize * 3 + padTop + 10;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#2f6b4f';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.fillText(label || 'CommunitE Tambola', 4, 24);
+
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 9; c++) {
+      const x = 2 + c * cellSize;
+      const y = padTop + r * cellSize;
+      ctx.strokeStyle = '#999';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, cellSize, cellSize);
+      const val = ticket[r][c];
+      if (val === null) {
+        ctx.fillStyle = '#efece5';
+        ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
+      } else {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(val), x + cellSize / 2, y + cellSize / 2 + 1);
+      }
+    }
+  }
+  return canvas;
+}
+
+async function shareOrDownloadCanvas(canvas, filename) {
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], filename, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'CommunitE Tambola Ticket' });
+        return;
+      } catch (e) { /* user cancelled or share failed — fall through to download */ }
+    }
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  }, 'image/png');
+}
+
+function generateTambolaTickets() {
+  const count = Math.max(1, Math.min(12, parseInt($('ticketCount').value, 10) || 6));
+  const names = ($('ticketNames').value || '')
+    .split(',').map(n => n.trim()).filter(Boolean);
+
+  const output = $('ticketsOutput');
+  output.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const ticket = generateOneTicket();
+    if (!ticket) continue;
+    const label = names[i] ? `Ticket #${i + 1} — ${names[i]}` : `Ticket #${i + 1}`;
+
+    const card = document.createElement('div');
+    card.className = 'ticket-card';
+    const canvas = renderTicketCanvas(ticket, label);
+    card.appendChild(canvas);
+
+    const actions = document.createElement('div');
+    actions.className = 'ticket-card-actions';
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'btn-secondary';
+    shareBtn.innerHTML = '<i class="fas fa-share-nodes"></i> Share';
+    shareBtn.onclick = () => shareOrDownloadCanvas(canvas, `tambola-ticket-${i + 1}.png`);
+    actions.appendChild(shareBtn);
+    card.appendChild(actions);
+
+    output.appendChild(card);
+  }
+}
+
+/* ---------- Number caller ---------- */
+
+let callerBoardBuilt = false;
+let callerRemaining = [];
+let callerCalled = [];
+
+function buildCallerBoard() {
+  const board = $('callerBoard');
+  board.innerHTML = '';
+  for (let n = 1; n <= 90; n++) {
+    const cell = document.createElement('div');
+    cell.className = 'caller-cell';
+    cell.id = `callerCell${n}`;
+    cell.textContent = n;
+    board.appendChild(cell);
+  }
+  callerBoardBuilt = true;
+  newCallerGame();
+}
+
+function newCallerGame() {
+  callerRemaining = Array.from({ length: 90 }, (_, i) => i + 1);
+  callerCalled = [];
+  document.querySelectorAll('.caller-cell').forEach(c => c.classList.remove('called'));
+  $('callerCurrentNumber').textContent = '—';
+  $('callerStatus').textContent = '0 of 90 numbers called';
+}
+
+function callNextNumber() {
+  if (callerRemaining.length === 0) { alert('All 90 numbers have been called!'); return; }
+  const idx = Math.floor(Math.random() * callerRemaining.length);
+  const num = callerRemaining.splice(idx, 1)[0];
+  callerCalled.push(num);
+  $('callerCurrentNumber').textContent = num;
+  $('callerStatus').textContent = `${callerCalled.length} of 90 numbers called`;
+  const cell = $(`callerCell${num}`);
+  if (cell) cell.classList.add('called');
+}
+
+function undoLastCall() {
+  if (callerCalled.length === 0) return;
+  const num = callerCalled.pop();
+  callerRemaining.push(num);
+  const cell = $(`callerCell${num}`);
+  if (cell) cell.classList.remove('called');
+  $('callerCurrentNumber').textContent = callerCalled.length ? callerCalled[callerCalled.length - 1] : '—';
+  $('callerStatus').textContent = `${callerCalled.length} of 90 numbers called`;
 }
