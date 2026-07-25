@@ -29,6 +29,9 @@ let selectedMemberPlan = null;   // 'monthly' | 'annual'
 let membershipAddedToCart = false;
 let membershipFeeAmount = 0;
 
+// Profile / account state — the currently recognized customer, if any
+let loggedInCustomer = null; // { mobile, full_name, email, apt_number, community, delivery_instructions }
+
 /* fallback images */
 const DEFAULT_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=800&auto=format&fit=crop";
 const DEFAULT_SUBCATEGORY_IMAGE = "https://images.unsplash.com/photo-1490818387583-1baba5e638af?q=80&w=800&auto=format&fit=crop";
@@ -63,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeReelsBtn) closeReelsBtn.addEventListener('click', closeReels);
   const closeMembershipBtn = document.getElementById('closeMembershipBtn');
   if (closeMembershipBtn) closeMembershipBtn.addEventListener('click', closeMembershipModal);
+  initProfileFromSavedMobile(); // silently recognize a returning customer, updates nav badge
   // Init ripple on hero cards
   setTimeout(() => {
     document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
@@ -127,6 +131,8 @@ function bindUI() {
     if ($('reelsModal') && $('reelsModal').style.display !== 'none') closeReels();
     if ($('membershipModal') && $('membershipModal').style.display !== 'none') closeMembershipModal();
     if ($('orderSuccessModal') && $('orderSuccessModal').style.display !== 'none') closeOrderSuccessModal();
+    if ($('membershipSuccessModal') && $('membershipSuccessModal').style.display !== 'none') closeMembershipSuccessModal();
+    if ($('profileModal') && $('profileModal').style.display !== 'none') closeProfileModal();
   });
 }
 
@@ -612,7 +618,174 @@ function applyMembershipStatus(customer, mobile) {
   renderCart();
 }
 
-/* Step 1 → Step 2: validate details, show payment */
+/* ============ PROFILE / MY ACCOUNT ============ */
+
+function updateAccountNavLabel() {
+  const label = $('accountNavLabel');
+  if (loggedInCustomer) {
+    const firstName = (loggedInCustomer.full_name || '').split(' ')[0] || 'Account';
+    label.textContent = firstName;
+  } else {
+    label.textContent = 'Login';
+  }
+}
+
+/* Silent lookup on page load if we already know this device's mobile number.
+   Populates memberState + the nav badge without opening any modal. */
+async function initProfileFromSavedMobile() {
+  const mobile = getSavedMobile();
+  if (!mobile) return;
+  try {
+    const res = await apiCall(`/customer/${mobile}`);
+    if (res.found) {
+      loggedInCustomer = res.customer;
+      applyMembershipStatus(res.customer, mobile);
+      updateAccountNavLabel();
+    }
+  } catch (e) {
+    console.warn('Silent profile load failed (non-critical):', e);
+  }
+}
+
+function openProfileModal() {
+  $('overlay').style.display = 'block';
+  $('profileModal').style.display = 'flex';
+  $('profileModal').setAttribute('aria-hidden', 'false');
+
+  if (loggedInCustomer) {
+    renderProfileView(loggedInCustomer);
+  } else {
+    resetProfileLookup();
+    const saved = getSavedMobile();
+    if (saved) $('profileMobileInput').value = saved;
+  }
+}
+
+function closeProfileModal() {
+  $('overlay').style.display = 'none';
+  $('profileModal').style.display = 'none';
+  $('profileModal').setAttribute('aria-hidden', 'true');
+}
+
+function resetProfileLookup() {
+  $('profileLookupStep').style.display = 'block';
+  $('profileNotFoundStep').style.display = 'none';
+  $('profileViewStep').style.display = 'none';
+  toggleEditAddress(false);
+}
+
+async function lookupProfile() {
+  const mobile = ($('profileMobileInput').value || '').trim();
+  if (!/^\d{10}$/.test(mobile)) { alert('Please enter a valid 10-digit mobile number'); return; }
+
+  try {
+    const res = await apiCall(`/customer/${mobile}`);
+    if (res.found) {
+      saveMobile(mobile);
+      loggedInCustomer = res.customer;
+      applyMembershipStatus(res.customer, mobile);
+      updateAccountNavLabel();
+      renderProfileView(res.customer);
+    } else {
+      $('profileLookupStep').style.display = 'none';
+      $('profileNotFoundStep').style.display = 'block';
+    }
+  } catch (e) {
+    alert('Error looking up your account. Please try again.');
+  }
+}
+
+function renderProfileView(c) {
+  $('profileLookupStep').style.display = 'none';
+  $('profileNotFoundStep').style.display = 'none';
+  $('profileViewStep').style.display = 'block';
+  toggleEditAddress(false);
+
+  $('profileName').textContent = c.full_name || '—';
+  $('profileMobileDisplay').textContent = c.mobile_number || '—';
+  $('profileEmail').textContent = c.email || '—';
+  $('profileApt').textContent = c.apt_number || '—';
+  $('profileCommunity').textContent = c.community || '—';
+  $('profileInstructions').textContent = c.delivery_instructions || '—';
+
+  const status = (c.membership_status || '').toLowerCase();
+  const badge = $('profileMemberBadge');
+  if (status === 'active') {
+    badge.style.display = 'flex';
+    badge.className = 'profile-member-badge is-active';
+    $('profileMemberText').textContent = `👑 Active Member — valid until ${c.membership_expiry ? formatDate(c.membership_expiry) : '—'}`;
+  } else if (status === 'pending') {
+    badge.style.display = 'flex';
+    badge.className = 'profile-member-badge is-pending';
+    $('profileMemberText').textContent = '⏳ Membership pending payment verification';
+  } else if (status === 'expired') {
+    badge.style.display = 'flex';
+    badge.className = 'profile-member-badge is-expired';
+    $('profileMemberText').textContent = '⚠️ Membership expired — renew to save again';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function toggleEditAddress(editing) {
+  $('profileAddressView').style.display = editing ? 'none' : 'block';
+  $('editAddressBtn').style.display = editing ? 'none' : 'block';
+  $('profileAddressEdit').style.display = editing ? 'block' : 'none';
+
+  if (editing && loggedInCustomer) {
+    $('editApt').value = loggedInCustomer.apt_number || '';
+    $('editCommunity').value = loggedInCustomer.community || '';
+    $('editInstructions').value = loggedInCustomer.delivery_instructions || '';
+  }
+}
+
+async function saveProfileChanges() {
+  if (!loggedInCustomer) return;
+  const apt = ($('editApt').value || '').trim();
+  const community = ($('editCommunity').value || '').trim();
+  const instructions = ($('editInstructions').value || '').trim();
+
+  const btn = $('saveProfileBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    const resp = await apiCall('/update-customer', {
+      method: 'POST',
+      body: JSON.stringify({
+        mobile_number: loggedInCustomer.mobile_number,
+        apt_number: apt,
+        community: community,
+        delivery_instructions: instructions
+      })
+    });
+    if (resp.success) {
+      loggedInCustomer = { ...loggedInCustomer, apt_number: apt, community: community, delivery_instructions: instructions };
+      renderProfileView(loggedInCustomer);
+    } else {
+      alert('Could not save changes: ' + (resp.message || 'Please try again'));
+    }
+  } catch (e) {
+    alert('Error saving changes. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+function logoutProfile() {
+  try { localStorage.removeItem(SAVED_MOBILE_KEY); } catch (e) { /* non-critical */ }
+  loggedInCustomer = null;
+  memberState = { isMember: false, status: null, plan: null, expiry: null, name: null, mobile: null };
+  updateAccountNavLabel();
+  const btn = $('memberLoginBtn');
+  btn.classList.remove('is-member');
+  $('memberLoginLabel').textContent = 'Join Membership';
+  resetProfileLookup();
+}
+
+
 function goToPaymentStep() {
   const fullName = $('fullName').value.trim();
   const mobileNumber = $('mobileNumber').value.trim();
@@ -662,6 +835,10 @@ async function submitOrderWithPayment() {
   const rrNumber = ($('orderRRNumber').value || '').trim();
   if (!rrNumber) {
     alert('Please enter your UPI Transaction ID / RR Number after making the payment');
+    return;
+  }
+  if (!/^\d{12}$/.test(rrNumber)) {
+    alert('UPI Transaction ID / RR Number must be exactly 12 digits');
     return;
   }
 
@@ -1151,9 +1328,13 @@ function goToMemberPayment() {
 }
 
 /* Submit membership (standalone — not bundled with order) */
+let isSubmittingMembership = false; // guards against duplicate membership requests from double-clicks / slow taps
 async function submitMembership() {
+  if (isSubmittingMembership) return;
+
   const rrNumber = ($('memberRRNumber').value || '').trim();
   if (!rrNumber) { alert('Please enter your UPI Transaction ID / RR Number'); return; }
+  if (!/^\d{12}$/.test(rrNumber)) { alert('UPI Transaction ID / RR Number must be exactly 12 digits'); return; }
 
   // Get customer details from whichever path we came through
   let mobile, name, email, apt, community;
@@ -1174,6 +1355,13 @@ async function submitMembership() {
   }
 
   const amount = MEMBERSHIP_PRICES[selectedMemberPlan];
+  const planLabel = selectedMemberPlan === 'annual' ? 'Annual — ₹3,999/year' : 'Monthly — ₹400/month';
+
+  isSubmittingMembership = true;
+  const btn = $('submitMembershipBtn');
+  const originalBtnHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
   try {
     const resp = await apiCall('/join-member', {
@@ -1191,14 +1379,34 @@ async function submitMembership() {
     });
 
     if (resp.success) {
-      alert(`✅ Membership request submitted! We'll activate your membership after verifying payment. Thank you!`);
       closeMembershipModal();
+      showMembershipSuccessModal({ plan: planLabel, amount, email });
     } else {
       alert('Could not submit membership: ' + (resp.message || 'Please try again'));
     }
   } catch(e) {
     alert('Error submitting membership. Please try again.');
+  } finally {
+    isSubmittingMembership = false;
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHtml;
   }
+}
+
+/* Membership success modal — mirrors the order success modal */
+function showMembershipSuccessModal({ plan, amount, email }) {
+  $('msPlan').textContent = plan || '—';
+  $('msAmount').textContent = amount ? `₹${amount}` : '—';
+  $('msEmail').textContent = email || '—';
+  $('overlay').style.display = 'block';
+  $('membershipSuccessModal').style.display = 'flex';
+  $('membershipSuccessModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeMembershipSuccessModal() {
+  $('overlay').style.display = 'none';
+  $('membershipSuccessModal').style.display = 'none';
+  $('membershipSuccessModal').setAttribute('aria-hidden', 'true');
 }
 
 /* Add membership fee to cart and switch prices */

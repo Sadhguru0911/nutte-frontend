@@ -1088,6 +1088,80 @@ main {
 .member-login-btn:hover { transform: scale(1.04); box-shadow: 0 4px 16px rgba(212,160,23,0.35); }
 .member-login-btn.is-member { background: linear-gradient(135deg, #1a5c3a, #2d8a5e); color: #fff; }
 
+/* Account / profile nav button */
+.account-nav-btn {
+  background: transparent;
+  color: var(--ink, #2b2b2b);
+  border: 1.5px solid #d8d5cd;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s, background 0.2s;
+  margin-right: 8px;
+}
+.account-nav-btn:hover { background: #f2f0ea; transform: scale(1.03); }
+
+/* Profile modal */
+.modal-box--profile { max-width: 440px; }
+.profile-empty-note { color: var(--muted, #777); font-size: 0.9rem; line-height: 1.5; }
+.profile-member-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.profile-member-badge.is-active { background: #eaf6ee; color: #1a5c3a; border: 1px solid #b7e0c4; }
+.profile-member-badge.is-pending { background: #fff8e6; color: #8a6200; border: 1px solid #f2d98a; }
+.profile-member-badge.is-expired { background: #fdecea; color: #a3352f; border: 1px solid #f2b8b5; }
+.profile-details {
+  border: 1px solid #eae7e0;
+  border-radius: 10px;
+  padding: 4px 14px;
+  margin-bottom: 14px;
+}
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0eee8;
+  font-size: 0.88rem;
+}
+.profile-row:last-child { border-bottom: none; }
+.profile-row span { color: var(--muted, #777); }
+.profile-row strong { text-align: right; font-weight: 600; }
+.profile-edit-actions { display: flex; gap: 10px; margin-top: 6px; }
+.profile-edit-actions button { flex: 1; }
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--green, #2d8a5e);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: block;
+  margin-inline: auto;
+}
+.btn-text:hover { opacity: 0.75; }
+
+@media (max-width: 600px) {
+  .account-nav-btn span { display: none; }
+  .account-nav-btn { padding: 7px 10px; }
+}
+
 /* ── DUAL PRICING ON PRODUCT CARDS ── */
 .product-price-wrap {
   display: flex;

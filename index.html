@@ -23,6 +23,10 @@
       </a>
       <div class="nav-links">
         <span class="nav-tagline">Collective Commerce</span>
+        <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
+          <i class="fas fa-user"></i>
+          <span id="accountNavLabel">Login</span>
+        </button>
         <button id="memberLoginBtn" class="member-login-btn" onclick="openMemberLogin()">
           <i class="fas fa-crown"></i>
           <span id="memberLoginLabel">Join Membership</span>
@@ -280,7 +284,7 @@
           </div>
           <div class="form-group" style="margin-top:16px">
             <label class="field-label">UPI Transaction ID / RR Number <span style="color:var(--green)">*</span></label>
-            <input id="orderRRNumber" class="field-input" type="text" placeholder="Enter transaction ID after paying" />
+            <input id="orderRRNumber" class="field-input" type="text" inputmode="numeric" maxlength="12" placeholder="12-digit transaction ID" oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)" />
           </div>
           <div class="payment-step-actions">
             <button class="btn-secondary" onclick="backToDetailsStep()"><i class="fas fa-arrow-left"></i> Back</button>
@@ -446,9 +450,9 @@
           </div>
           <div class="form-group" style="margin-top:16px">
             <label class="field-label">UPI Transaction ID / RR Number</label>
-            <input id="memberRRNumber" class="field-input" type="text" placeholder="12-digit transaction ID" />
+            <input id="memberRRNumber" class="field-input" type="text" inputmode="numeric" maxlength="12" placeholder="12-digit transaction ID" oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)" />
           </div>
-          <button class="btn-primary btn-block" style="margin-top:12px" onclick="submitMembership()">Submit Membership <i class="fas fa-check"></i></button>
+          <button id="submitMembershipBtn" class="btn-primary btn-block" style="margin-top:12px" onclick="submitMembership()">Submit Membership <i class="fas fa-check"></i></button>
         </div>
         <div id="memberStep3" class="member-step" style="display:none">
           <div class="member-active-card">
@@ -462,6 +466,90 @@
             <p class="mac-note">You're enjoying exclusive member pricing on all products 🎉</p>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE / MY ACCOUNT MODAL -->
+  <div id="profileModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--profile">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fas fa-user" style="color:var(--green);margin-right:8px"></i>My Account</h2>
+        <button id="closeProfileBtn" class="icon-btn" aria-label="Close" onclick="closeProfileModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+
+        <div id="profileLookupStep">
+          <label class="field-label">Mobile Number</label>
+          <div class="inline-row">
+            <input id="profileMobileInput" class="field-input" type="tel" placeholder="10-digit mobile" maxlength="10" />
+            <button class="btn-secondary" onclick="lookupProfile()">Look Up</button>
+          </div>
+        </div>
+
+        <div id="profileNotFoundStep" style="display:none">
+          <p class="profile-empty-note">We couldn't find an account with that number yet — place an order or join membership first, and your details will show up here.</p>
+          <button class="btn-text" onclick="resetProfileLookup()">Try a different number</button>
+        </div>
+
+        <div id="profileViewStep" style="display:none">
+          <div id="profileMemberBadge" class="profile-member-badge" style="display:none">
+            <span id="profileMemberText"></span>
+          </div>
+
+          <div class="profile-details">
+            <div class="profile-row"><span>Name</span><strong id="profileName"></strong></div>
+            <div class="profile-row"><span>Mobile</span><strong id="profileMobileDisplay"></strong></div>
+            <div class="profile-row"><span>Email</span><strong id="profileEmail"></strong></div>
+          </div>
+
+          <div id="profileAddressView" class="profile-details">
+            <div class="profile-row"><span>Apartment / Address</span><strong id="profileApt"></strong></div>
+            <div class="profile-row"><span>Community</span><strong id="profileCommunity"></strong></div>
+            <div class="profile-row"><span>Delivery Instructions</span><strong id="profileInstructions"></strong></div>
+          </div>
+          <button id="editAddressBtn" class="btn-secondary btn-block" style="margin-top:10px" onclick="toggleEditAddress(true)">Edit Address <i class="fas fa-pen"></i></button>
+
+          <div id="profileAddressEdit" style="display:none; margin-top:10px">
+            <div class="form-group"><label class="field-label">Apartment / Address</label><input id="editApt" class="field-input" type="text" /></div>
+            <div class="form-group"><label class="field-label">Community</label><input id="editCommunity" class="field-input" type="text" /></div>
+            <div class="form-group"><label class="field-label">Delivery Instructions</label><input id="editInstructions" class="field-input" type="text" /></div>
+            <div class="profile-edit-actions">
+              <button class="btn-secondary" onclick="toggleEditAddress(false)">Cancel</button>
+              <button id="saveProfileBtn" class="btn-primary" onclick="saveProfileChanges()">Save Changes</button>
+            </div>
+          </div>
+
+          <button class="btn-text" style="margin-top:18px" onclick="logoutProfile()">Not you? Switch account</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMBERSHIP SUCCESS MODAL -->
+  <div id="membershipSuccessModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--success">
+      <div class="order-success-body">
+        <div class="order-success-mascot">
+          <img src="assets/NuttE_edited.png" alt="NuttE mascot" />
+        </div>
+        <h2 class="order-success-title">Membership request received!</h2>
+        <p class="order-success-sub">We'll verify your payment and activate your membership shortly.</p>
+
+        <div class="order-success-details">
+          <div class="osd-row"><span>Plan</span><strong id="msPlan">—</strong></div>
+          <div class="osd-row"><span>Amount</span><strong id="msAmount">—</strong></div>
+        </div>
+
+        <p class="order-success-email">
+          <i class="fas fa-envelope"></i> A confirmation email has been sent to
+          <strong id="msEmail">—</strong>
+        </p>
+
+        <button class="btn-primary btn-block" onclick="closeMembershipSuccessModal()">
+          Great, thanks! <i class="fas fa-check"></i>
+        </button>
       </div>
     </div>
   </div>
