@@ -1815,10 +1815,33 @@ function callNextNumber() {
   const idx = Math.floor(Math.random() * callerRemaining.length);
   const num = callerRemaining.splice(idx, 1)[0];
   callerCalled.push(num);
-  $('callerCurrentNumber').textContent = num;
+  const display = $('callerCurrentNumber');
+  display.textContent = num;
+  display.classList.remove('pop');
+  void display.offsetWidth; // restart animation even if same number is called consecutively
+  display.classList.add('pop');
+  spawnConfetti(display);
   $('callerStatus').textContent = `${callerCalled.length} of 90 numbers called`;
   const cell = $(`callerCell${num}`);
   if (cell) cell.classList.add('called');
+}
+
+/* Small emoji confetti burst around the caller number display */
+function spawnConfetti(anchorEl) {
+  const emojis = ['🎉', '✨', '🎊', '⭐'];
+  for (let i = 0; i < 6; i++) {
+    const piece = document.createElement('span');
+    piece.className = 'confetti-piece';
+    piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    const angle = (Math.random() * 360) * (Math.PI / 180);
+    const dist = 40 + Math.random() * 30;
+    piece.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+    piece.style.setProperty('--rot', `${(Math.random() * 360) - 180}deg`);
+    piece.style.left = '50%';
+    piece.style.top = '50%';
+    anchorEl.appendChild(piece);
+    setTimeout(() => piece.remove(), 950);
+  }
 }
 
 function undoLastCall() {

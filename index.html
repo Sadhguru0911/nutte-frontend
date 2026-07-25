@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=32" />
-  <script src="app.js?v=32" defer></script>
+  <link rel="stylesheet" href="style.css?v=33" />
+  <script src="app.js?v=33" defer></script>
 </head>
 <body>
 
@@ -507,15 +507,15 @@
   <div id="tambolaModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box modal-box--tambola">
       <div class="modal-header">
-        <h2 class="modal-title"><i class="fas fa-dice" style="color:var(--green);margin-right:8px"></i>Tambola</h2>
+        <h2 class="modal-title"><span class="dice-bounce">🎲</span>Tambola</h2>
         <button id="closeTambolaBtn" class="icon-btn" aria-label="Close" onclick="closeTambolaModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
 
         <div class="tambola-tabs">
-          <button id="tambolaTabTicketsBtn" class="tambola-tab active" onclick="switchTambolaTab('tickets')">Generate Tickets</button>
-          <button id="tambolaTabCallerBtn" class="tambola-tab" onclick="switchTambolaTab('caller')">Number Caller</button>
-          <button id="tambolaTabRulesBtn" class="tambola-tab" onclick="switchTambolaTab('rules')">Rules</button>
+          <button id="tambolaTabTicketsBtn" class="tambola-tab active" onclick="switchTambolaTab('tickets')">🎟️ Generate Tickets</button>
+          <button id="tambolaTabCallerBtn" class="tambola-tab" onclick="switchTambolaTab('caller')">📢 Number Caller</button>
+          <button id="tambolaTabRulesBtn" class="tambola-tab" onclick="switchTambolaTab('rules')">📜 Rules</button>
         </div>
 
         <!-- TICKET GENERATOR PANEL -->
@@ -530,7 +530,7 @@
               <input id="ticketNames" class="field-input" type="text" placeholder="Priya, Rahul, Amma..." />
             </div>
           </div>
-          <button class="btn-primary btn-block" onclick="generateTambolaTickets()">Generate Tickets <i class="fas fa-shuffle"></i></button>
+          <button class="btn-primary btn-block tambola-generate-btn" onclick="generateTambolaTickets()">🎲 Roll Up Tickets!</button>
           <p class="tambola-note">Each ticket follows standard Tambola rules — 15 numbers per ticket, 5 per row, arranged by column.</p>
           <div id="ticketsOutput" class="tickets-output"></div>
         </div>
@@ -540,9 +540,9 @@
           <div class="caller-number-display" id="callerCurrentNumber">—</div>
           <p class="caller-status" id="callerStatus">0 of 90 numbers called</p>
           <div class="caller-actions">
-            <button id="callNextBtn" class="btn-primary" onclick="callNextNumber()">Call Next Number</button>
-            <button class="btn-secondary" onclick="undoLastCall()">Undo Last</button>
-            <button class="btn-secondary" onclick="newCallerGame()">New Game</button>
+            <button id="callNextBtn" class="btn-primary" onclick="callNextNumber()">🎲 Call Next!</button>
+            <button class="btn-secondary" onclick="undoLastCall()">↩️ Undo</button>
+            <button class="btn-secondary" onclick="newCallerGame()">🔄 New Game</button>
           </div>
           <div id="callerBoard" class="caller-board"></div>
         </div>
@@ -564,12 +564,12 @@
 
             <h3>Common winning patterns</h3>
             <ul class="rules-patterns">
-              <li><strong>Early Five</strong> — first player to cross any 5 numbers, in any order</li>
-              <li><strong>Top Line</strong> — all 5 numbers in the top row</li>
-              <li><strong>Middle Line</strong> — all 5 numbers in the middle row</li>
-              <li><strong>Bottom Line</strong> — all 5 numbers in the bottom row</li>
-              <li><strong>Four Corners</strong> — the first and last numbers of the top row, plus the first and last numbers of the bottom row</li>
-              <li><strong>Full House (Housie)</strong> — all 15 numbers on the ticket</li>
+              <li><span class="pattern-icon">🐇</span><div><strong>Early Five</strong><br>first player to cross any 5 numbers, in any order</div></li>
+              <li><span class="pattern-icon">⬆️</span><div><strong>Top Line</strong><br>all 5 numbers in the top row</div></li>
+              <li><span class="pattern-icon">➖</span><div><strong>Middle Line</strong><br>all 5 numbers in the middle row</div></li>
+              <li><span class="pattern-icon">⬇️</span><div><strong>Bottom Line</strong><br>all 5 numbers in the bottom row</div></li>
+              <li><span class="pattern-icon">📐</span><div><strong>Four Corners</strong><br>the first and last numbers of the top row, plus the first and last numbers of the bottom row</div></li>
+              <li><span class="pattern-icon">🏠</span><div><strong>Full House (Housie)</strong><br>all 15 numbers on the ticket</div></li>
             </ul>
             <p class="tambola-note">The host can also announce their own house rules or extra patterns
             (like a "Star" or "Second Full House") before starting — just make sure everyone agrees on
