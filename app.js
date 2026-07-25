@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeMembershipBtn = document.getElementById('closeMembershipBtn');
   if (closeMembershipBtn) closeMembershipBtn.addEventListener('click', closeMembershipModal);
   initProfileFromSavedMobile(); // silently recognize a returning customer, updates nav badge
+  checkForSharedTicketLink(); // if opened from a shared Tambola ticket link, show it immediately
   // Init ripple on hero cards
   setTimeout(() => {
     document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
@@ -134,6 +135,7 @@ function bindUI() {
     if ($('membershipSuccessModal') && $('membershipSuccessModal').style.display !== 'none') closeMembershipSuccessModal();
     if ($('profileModal') && $('profileModal').style.display !== 'none') closeProfileModal();
     if ($('tambolaModal') && $('tambolaModal').style.display !== 'none') closeTambolaModal();
+    if ($('sharedTicketModal') && $('sharedTicketModal').style.display !== 'none') closeSharedTicketModal();
   });
 }
 
@@ -1624,11 +1626,12 @@ function closeTambolaModal() {
 }
 
 function switchTambolaTab(tab) {
-  const isTickets = tab === 'tickets';
-  $('tambolaTicketsPanel').style.display = isTickets ? 'block' : 'none';
-  $('tambolaCallerPanel').style.display = isTickets ? 'none' : 'block';
-  $('tambolaTabTicketsBtn').classList.toggle('active', isTickets);
-  $('tambolaTabCallerBtn').classList.toggle('active', !isTickets);
+  $('tambolaTicketsPanel').style.display = tab === 'tickets' ? 'block' : 'none';
+  $('tambolaCallerPanel').style.display = tab === 'caller' ? 'block' : 'none';
+  $('tambolaRulesPanel').style.display = tab === 'rules' ? 'block' : 'none';
+  $('tambolaTabTicketsBtn').classList.toggle('active', tab === 'tickets');
+  $('tambolaTabCallerBtn').classList.toggle('active', tab === 'caller');
+  $('tambolaTabRulesBtn').classList.toggle('active', tab === 'rules');
 }
 
 /* ---------- Ticket generation ---------- */
@@ -1763,9 +1766,16 @@ function generateTambolaTickets() {
     actions.className = 'ticket-card-actions';
     const shareBtn = document.createElement('button');
     shareBtn.className = 'btn-secondary';
-    shareBtn.innerHTML = '<i class="fas fa-share-nodes"></i> Share';
+    shareBtn.innerHTML = '<i class="fas fa-share-nodes"></i> Share Image';
     shareBtn.onclick = () => shareOrDownloadCanvas(canvas, `tambola-ticket-${i + 1}.png`);
     actions.appendChild(shareBtn);
+
+    const linkBtn = document.createElement('button');
+    linkBtn.className = 'btn-secondary';
+    linkBtn.innerHTML = '<i class="fas fa-link"></i> Send Tappable Link';
+    linkBtn.onclick = () => shareTicketLink(ticket, names[i] || '');
+    actions.appendChild(linkBtn);
+
     card.appendChild(actions);
 
     output.appendChild(card);
@@ -1819,4 +1829,83 @@ function undoLastCall() {
   if (cell) cell.classList.remove('called');
   $('callerCurrentNumber').textContent = callerCalled.length ? callerCalled[callerCalled.length - 1] : '—';
   $('callerStatus').textContent = `${callerCalled.length} of 90 numbers called`;
+}
+
+/* ---------- Tappable ticket links (interactive, no backend needed) ---------- */
+
+/* Ticket grid <-> compact URL-safe string. 27 cells, blanks as empty tokens. */
+function encodeTicket(ticket) {
+  return ticket.flat().map(v => (v === null ? '' : v)).join(',');
+}
+function decodeTicket(str) {
+  const tokens = str.split(',');
+  if (tokens.length !== 27) return null;
+  const vals = tokens.map(t => (t === '' ? null : parseInt(t, 10)));
+  return [vals.slice(0, 9), vals.slice(9, 18), vals.slice(18, 27)];
+}
+
+function buildTicketShareUrl(ticket, name) {
+  const base = `${location.origin}${location.pathname}`;
+  const params = new URLSearchParams();
+  params.set('t', encodeTicket(ticket));
+  if (name) params.set('n', name);
+  return `${base}?${params.toString()}`;
+}
+
+async function shareTicketLink(ticket, name) {
+  const url = buildTicketShareUrl(ticket, name);
+  const shareText = name
+    ? `${name}'s CommunitE Tambola ticket — tap to open and cross off numbers as they're called! 🎲`
+    : `Your CommunitE Tambola ticket — tap to open and cross off numbers as they're called! 🎲`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'CommunitE Tambola Ticket', text: shareText, url });
+      return;
+    } catch (e) { /* user cancelled — fall through to clipboard */ }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Link copied! Paste it into WhatsApp to send.');
+  } catch (e) {
+    prompt('Copy this link to share:', url);
+  }
+}
+
+/* Renders a tappable grid into `container` — clicking a filled cell toggles a crossed-off look. */
+function renderInteractiveTicketGrid(container, ticket) {
+  container.innerHTML = '';
+  ticket.flat().forEach(val => {
+    const cell = document.createElement('div');
+    if (val === null) {
+      cell.className = 'iticket-cell blank';
+    } else {
+      cell.className = 'iticket-cell';
+      cell.textContent = val;
+      cell.onclick = () => cell.classList.toggle('crossed');
+    }
+    container.appendChild(cell);
+  });
+}
+
+function closeSharedTicketModal() {
+  $('overlay').style.display = 'none';
+  $('sharedTicketModal').style.display = 'none';
+  $('sharedTicketModal').setAttribute('aria-hidden', 'true');
+}
+
+/* Checked once on page load — if this URL was opened from a shared ticket
+   link, show the interactive ticket immediately instead of the normal site. */
+function checkForSharedTicketLink() {
+  const params = new URLSearchParams(location.search);
+  const t = params.get('t');
+  if (!t) return;
+  const ticket = decodeTicket(t);
+  if (!ticket) return;
+  const name = params.get('n');
+  $('sharedTicketTitle').textContent = name ? `🎉 ${name}'s Tambola Ticket` : '🎉 Your Tambola Ticket';
+  renderInteractiveTicketGrid($('sharedTicketGrid'), ticket);
+  $('overlay').style.display = 'block';
+  $('sharedTicketModal').style.display = 'flex';
+  $('sharedTicketModal').setAttribute('aria-hidden', 'false');
 }

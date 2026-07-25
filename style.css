@@ -1120,6 +1120,15 @@ main {
 .tambola-tab.active { color: var(--green, #2d8a5e); border-bottom-color: var(--green, #2d8a5e); }
 .tambola-note { font-size: 0.78rem; color: var(--muted, #888); margin: 8px 0 16px; }
 
+.rules-block h3 { font-size: 0.95rem; margin: 18px 0 6px; color: var(--green, #2d8a5e); }
+.rules-block h3:first-child { margin-top: 0; }
+.rules-block p { font-size: 0.88rem; line-height: 1.55; color: var(--ink, #2b2b2b); margin: 0 0 4px; }
+.rules-patterns { margin: 6px 0 4px; padding-left: 20px; font-size: 0.88rem; line-height: 1.7; }
+.rules-disclaimer {
+  background: #fff8e6; border: 1px solid #f2d98a; border-radius: 8px;
+  padding: 12px 14px; font-size: 0.82rem; line-height: 1.55; color: #6b4f00; margin-top: 4px;
+}
+
 .tickets-output { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
 .ticket-card {
   border: 1px solid #e2e0da; border-radius: 8px; padding: 10px; background: #fff;
@@ -1143,6 +1152,22 @@ main {
   justify-content: center; font-size: 0.75rem; color: #999; background: #fafaf8;
 }
 .caller-cell.called { background: var(--green, #2d8a5e); color: #fff; border-color: var(--green, #2d8a5e); font-weight: 700; }
+
+/* Interactive tappable ticket (opened via a shared link) */
+.interactive-ticket-grid {
+  display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px;
+  max-width: 480px; margin: 0 auto;
+}
+.iticket-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid #ccc; border-radius: 6px; font-weight: 700; font-size: 0.95rem;
+  background: #fff; cursor: pointer; user-select: none; transition: background 0.15s, color 0.15s;
+}
+.iticket-cell.blank { background: #efece5; border-style: dashed; cursor: default; }
+.iticket-cell.crossed {
+  background: var(--green, #2d8a5e); color: #fff; border-color: var(--green, #2d8a5e);
+  text-decoration: line-through; opacity: 0.9;
+}
 
 @media (max-width: 600px) {
   .caller-board { grid-template-columns: repeat(9, 1fr); }

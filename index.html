@@ -4,6 +4,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CommunitE — Collective Commerce</title>
+  <meta name="description" content="CommunitE brings your Bangalore apartment community wholesale prices on dry fruits, nuts, spices, dates and more — collective buying power, doorstep delivered. Trust sahi. Quality sahi. Price bhi sahi." />
+
+  <!-- Open Graph — controls how the link looks when shared on WhatsApp, Instagram, Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sadhguru0911.github.io/nutte-frontend/" />
+  <meta property="og:title" content="CommunitE — Collective Commerce" />
+  <meta property="og:description" content="Wholesale prices on dry fruits, nuts, spices and more for your apartment community — bulk buying power, doorstep delivered." />
+  <meta property="og:image" content="https://sadhguru0911.github.io/nutte-frontend/assets/NuttE_edited.png" />
+
+  <!-- Twitter Card — same idea, for X/Twitter previews -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CommunitE — Collective Commerce" />
+  <meta name="twitter:description" content="Wholesale prices on dry fruits, nuts, spices and more for your apartment community — bulk buying power, doorstep delivered." />
+  <meta name="twitter:image" content="https://sadhguru0911.github.io/nutte-frontend/assets/NuttE_edited.png" />
+
+  <link rel="canonical" href="https://sadhguru0911.github.io/nutte-frontend/" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -23,10 +39,6 @@
       </a>
       <div class="nav-links">
         <span class="nav-tagline" onclick="openAbout()" style="cursor:pointer">About Us</span>
-        <button id="tambolaNavBtn" class="account-nav-btn" onclick="openTambolaModal()">
-          <span class="nav-emoji">🎲</span>
-          <span>Tambola</span>
-        </button>
         <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
           <span class="nav-emoji">👤</span>
           <span id="accountNavLabel">Login</span>
@@ -476,6 +488,21 @@
     </div>
   </div>
 
+  <!-- SHARED TICKET MODAL — opens automatically when someone taps a shared ticket link -->
+  <div id="sharedTicketModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--tambola">
+      <div class="modal-header">
+        <h2 class="modal-title" id="sharedTicketTitle">🎉 Your Tambola Ticket</h2>
+        <button class="icon-btn" aria-label="Close" onclick="closeSharedTicketModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="tambola-note">Tap a number as it's called to cross it off — tap again to undo. This stays on your phone only.</p>
+        <div id="sharedTicketGrid" class="interactive-ticket-grid"></div>
+        <button class="btn-secondary btn-block" style="margin-top:18px" onclick="closeSharedTicketModal(); openTambolaModal();">Generate Your Own Tickets</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TAMBOLA MODAL -->
   <div id="tambolaModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box modal-box--tambola">
@@ -488,6 +515,7 @@
         <div class="tambola-tabs">
           <button id="tambolaTabTicketsBtn" class="tambola-tab active" onclick="switchTambolaTab('tickets')">Generate Tickets</button>
           <button id="tambolaTabCallerBtn" class="tambola-tab" onclick="switchTambolaTab('caller')">Number Caller</button>
+          <button id="tambolaTabRulesBtn" class="tambola-tab" onclick="switchTambolaTab('rules')">Rules</button>
         </div>
 
         <!-- TICKET GENERATOR PANEL -->
@@ -517,6 +545,44 @@
             <button class="btn-secondary" onclick="newCallerGame()">New Game</button>
           </div>
           <div id="callerBoard" class="caller-board"></div>
+        </div>
+
+        <!-- RULES PANEL -->
+        <div id="tambolaRulesPanel" class="tambola-panel" style="display:none">
+          <div class="rules-block">
+            <h3>How to play</h3>
+            <p>Tambola (Housie) is meant to be played with everyone in the same room. One person hosts —
+            they open the <strong>Number Caller</strong> tab and call out numbers one at a time. Everyone
+            else plays from their own ticket (printed, or the tappable link) and crosses off matching
+            numbers as they're called.</p>
+
+            <h3>Claiming a win</h3>
+            <p>The moment a player completes a pattern, they <strong>call it out loud immediately</strong>
+            — e.g. "Top Line!" or "Housie!" The host pauses calling, checks that player's ticket against
+            the numbers already called, and confirms or rejects the claim out loud before continuing. This
+            keeps everything fair, transparent, and settled in the room in real time.</p>
+
+            <h3>Common winning patterns</h3>
+            <ul class="rules-patterns">
+              <li><strong>Early Five</strong> — first player to cross any 5 numbers, in any order</li>
+              <li><strong>Top Line</strong> — all 5 numbers in the top row</li>
+              <li><strong>Middle Line</strong> — all 5 numbers in the middle row</li>
+              <li><strong>Bottom Line</strong> — all 5 numbers in the bottom row</li>
+              <li><strong>Four Corners</strong> — the first and last numbers of the top row, plus the first and last numbers of the bottom row</li>
+              <li><strong>Full House (Housie)</strong> — all 15 numbers on the ticket</li>
+            </ul>
+            <p class="tambola-note">The host can also announce their own house rules or extra patterns
+            (like a "Star" or "Second Full House") before starting — just make sure everyone agrees on
+            the patterns and prizes before the first number is called.</p>
+
+            <h3>A note on prizes</h3>
+            <p class="rules-disclaimer">This is a free tool for casual, in-person community fun — CommunitE
+            doesn't run, organize, or take a share of any prize pool, and doesn't facilitate real-money
+            wagering in any way. If you and your group choose to play for prizes, that's entirely between
+            the players — we'd suggest keeping it to non-cash prizes (discount codes, small gifts, bragging
+            rights) to stay clearly on the safe, informal side. You're responsible for following whatever
+            local rules apply to your group if real money is ever involved.</p>
+          </div>
         </div>
 
       </div>
