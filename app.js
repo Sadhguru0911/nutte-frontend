@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeMembershipBtn) closeMembershipBtn.addEventListener('click', closeMembershipModal);
   initProfileFromSavedMobile(); // silently recognize a returning customer, updates nav badge
   checkForSharedTicketLink(); // if opened from a shared Tambola ticket link, show it immediately
+  loadFeaturedPartnerOnBoot(); // show the homepage Featured Partner banner if one is set
   // Init ripple on hero cards
   setTimeout(() => {
     document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
@@ -136,6 +137,8 @@ function bindUI() {
     if ($('profileModal') && $('profileModal').style.display !== 'none') closeProfileModal();
     if ($('tambolaModal') && $('tambolaModal').style.display !== 'none') closeTambolaModal();
     if ($('sharedTicketModal') && $('sharedTicketModal').style.display !== 'none') closeSharedTicketModal();
+    if ($('partnersModal') && $('partnersModal').style.display !== 'none') closePartnersModal();
+    if ($('becomePartnerModal') && $('becomePartnerModal').style.display !== 'none') closeBecomePartnerInfo();
   });
 }
 
@@ -728,6 +731,8 @@ function renderProfileView(c) {
   } else {
     badge.style.display = 'none';
   }
+
+  loadMyOrders(c.mobile_number);
 }
 
 function toggleEditAddress(editing) {
@@ -1931,4 +1936,174 @@ function checkForSharedTicketLink() {
   $('overlay').style.display = 'block';
   $('sharedTicketModal').style.display = 'flex';
   $('sharedTicketModal').setAttribute('aria-hidden', 'false');
+}
+
+/* ============ MY ORDERS (Profile page) ============ */
+
+async function loadMyOrders(mobile) {
+  const list = $('myOrdersList');
+  const emptyMsg = $('myOrdersEmptyMsg');
+  list.innerHTML = '';
+  emptyMsg.style.display = 'none';
+  if (!mobile) return;
+
+  try {
+    const res = await apiCall(`/customer-orders/${mobile}`);
+    if (!res.success || !res.orders || res.orders.length === 0) {
+      emptyMsg.style.display = 'block';
+      return;
+    }
+    res.orders.forEach(o => {
+      const card = document.createElement('div');
+      card.className = 'my-order-card';
+      card.innerHTML = `
+        <div class="my-order-top">
+          <strong>${o.order_id || '—'}</strong>
+          <span>₹${o.total_amount || '—'}</span>
+        </div>
+        <p class="my-order-items">${(o.items || '').replace(/\n/g, '<br>')}</p>
+        <p class="my-order-dates">Ordered ${o.timestamp ? formatDate(o.timestamp) : '—'} · Delivery ${o.delivery_date ? formatDate(o.delivery_date) : '—'}</p>
+      `;
+      list.appendChild(card);
+    });
+  } catch (e) {
+    console.warn('Could not load orders:', e);
+    emptyMsg.style.display = 'block';
+  }
+}
+
+/* ============ COMMUNITY PARTNERS DIRECTORY ============ */
+
+let partnersCache = [];
+let featuredPartnerNameForClick = '';
+
+function openPartnersModal() {
+  $('overlay').style.display = 'block';
+  $('partnersModal').style.display = 'flex';
+  $('partnersModal').setAttribute('aria-hidden', 'false');
+  showPartnersListView();
+  loadPartnersDirectory();
+}
+
+function closePartnersModal() {
+  $('overlay').style.display = 'none';
+  $('partnersModal').style.display = 'none';
+  $('partnersModal').setAttribute('aria-hidden', 'true');
+}
+
+function showPartnersListView() {
+  $('partnersListView').style.display = 'block';
+  $('partnerDetailView').style.display = 'none';
+}
+
+async function loadPartnersDirectory() {
+  const grid = $('partnersGrid');
+  const emptyMsg = $('partnersEmptyMsg');
+  try {
+    const res = await apiCall('/partners');
+    if (!res.success || !res.partners || res.partners.length === 0) {
+      grid.innerHTML = '';
+      emptyMsg.style.display = 'block';
+      return;
+    }
+    partnersCache = res.partners;
+    emptyMsg.style.display = 'none';
+    grid.innerHTML = '';
+    partnersCache.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'partner-card';
+      card.onclick = () => showPartnerDetail(i);
+      card.innerHTML = `
+        <div class="partner-card-photo" style="${p.photo_url ? `background-image:url('${p.photo_url}')` : ''}">${p.photo_url ? '' : '🏪'}</div>
+        <p class="partner-card-name">${p.vendor_name || 'Vendor'}</p>
+        <p class="partner-card-category">${p.category || ''}</p>
+      `;
+      grid.appendChild(card);
+    });
+    renderFeaturedPartnerBanner();
+  } catch (e) {
+    console.warn('Could not load partners:', e);
+    emptyMsg.style.display = 'block';
+  }
+}
+
+function showPartnerDetail(index) {
+  const p = partnersCache[index];
+  if (!p) return;
+  $('partnersListView').style.display = 'none';
+  $('partnerDetailView').style.display = 'block';
+
+  const photoEl = $('partnerDetailPhoto');
+  photoEl.style.backgroundImage = p.photo_url ? `url('${p.photo_url}')` : '';
+  photoEl.textContent = p.photo_url ? '' : '🏪';
+  $('partnerDetailName').textContent = p.vendor_name || 'Vendor';
+  $('partnerDetailCategory').textContent = p.category || '';
+  $('partnerDetailStory').textContent = p.story || '';
+
+  const contactBtn = $('partnerDetailContact');
+  contactBtn.href = p.contact_link || '#';
+  if ((p.contact_link || '').includes('wa.me') || (p.contact_link || '').includes('whatsapp')) {
+    contactBtn.textContent = 'Message on WhatsApp';
+  } else if ((p.contact_link || '').includes('instagram')) {
+    contactBtn.textContent = 'View on Instagram';
+  } else {
+    contactBtn.textContent = 'Contact Vendor';
+  }
+}
+
+function showPartnerDetailByName(name) {
+  if (!name) return;
+  const idx = partnersCache.findIndex(p => p.vendor_name === name);
+  if (idx >= 0) showPartnerDetail(idx);
+}
+
+function renderFeaturedPartnerBanner() {
+  const featured = partnersCache.find(p => p.featured);
+  const banner = $('featuredPartnerBanner');
+  if (!featured) { banner.style.display = 'none'; return; }
+
+  featuredPartnerNameForClick = featured.vendor_name;
+  $('featuredPartnerName').textContent = featured.vendor_name || 'Vendor';
+  $('featuredPartnerCategory').textContent = featured.category || '';
+  const photoEl = $('featuredPartnerPhoto');
+  photoEl.src = featured.photo_url || '';
+  photoEl.style.display = featured.photo_url ? 'block' : 'none';
+  banner.style.display = 'flex';
+}
+
+/* Load the featured partner (if any) right on page boot, so it shows on the
+   homepage without requiring anyone to open the directory first. */
+async function loadFeaturedPartnerOnBoot() {
+  try {
+    const res = await apiCall('/partners');
+    if (res.success && res.partners) {
+      partnersCache = res.partners;
+      renderFeaturedPartnerBanner();
+    }
+  } catch (e) { /* non-critical */ }
+}
+
+/* ---- "Become a partner" shareable application link ---- */
+function openBecomePartnerInfo() {
+  const url = `${location.origin}${location.pathname.replace(/index\.html$/, '')}apply-vendor.html`;
+  $('partnerApplyLinkInput').value = url;
+  $('overlay').style.display = 'block';
+  $('becomePartnerModal').style.display = 'flex';
+  $('becomePartnerModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeBecomePartnerInfo() {
+  $('overlay').style.display = 'none';
+  $('becomePartnerModal').style.display = 'none';
+  $('becomePartnerModal').setAttribute('aria-hidden', 'true');
+}
+
+async function copyPartnerApplyLink() {
+  const url = $('partnerApplyLinkInput').value;
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Link copied!');
+  } catch (e) {
+    prompt('Copy this link:', url);
+  }
 }

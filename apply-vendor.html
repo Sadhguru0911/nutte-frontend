@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Become a CommunitE Partner</title>
+<style>
+  :root{ --green:#2d8a5e; --ink:#2b2b2b; --bg:#faf8f4; }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink);
+    margin:0; padding:28px 18px 60px; max-width:480px; margin-inline:auto;
+  }
+  h1{font-size:1.3rem; margin:0 0 4px;}
+  p.sub{color:#666; font-size:0.88rem; line-height:1.5; margin:0 0 24px;}
+  .card{background:#fff; border:1px solid #e2e0da; border-radius:12px; padding:20px;}
+  label{display:block; font-size:0.8rem; font-weight:700; margin-bottom:6px; color:#444;}
+  .hint{font-size:0.74rem; color:#888; margin:-4px 0 12px;}
+  input, textarea{
+    width:100%; padding:11px 12px; border:1.5px solid #ccc; border-radius:8px; font-size:0.95rem;
+    margin-bottom:4px; font-family:inherit;
+  }
+  textarea{ resize:vertical; min-height:80px; }
+  .field{ margin-bottom:16px; }
+  button{
+    width:100%; padding:13px; border:none; border-radius:24px; background:var(--green); color:#fff;
+    font-size:0.95rem; font-weight:700; cursor:pointer; margin-top:6px;
+  }
+  button:disabled{opacity:.6;}
+  .result{
+    margin-top:16px; padding:14px; border-radius:8px; font-size:0.88rem; line-height:1.5; display:none;
+  }
+  .result.ok{ background:#eaf6ee; border:1px solid #b7e0c4; display:block; }
+  .result.err{ background:#fdecea; border:1px solid #f2b8b5; display:block; }
+  #successView{ display:none; text-align:center; }
+  #successView h2{ font-size:1.1rem; }
+</style>
+</head>
+<body>
+
+  <div id="formView">
+    <h1>🤝 Become a CommunitE Community Partner</h1>
+    <p class="sub">Tell us a bit about your shop — we'll review it and list you in the Community
+    Partners directory on our site so your neighbours can find you.</p>
+    <p class="sub" style="background:#fff8e6;border:1px solid #f2d98a;border-radius:8px;padding:10px 12px;color:#6b4f00;">
+      ⚠️ Being listed makes you an independent Community Partner, not an employee, agent, or business
+      partner of CommunitE. We don't verify or guarantee any claims in your listing, and any sale or
+      communication with a customer is directly between you and them.
+    </p>
+
+    <div class="card">
+      <div class="field">
+        <label>Shop / vendor name *</label>
+        <input id="vendorName" type="text" placeholder="e.g. Amma's Pickles" />
+      </div>
+      <div class="field">
+        <label>Category *</label>
+        <input id="vendorCategory" type="text" placeholder="e.g. Homemade pickles, Organic veggies, Bakery" />
+      </div>
+      <div class="field">
+        <label>Tell us your story</label>
+        <div class="hint">A couple of lines about what you make/sell — this shows on your listing</div>
+        <textarea id="vendorStory" placeholder="e.g. Homemade pickles using my grandmother's recipes, made fresh every week..."></textarea>
+      </div>
+      <div class="field">
+        <label>Contact link *</label>
+        <div class="hint">WhatsApp link (wa.me/91XXXXXXXXXX), Instagram profile, or phone number</div>
+        <input id="vendorContact" type="text" placeholder="e.g. https://wa.me/919876543210" />
+      </div>
+      <div class="field">
+        <label>Photo link (optional)</label>
+        <div class="hint">A link to a photo of your shop/products (Google Drive, Instagram post, etc.)</div>
+        <input id="vendorPhoto" type="text" placeholder="https://..." />
+      </div>
+      <button id="submitBtn" onclick="submitApplication()">Submit Application</button>
+      <div id="resultMsg" class="result"></div>
+    </div>
+  </div>
+
+  <div id="successView">
+    <div class="card">
+      <h2>🎉 Thanks for applying!</h2>
+      <p class="sub">Your application has been received. We'll review it and, once approved, you'll
+      appear in the Community Partners section on the CommunitE site.</p>
+    </div>
+  </div>
+
+<script>
+  const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
+
+  async function submitApplication() {
+    const vendor_name = document.getElementById('vendorName').value.trim();
+    const category = document.getElementById('vendorCategory').value.trim();
+    const story = document.getElementById('vendorStory').value.trim();
+    const contact_link = document.getElementById('vendorContact').value.trim();
+    const photo_url = document.getElementById('vendorPhoto').value.trim();
+
+    const resultEl = document.getElementById('resultMsg');
+    resultEl.className = 'result';
+    resultEl.textContent = '';
+
+    if (!vendor_name || !category || !contact_link) {
+      resultEl.className = 'result err';
+      resultEl.textContent = 'Please fill in shop name, category, and a contact link.';
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    try {
+      const res = await fetch(`${apiBase}/api/apply-partner`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vendor_name, category, story, contact_link, photo_url })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+      } else {
+        resultEl.className = 'result err';
+        resultEl.textContent = '❌ ' + (data.message || 'Something went wrong — please try again.');
+      }
+    } catch (e) {
+      resultEl.className = 'result err';
+      resultEl.textContent = '❌ Network error — please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Application';
+    }
+  }
+</script>
+</body>
+</html>

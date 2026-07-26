@@ -139,16 +139,27 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   margin: 0;
 }
 
-/* Row of 3 equal-width cards below the brand card */
+/* Row of small cards below the brand card — wraps to 2x2 on narrow screens */
 .hero-col-small {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
 }
-.hero-col-small .hero-card--about  { flex: 1; min-width: 0; }
-.hero-col-small .hero-card--reels  { flex: 1; min-width: 0; }
-.hero-col-small .hero-card--member { flex: 1; min-height: 0; overflow: visible; }
+.hero-col-small .hero-card--about    { flex: 1 1 calc(50% - 5px); min-width: 0; }
+.hero-col-small .hero-card--partners { flex: 1 1 calc(50% - 5px); min-width: 0; }
+.hero-col-small .hero-card--reels    { flex: 1 1 calc(50% - 5px); min-width: 0; }
+.hero-col-small .hero-member-wrap    { flex: 1 1 calc(50% - 5px); }
+.hero-col-small .hero-card--member   { flex: 1; min-height: 0; overflow: visible; }
 .hero-col-small .hero-card { padding: 18px 20px; min-height: 0; }
+
+@media (min-width: 901px) {
+  /* Enough room for all 4 in a single row on larger screens */
+  .hero-col-small .hero-card--about,
+  .hero-col-small .hero-card--partners,
+  .hero-col-small .hero-card--reels,
+  .hero-col-small .hero-member-wrap { flex: 1 1 0; }
+}
 
 .hero-card {
   border-radius: 20px;
@@ -164,6 +175,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.13); }
 
 .hero-card--about  { background: #c8c4f0; color: #1a1060; }
+.hero-card--partners { background: #ffcb8e; color: #5c2f00; }
 .hero-card--fresh  { background: #e8395a; }
 .hero-card--reels  { }
 .hero-card--member {
@@ -360,6 +372,8 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* About card blobs */
 .hero-card--about::before { background: #5a4fcf; opacity: 0.12; }
 .hero-card--about::after  { background: #5a4fcf; opacity: 0.08; animation-delay: -2s; }
+.hero-card--partners::before { background: #e07b00; opacity: 0.12; }
+.hero-card--partners::after  { background: #e07b00; opacity: 0.08; animation-delay: -2s; }
 
 /* Reels card blobs */
 .hero-card--fresh::before { background: #fff; opacity: 0.12; }
@@ -387,6 +401,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-col-small .hero-card:nth-child(1) { animation-delay: 0.05s; }
 .hero-col-small .hero-card:nth-child(2) { animation-delay: 0.15s; }
 .hero-col-small .hero-card:nth-child(3) { animation-delay: 0.25s; }
+.hero-col-small .hero-card:nth-child(4) { animation-delay: 0.35s; }
 .hero-card--brand { animation-delay: 0.1s; }
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
@@ -2324,4 +2339,71 @@ body.overlay-open .floating-cart-bar {
   .category-grid-label { font-size: 0.72rem; padding: 6px 6px; }
   .category-grid--sub { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .shop-section-label { font-size: 1rem; }
+}
+
+/* ============ MY ORDERS (profile page) ============ */
+.profile-section-title { font-size: 0.95rem; margin: 20px 0 10px; color: var(--green, #2d8a5e); }
+.my-orders-list { display: flex; flex-direction: column; gap: 10px; }
+.my-order-card {
+  border: 1px solid #eae7e0; border-radius: 10px; padding: 12px 14px; background: #fafaf8;
+}
+.my-order-top { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; }
+.my-order-items { font-size: 0.8rem; color: var(--ink, #2b2b2b); line-height: 1.5; margin: 0 0 6px; }
+.my-order-dates { font-size: 0.75rem; color: var(--muted, #888); margin: 0; }
+
+/* ============ COMMUNITY PARTNERS DIRECTORY ============ */
+.partners-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px;
+  margin-top: 10px;
+}
+.partner-card {
+  border: 1px solid #eae7e0; border-radius: 10px; padding: 10px; background: #fff;
+  cursor: pointer; text-align: center; transition: transform 0.15s, box-shadow 0.15s;
+}
+.partner-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+.partner-card-photo {
+  width: 100%; aspect-ratio: 1; border-radius: 8px; background-color: #f2f0ea; background-size: cover;
+  background-position: center; display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin-bottom: 8px;
+}
+.partner-card-name { font-size: 0.85rem; font-weight: 700; margin: 0 0 2px; }
+.partner-card-category { font-size: 0.72rem; color: var(--muted, #888); margin: 0; }
+
+.partner-detail-photo {
+  width: 100%; aspect-ratio: 16/9; border-radius: 10px; background-color: #f2f0ea; background-size: cover;
+  background-position: center; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; margin-bottom: 14px;
+}
+.partner-detail-name { font-size: 1.15rem; margin: 0 0 2px; }
+.partner-detail-category { font-size: 0.8rem; color: var(--muted, #888); margin: 0 0 12px; }
+.partner-detail-story { font-size: 0.9rem; line-height: 1.6; margin: 0 0 18px; }
+
+.partners-disclaimer {
+  background: #fff8e6; border: 1px solid #f2d98a; border-radius: 8px;
+  padding: 12px 14px; font-size: 0.8rem; line-height: 1.55; color: #6b4f00; margin-bottom: 14px;
+}
+.partners-disclaimer--compact { font-size: 0.72rem; margin-top: 14px; margin-bottom: 0; }
+
+/* Featured Partner homepage banner */
+.featured-partner-banner {
+  max-width: 960px; margin: 14px auto 0; padding: 12px 18px; border-radius: 14px;
+  background: linear-gradient(135deg, #fff8e6, #fff3d6); border: 1px solid #f2d98a;
+  cursor: pointer; transition: transform 0.15s;
+}
+.featured-partner-banner:hover { transform: scale(1.01); }
+.featured-partner-tag {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: #8a6200; display: block; margin-bottom: 8px;
+}
+.featured-partner-body { display: flex; align-items: center; gap: 12px; }
+.featured-partner-photo {
+  width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+}
+.featured-partner-name { font-weight: 700; font-size: 0.92rem; margin: 0; }
+.featured-partner-category { font-size: 0.78rem; color: var(--muted, #888); margin: 0; }
+.featured-partner-body > div { flex: 1; }
+
+@media (max-width: 600px) {
+  .partners-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
+  .featured-partner-banner { margin: 10px 10px 0; padding: 10px 14px; }
 }

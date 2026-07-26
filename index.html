@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=33" />
-  <script src="app.js?v=33" defer></script>
+  <link rel="stylesheet" href="style.css?v=35" />
+  <script src="app.js?v=35" defer></script>
 </head>
 <body>
 
@@ -87,6 +87,16 @@
           <canvas class="ripple-canvas"></canvas>
         </div>
 
+        <div class="hero-card hero-card--partners ripple-card" onclick="openPartnersModal()">
+          <p class="hero-label">Community Partners</p>
+          <div class="hero-card-bottom">
+            <span class="hero-icon-sm" style="font-size:1.4rem">🤝</span>
+            <p class="hero-stat-label">Meet Local Vendors</p>
+          </div>
+          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+
         <!-- Membership card — star lives OUTSIDE the card to avoid clipping -->
         <div class="hero-member-wrap">
           <div class="hero-card hero-card--member ripple-card" onclick="openMembershipModal()">
@@ -115,6 +125,19 @@
 
     </div>
   </section>
+
+  <!-- FEATURED PARTNER — only shows when a partner is marked Featured -->
+  <div id="featuredPartnerBanner" class="featured-partner-banner" style="display:none" onclick="openPartnersModal(); showPartnerDetailByName(featuredPartnerNameForClick);">
+    <span class="featured-partner-tag">🌟 Featured Community Partner</span>
+    <div class="featured-partner-body">
+      <img id="featuredPartnerPhoto" class="featured-partner-photo" src="" alt="" />
+      <div>
+        <p id="featuredPartnerName" class="featured-partner-name"></p>
+        <p id="featuredPartnerCategory" class="featured-partner-category"></p>
+      </div>
+      <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
+    </div>
+  </div>
 
   <!-- FLOATING BACK BUTTON -->
   <button id="backToCategoriesBtn" class="floating-back-btn" style="display:none" onclick="goBackToCategories()">
@@ -503,6 +526,62 @@
     </div>
   </div>
 
+  <!-- COMMUNITY PARTNERS MODAL -->
+  <div id="partnersModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--tambola">
+      <div class="modal-header">
+        <h2 class="modal-title">🤝 Community Partners</h2>
+        <button class="icon-btn" aria-label="Close" onclick="closePartnersModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+
+        <div id="partnersListView">
+          <div class="partners-disclaimer">
+            ⚠️ <strong>Community Partners are independent local vendors</strong> — not employees, agents,
+            or business partners of CommunitE. Listing here isn't an endorsement or guarantee of quality,
+            safety, or any claims made by the vendor (including food safety licensing). Descriptions and
+            contact details are provided directly by the vendor and aren't independently verified. Any
+            purchase or communication is strictly between you and the vendor — CommunitE isn't responsible
+            for the outcome.
+          </div>
+          <p class="tambola-note">Small vendors from our community — say hi, and support each other's shops. Know someone who'd like to be listed here? <a href="#" onclick="closePartnersModal(); openBecomePartnerInfo(); return false;">Tap here to share the application link.</a></p>
+          <div id="partnersGrid" class="partners-grid"></div>
+          <p id="partnersEmptyMsg" class="tambola-note" style="display:none">No partners listed yet — check back soon!</p>
+        </div>
+
+        <div id="partnerDetailView" style="display:none">
+          <button class="btn-text" style="margin-bottom:12px" onclick="showPartnersListView()">← Back to all partners</button>
+          <div id="partnerDetailPhoto" class="partner-detail-photo"></div>
+          <h3 id="partnerDetailName" class="partner-detail-name"></h3>
+          <p id="partnerDetailCategory" class="partner-detail-category"></p>
+          <p id="partnerDetailStory" class="partner-detail-story"></p>
+          <a id="partnerDetailContact" class="btn-primary btn-block" target="_blank" rel="noopener">Contact Vendor</a>
+          <p class="partners-disclaimer partners-disclaimer--compact">
+            ⚠️ Independent vendor, not affiliated with CommunitE. Not an endorsement — contact and purchase directly at your own discretion.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- BECOME A PARTNER INFO MODAL — shows the shareable application link -->
+  <div id="becomePartnerModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">Share with vendors</h2>
+        <button class="icon-btn" aria-label="Close" onclick="closeBecomePartnerInfo()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="tambola-note">Send this link to any vendor who'd like to be listed as a Community Partner. They fill it in themselves — it lands as pending until you review and approve it.</p>
+        <div class="inline-row">
+          <input id="partnerApplyLinkInput" class="field-input" type="text" readonly />
+          <button class="btn-secondary" onclick="copyPartnerApplyLink()">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TAMBOLA MODAL -->
   <div id="tambolaModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box modal-box--tambola">
@@ -638,6 +717,10 @@
               <button id="saveProfileBtn" class="btn-primary" onclick="saveProfileChanges()">Save Changes</button>
             </div>
           </div>
+
+          <h3 class="profile-section-title">My Orders</h3>
+          <div id="myOrdersList" class="my-orders-list"></div>
+          <p id="myOrdersEmptyMsg" class="tambola-note" style="display:none">No orders yet — your first order will show up here.</p>
 
           <button class="btn-text" style="margin-top:18px" onclick="logoutProfile()">Not you? Switch account</button>
         </div>
