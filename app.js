@@ -1060,7 +1060,6 @@ async function buildSearchIndex() {
     }));
     renderThemeCards();
     renderSubcategoryRows();
-    renderBulletinBoard();
   } catch (e) {
     console.warn('Search index build failed (non-critical):', e);
     allProductsCache = [];
@@ -2198,96 +2197,7 @@ async function copyPartnerApplyLink() {
   }
 }
 
-/* ============ BULLETIN BOARD ============ */
 
-const NUT_FACTS = [
-  "Almonds are technically seeds, not true nuts — they come from the fruit of the almond tree.",
-  "Cashews grow attached to the bottom of a fruit called the cashew apple.",
-  "Walnuts are one of the oldest tree foods known, dating back over 8,000 years.",
-  "Pistachios are sometimes called \"the smiling nut\" — their shells naturally split open as they ripen.",
-  "A single date palm tree can keep producing fruit for over 100 years.",
-  "Soaking almonds overnight makes their nutrients easier for the body to absorb.",
-  "Dried apricots pack more potassium, gram for gram, than a fresh banana.",
-  "Brazil nuts come from trees that can grow over 50 meters tall in the Amazon rainforest.",
-  "Raisins are simply dried grapes — no additives, just sunshine and time.",
-  "Walnuts are one of the few nuts with a good plant-based source of Omega-3s.",
-  "Figs were among the first fruits ever cultivated by humans — over 11,000 years ago.",
-  "Pine nuts are actually seeds from pine cones — some varieties take up to 3 years to mature.",
-  "A handful of dates a day has been a traditional energy staple for centuries.",
-  "Peanuts aren't technically nuts — they're legumes, related to beans and lentils.",
-  "Cashews are never sold in-shell — the shell contains an irritant oil that must be carefully removed first."
-];
-
-let aboutTimer = null, factTimer = null, photoTimer = null;
-let aboutIdx = 0, factIdx = 0, photoIdx = 0;
-
-const ABOUT_FACTS = [
-  '"Come Unite" — Collective commerce that brings your community wholesale prices, without the wholesale hassle.',
-  "450+ Members strong.",
-  "20+ Societies already shopping together.",
-  "Members save up to 40% off retail prices.",
-  "Our Mission: To harness the collective buying power of communities — so every member gets wholesale-quality prices on premium products, delivered to their door.",
-  "Our Vision: When a community shops together, everyone wins. We pool demand, cut out middlemen, and pass every rupee of savings directly to our members.",
-  "Trust sahi — Transparent sourcing, honest pricing, always.",
-  "Quality sahi — Every product meets the highest standards.",
-  "Price bhi sahi — Collective buying means real savings.",
-  "Community first — We exist because of our members, for our members.",
-  "What we offer: Dry Fruits, Dates, Whole Spices, Millets/Rice/Atta, Snacks, Tea & Coffee, Gift Boxes, Exotic Nuts, and Seeds.",
-  "Get in touch: Sameer Gupta, Founder & Managing Director — +91 89510 48013 or @dryfruits_communitE on Instagram."
-];
-
-function renderBulletinBoard() {
-  const aboutFacts = [...ABOUT_FACTS]; // real top-to-bottom order, cycles on repeat
-  aboutIdx = 0;
-  $('bulletinAboutText').textContent = aboutFacts[0];
-  if (aboutTimer) clearInterval(aboutTimer);
-  aboutTimer = setInterval(() => {
-    aboutIdx = (aboutIdx + 1) % aboutFacts.length;
-    fadeSwapText('bulletinAboutText', aboutFacts[aboutIdx]);
-  }, 5000);
-
-  const facts = shuffleArray([...NUT_FACTS]);
-  factIdx = 0;
-  $('bulletinFactText').textContent = facts[0];
-  if (factTimer) clearInterval(factTimer);
-  factTimer = setInterval(() => {
-    factIdx = (factIdx + 1) % facts.length;
-    fadeSwapText('bulletinFactText', facts[factIdx]);
-  }, 5000);
-
-  if (allProductsCache && allProductsCache.length > 0) {
-    const withImages = shuffleArray([...allProductsCache.filter(p => p.image)]);
-    if (withImages.length > 0) {
-      photoIdx = 0;
-      showBulletinPhoto(withImages);
-      if (photoTimer) clearInterval(photoTimer);
-      photoTimer = setInterval(() => {
-        photoIdx = (photoIdx + 1) % withImages.length;
-        showBulletinPhoto(withImages);
-      }, 4000);
-    }
-  }
-}
-
-function showBulletinPhoto(list) {
-  const p = list[photoIdx];
-  if (!p) return;
-  const imgEl = $('bulletinPhotoImg');
-  imgEl.style.opacity = '0';
-  setTimeout(() => {
-    imgEl.src = p.image;
-    $('bulletinPhotoCaption').textContent = p.product_name;
-    imgEl.style.opacity = '1';
-  }, 200);
-}
-
-function fadeSwapText(elId, newText) {
-  const el = $(elId);
-  el.style.opacity = '0';
-  setTimeout(() => { el.textContent = newText; el.style.opacity = '1'; }, 200);
-}
-
-/* ============ THEME CARDS (dynamic from Tags + Member Discount) ============ */
 
 const TAG_DISPLAY_MAP = {
   'best seller': { title: '🔥 Best Sellers', color: '#e8395a' },

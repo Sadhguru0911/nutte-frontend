@@ -22,11 +22,11 @@
   <link rel="canonical" href="https://sadhguru0911.github.io/nutte-frontend/" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=43" />
-  <script src="app.js?v=43" defer></script>
+  <link rel="stylesheet" href="style.css?v=44" />
+  <script src="app.js?v=44" defer></script>
 </head>
 <body>
 
@@ -35,9 +35,10 @@
     <div class="nav-inner">
       <a class="nav-brand" href="#">
         <img src="assets/NuttE_edited.png" alt="CommunitE" class="nav-logo" />
-        <span class="nav-name">CommunitE</span>
+        <span class="nav-name">Communit<em>E</em></span>
       </a>
       <div class="nav-links">
+        <span class="nav-tagline" onclick="scrollToSection('shopSection')" style="cursor:pointer">Shop</span>
         <span class="nav-tagline" onclick="openAbout()" style="cursor:pointer">About Us</span>
         <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
           <span class="nav-emoji">👤</span>
@@ -57,41 +58,31 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-grid">
-
-      <!-- TOP: Big brand card -->
-      <div class="hero-card hero-card--brand ripple-card" onclick="scrollToSection('shopSection')">
-        <div class="hero-brand-tagline">
-          <span>Trust <em>sahi.</em></span>
-          <span>Quality <em>sahi.</em></span>
-          <span>Price bhi <em>sahi.</em></span>
-        </div>
-        <div class="hero-brand-name">
-          <h1 class="hero-title">CommunitE</h1>
-          <p class="hero-brand-sub">Bulk prices. Community powered.<br>Doorstep delivered.</p>
-        </div>
-        <div class="hero-deco hero-deco--circle"></div>
-        <canvas class="ripple-canvas"></canvas>
-      </div>
-
+    <div class="hero-eyebrow">Collective Commerce</div>
+    <h1 class="hero-title">
+      <span class="hero-title-come">Come</span>
+      <span class="hero-title-unite">Unite.</span>
+    </h1>
+    <p class="hero-subtitle">Wholesale prices on premium dry fruits, nuts, and spices for your apartment community. We pool demand. You save up to 40%.</p>
+    <div class="hero-cta-row">
+      <button class="btn-gold" onclick="scrollToSection('shopSection')">Browse Products</button>
+      <button class="btn-outline" onclick="openMembershipModal()">Join Membership</button>
+    </div>
+    <div class="hero-product-strip">
+      <div class="hero-chip"><span class="hero-chip-emoji">🥜</span><span class="hero-chip-name">Cashews</span></div>
+      <div class="hero-chip"><span class="hero-chip-emoji">🌰</span><span class="hero-chip-name">Almonds</span></div>
+      <div class="hero-chip"><span class="hero-chip-emoji">🫘</span><span class="hero-chip-name">Dates</span></div>
+      <div class="hero-chip"><span class="hero-chip-emoji">🧂</span><span class="hero-chip-name">Spices</span></div>
+      <div class="hero-chip"><span class="hero-chip-emoji">🍵</span><span class="hero-chip-name">Tea</span></div>
+      <div class="hero-chip"><span class="hero-chip-emoji">🎁</span><span class="hero-chip-name">Gift Boxes</span></div>
     </div>
   </section>
 
-  <!-- BULLETIN BOARD — 3 independent tiles, each rotating its own content -->
-  <div class="bulletin-board-row">
-    <div class="bulletin-tile bt--about" onclick="openAbout()">
-      <div class="bulletin-tag">🏠 About Us</div>
-      <p id="bulletinAboutText" class="bulletin-text">Loading...</p>
-    </div>
-    <div class="bulletin-tile bt--photo">
-      <div class="bulletin-tag">🥜 From Our Shelves</div>
-      <img id="bulletinPhotoImg" class="bulletin-photo-img" src="" alt="" />
-      <p id="bulletinPhotoCaption" class="bulletin-photo-caption"></p>
-    </div>
-    <div class="bulletin-tile bt--fact">
-      <div class="bulletin-tag">📌 Did You Know?</div>
-      <p id="bulletinFactText" class="bulletin-text">Loading...</p>
-    </div>
+  <!-- TRUST BAR — pulled from real About Us stats, surfaced right up front -->
+  <div class="trust-bar">
+    <div class="trust-item"><div class="trust-number">450+</div><div class="trust-label">Members</div></div>
+    <div class="trust-item"><div class="trust-number">20+</div><div class="trust-label">Societies</div></div>
+    <div class="trust-item"><div class="trust-number">40%</div><div class="trust-label">Max Savings</div></div>
   </div>
 
   <!-- THEME CARDS — dynamic, generated from product Tags + Member Discount -->
@@ -169,28 +160,103 @@
 
   </section>
 
-  <!-- SECONDARY FEATURES — Tambola, Community Partners, Membership, Reels (smaller, below shopping) -->
-  <div class="secondary-features-section">
-    <div class="secondary-features-row">
-      <div class="secondary-feature-card sf--tambola ripple-card" onclick="openTambolaModal()">
-        <span class="sf-icon">🎲</span>
-        <p class="sf-label">Play Tambola</p>
+  <!-- TAGLINE STRIP -->
+  <div class="tagline-strip">
+    <div class="tagline-text">Trust <em>sahi.</em> Quality <em>sahi.</em><br>Price bhi <em>sahi.</em></div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="section-eyebrow">How It Works</div>
+    <div class="section-title">Three steps to savings</div>
+    <p class="section-desc">No middlemen. No markup. Just your community's buying power.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Join your community</h3>
+          <p>Pick a plan starting at ₹400/month. Your apartment is your buying group.</p>
+        </div>
       </div>
-      <div class="secondary-feature-card sf--partners ripple-card" onclick="openPartnersModal()">
-        <span class="sf-icon">🤝</span>
-        <p class="sf-label">Community Partners</p>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Shop at member prices</h3>
+          <p>Browse and order premium dry fruits, spices, and more at wholesale rates.</p>
+        </div>
       </div>
-      <div class="secondary-feature-card sf--member ripple-card" onclick="openMembershipModal()">
-        <span class="sf-icon">👑</span>
-        <p class="sf-label">Join &amp; Save</p>
-        <p class="sf-sublabel">Save up to 40% · From ₹400</p>
-      </div>
-      <div class="secondary-feature-card sf--reels ripple-card" onclick="openReels()">
-        <span class="sf-icon"><i class="fab fa-instagram"></i></span>
-        <p class="sf-label">Watch Us</p>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Doorstep delivery</h3>
+          <p>We deliver right to your community. Community orders, individual convenience.</p>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- MEMBERSHIP -->
+  <section style="padding-bottom:0">
+    <div class="membership-section">
+      <div class="section-eyebrow">Membership</div>
+      <div class="section-title" style="color:#fff">Join &amp; save on every order</div>
+      <p class="section-desc" style="color:rgba(255,255,255,0.6); margin:0 auto 32px;">Exclusive pricing, priority delivery, and early access to new products.</p>
+
+      <div class="membership-perks">
+        <div class="perk"><span class="perk-icon">💰</span> Up to 40% off retail on all products</div>
+        <div class="perk"><span class="perk-icon">🚚</span> Priority delivery to your apartment</div>
+        <div class="perk"><span class="perk-icon">🆕</span> Early access to seasonal arrivals</div>
+        <div class="perk"><span class="perk-icon">🤝</span> Support community-powered commerce</div>
+      </div>
+
+      <div class="plans-row">
+        <div class="plan-card">
+          <div class="plan-name">Monthly</div>
+          <div class="plan-price">₹400</div>
+          <div class="plan-period">/month</div>
+          <div class="plan-note">Cancel anytime</div>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-badge">Best Value</div>
+          <div class="plan-name">Annual</div>
+          <div class="plan-price">₹3,999</div>
+          <div class="plan-period">/year</div>
+          <div class="plan-note">2 months free</div>
+        </div>
+      </div>
+      <button class="btn-gold" onclick="openMembershipModal()">Join CommunitE</button>
+    </div>
+  </section>
+
+  <!-- COMMUNITY — Tambola, Community Partners, Reels (membership now has its own section above) -->
+  <section class="community-section">
+    <div class="section-eyebrow">More Than Shopping</div>
+    <div class="section-title">Your community hub</div>
+    <p class="section-desc">Shopping is just the start.</p>
+    <div class="community-cards">
+      <div class="community-card" onclick="openTambolaModal()">
+        <div class="community-icon">🎲</div>
+        <div>
+          <h3>Tambola Nights</h3>
+          <p>Free in-app Tambola for your apartment gatherings. Generate tickets, call numbers, play together.</p>
+        </div>
+      </div>
+      <div class="community-card" onclick="openPartnersModal()">
+        <div class="community-icon">🤝</div>
+        <div>
+          <h3>Community Partners</h3>
+          <p>Discover local vendors from your neighborhood. Small businesses, supported by your community.</p>
+        </div>
+      </div>
+      <div class="community-card" onclick="openReels()">
+        <div class="community-icon">📹</div>
+        <div>
+          <h3>Behind the Scenes</h3>
+          <p>Follow @dryfruits_communitE for reels on sourcing, packing, and community stories.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- DISCOUNT TIER TILES -->
   <div class="discount-tiles-section">
@@ -218,12 +284,33 @@
   <!-- SUBCATEGORY ROWS — endless scroll, shuffled order -->
   <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
 
+  <!-- MASCOT CALLOUT -->
+  <div class="mascot-callout">
+    <img class="mascot-img" src="assets/NuttE_edited.png" alt="NuttE mascot" />
+    <p class="mascot-text">
+      <strong>Meet NuttE</strong> — our unofficial mascot.<br>
+      You'll spot him on our reels, WhatsApp groups, and community events. He's the fun side. The logo handles the serious stuff.
+    </p>
+  </div>
+
   <!-- FOOTER -->
   <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-brand">CommunitE</div>
-      <p class="footer-sub">Collective commerce — bulk prices, community powered, doorstep delivered.</p>
+    <div class="footer-logo">Communit<span>E</span></div>
+    <div class="footer-tagline">Collective Commerce</div>
+    <div class="footer-links">
+      <span onclick="scrollToSection('shopSection')" style="cursor:pointer">Shop</span>
+      <span onclick="openMembershipModal()" style="cursor:pointer">Membership</span>
+      <span onclick="openAbout()" style="cursor:pointer">About Us</span>
+      <span onclick="openPartnersModal()" style="cursor:pointer">Community Partners</span>
+      <a href="https://instagram.com/dryfruits_communitE" target="_blank" rel="noopener">Instagram</a>
     </div>
+    <div class="footer-divider"></div>
+    <div class="footer-contact">
+      Sameer Gupta, Founder &amp; Managing Director<br>
+      <a href="tel:+918951048013">+91 89510 48013</a>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-copy">&copy; 2026 CommunitE. All rights reserved.</div>
   </footer>
 
   <!-- CART SIDEBAR -->
