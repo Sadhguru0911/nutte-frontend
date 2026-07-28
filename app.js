@@ -1832,49 +1832,34 @@ let callerVoiceEnabled = true;
 /* Traditional Housie calls, given an Indian flavour — cricket, Bollywood,
    Hindi number wordplay. Family-friendly throughout. */
 const CALLER_LINES = {
-  1: "Akela — Ekla Chalo Re", 2: "Do Ka Jodidar", 3: "Teen Deviyaan",
-  4: "Chaar Yaar", 5: "Paanch Pandav", 6: "Chakka!", 7: "Lucky Saat",
-  8: "Aath Din Saat Raat", 9: "Nau Do Gyarah", 10: "Dus Ka Dum",
-  11: "Chaddi Pehan Ke Phool Khila Hai", 12: "Baarah Baj Gaye",
-  13: "Terah — Yahan Manhoos Nahi!", 14: "Chaudah Ratna",
-  15: "Pandrah Din Mein Paisa Double", 16: "Solah Singaar",
-  17: "Satrah — Satrangi Ank", 18: "Atharah — Mahabharat Ki Kahani",
-  19: "Unnees Bees Ka Farak", 20: "Bees Saal Baad",
-  21: "Ekkis Toppon Ki Salaami", 22: "Do Batakh — Two Little Ducks",
-  23: "Teiis — Lucky Teiis", 24: "Chaubis Ghante",
-  25: "Pachchis — Sava Century Ka Raasta", 26: "Chhabbis January",
-  27: "Sattaees — Ekdum Fit", 28: "Athaees — Bas Thoda Aur",
-  29: "Unatees — Century Ke Kareeb", 30: "Tees Maar Khan",
-  31: "Ikatees — Ekdum Jawaan Ank", 32: "Battis Daant",
-  33: "Crore Devi Devta", 34: "Chauntis — Chalta Rahe Safar",
-  35: "Painttees — Aadha Sach", 36: "Chhattis Ka Aankda",
-  37: "Saintees — Lucky Number", 38: "Adtees — Bas Thoda Sabar",
-  39: "Untaalis — Chaalis Ke Darwaze Par", 40: "Alibaba Aur Chaalis Chor",
-  41: "Iktaalis — Ekdum Set", 42: "Bayaalis — Zindagi Ka Jawaab",
-  43: "Taintaalis — Aage Badho", 44: "Chauvaalis — Set Ho Gaya",
-  45: "Paintaalis — Aadha Safar", 46: "Chhiyaalis — Set Match",
-  47: "Saintaalis — Lucky Number", 48: "Adtaalis — Bas Aadha Ghanta",
-  49: "Unchaas — Pachaas Ke Darwaze Par", 50: "Half Century!",
-  51: "Ekyaawan — Shubh Ank", 52: "Taash Ka Poora Packet",
-  53: "Tirpan — Lucky Tirpan", 54: "Chauvan — Set Ho Gaya Match",
-  55: "Pachpan — Do Panje", 56: "Chhappan Bhog",
-  57: "Sattaawan — Sadaa Khush Raho", 58: "Athhaawan — Bas Thoda Sabar",
-  59: "Unsath — Saath Ke Darwaze Par", 60: "Saath Ka Pahaada",
-  61: "Iksath — Ekdum Set", 62: "Baasath — Aage Badho",
-  63: "Tirsath — Lucky Tirsath", 64: "Chausath Kalayen",
-  65: "Painsath — Aadha Century Aur", 66: "Chhiyasath — Ekdum Set",
-  67: "Sadsath — Lucky Number", 68: "Adhsath — Bas Thoda Sabar",
-  69: "Unhattar — Sattar Ke Darwaze Par", 70: "Sattar — Buzurgo Ka Ank",
-  71: "Ikhattar — Ekdum Jawaan", 72: "Bahattar — Aage Badho",
-  73: "Tihattar — Lucky Tihattar", 74: "Chauhattar — Set Ho Gaya",
-  75: "Pachattar — Teen Chaucha", 76: "Chhihattar — Trombone Bina Baja",
-  77: "Sadasattar — Double Lucky Saat Saat", 78: "Atthattar — Bas Thoda Sabar",
-  79: "Unaasi — Assi Ke Darwaze Par", 80: "Assi — Buddhe Baba",
-  81: "Ikaasi — Ekdum Jawaan Ank", 82: "Bayaasi — Aage Badho",
-  83: "Tirasi — Kapil Dev Ka World Cup!", 84: "Chaurasi Ka Chakkar",
-  85: "Pachaasi — Bas Thoda Sabar", 86: "Chhiyaasi — Set Ho Gaya",
-  87: "Sattaasi — Lucky Number", 88: "Do Mota Ladies",
-  89: "Nawaasi — Nabbe Ke Darwaze Par", 90: "Nabbe Paar, Bas Ab Aaram!"
+  1: "Kelly's Eye", 2: "One Little Duck", 3: "Cup of Tea", 4: "Knock at the Door",
+  5: "Man Alive", 6: "Half a Dozen", 7: "Lucky Seven", 8: "Garden Gate",
+  9: "Doctor's Orders", 10: "Cock and Hen", 11: "Legs Eleven", 12: "One Dozen",
+  13: "Unlucky for Some", 14: "Valentine's Day", 15: "Young and Keen",
+  16: "Sweet Sixteen", 17: "Dancing Queen", 18: "Coming of Age",
+  19: "Goodbye Teens", 20: "One Score", 21: "Royal Salute",
+  22: "Two Little Ducks", 23: "Thee and Me", 24: "Two Dozen", 25: "Duck and Dive",
+  26: "Half a Crown", 27: "Gateway to Heaven", 28: "In a State",
+  29: "Rise and Shine", 30: "Blind Thirty", 31: "Get Up and Run",
+  32: "Buckle My Shoe", 33: "All the Threes", 34: "Ask for More",
+  35: "Jump and Jive", 36: "Three Dozen", 37: "More Than Eleven",
+  38: "Christmas Cake", 39: "Steps", 40: "Life Begins", 41: "Time for Fun",
+  42: "Winnie the Pooh", 43: "Down on Your Knees", 44: "Droopy Drawers",
+  45: "Halfway There", 46: "Up to Tricks", 47: "Four and Seven",
+  48: "Four Dozen", 49: "PC — Rise and Shine", 50: "Half a Century",
+  51: "Tweak of the Thumb", 52: "Weeks in a Year", 53: "Here to There",
+  54: "Clean the Floor", 55: "Snakes Alive", 56: "Was She Worth It",
+  57: "Heinz Varieties", 58: "Make Them Wait", 59: "Brighton Line",
+  60: "Five Dozen", 61: "Baker's Bun", 62: "Turn the Screw", 63: "Tickle Me",
+  64: "Red Raw", 65: "Old Age Pension", 66: "Clickety Click",
+  67: "Made in Heaven", 68: "Pick a Tick", 69: "Favourite of Mine",
+  70: "Three Score and Ten", 71: "Bang on the Drum", 72: "Six Dozen",
+  73: "Queen Bee", 74: "Candy Store", 75: "Strive and Strive",
+  76: "Trombones", 77: "Sunset Strip", 78: "Heaven's Gate",
+  79: "One More Time", 80: "Eight and Blank", 81: "Stop and Run",
+  82: "Straight On Through", 83: "Time for Tea", 84: "Seven Dozen",
+  85: "Staying Alive", 86: "Between the Sticks", 87: "Torquay in Devon",
+  88: "Two Fat Ladies", 89: "Nearly There", 90: "Top of the Shop"
 };
 
 function toggleCallerVoice() {
@@ -2233,58 +2218,65 @@ const NUT_FACTS = [
   "Cashews are never sold in-shell — the shell contains an irritant oil that must be carefully removed first."
 ];
 
-let bulletinSlides = [];
-let bulletinIndex = 0;
-let bulletinTimer = null;
+let aboutTimer = null, factTimer = null, photoTimer = null;
+let aboutIdx = 0, factIdx = 0, photoIdx = 0;
+
+const ABOUT_FACTS = [
+  "CommunitE brings your apartment community wholesale prices on dry fruits, nuts, spices and more — bulk buying power, doorstep delivered.",
+  "Our mission: Trust sahi. Quality sahi. Price bhi sahi.",
+  "We're community-powered — buying together means better prices for everyone in your building.",
+  "From our shelves to your doorstep — no middlemen, no markup games."
+];
 
 function renderBulletinBoard() {
-  bulletinSlides = [
-    { type: 'text', tag: '🏠 About Us', text: "CommunitE brings your apartment community wholesale prices on dry fruits, nuts, spices and more — bulk buying power, doorstep delivered." },
-    { type: 'text', tag: '🏠 About Us', text: "Trust sahi. Quality sahi. Price bhi sahi. — that's the whole idea behind CommunitE." },
-    { type: 'text', tag: '🎬 Watch Us', text: "Catch our latest reels — behind the scenes, product picks, and community moments. Tap to watch." },
-  ];
-  NUT_FACTS.forEach(fact => bulletinSlides.push({ type: 'text', tag: '📌 Did you know?', text: fact }));
-
-  // Sprinkle in a few random product photos, if we have product data yet
-  if (allProductsCache && allProductsCache.length > 0) {
-    const withImages = allProductsCache.filter(p => p.image);
-    const shuffled = shuffleArray([...withImages]).slice(0, 5);
-    shuffled.forEach(p => {
-      bulletinSlides.push({ type: 'image', tag: '🥜 From our shelves', text: p.product_name, image: p.image });
-    });
-  }
-
-  shuffleArray(bulletinSlides);
-  bulletinIndex = 0;
-  showBulletinSlide();
-
-  if (bulletinTimer) clearInterval(bulletinTimer);
-  bulletinTimer = setInterval(() => {
-    bulletinIndex = (bulletinIndex + 1) % bulletinSlides.length;
-    showBulletinSlide();
+  const aboutFacts = shuffleArray([...ABOUT_FACTS]);
+  aboutIdx = 0;
+  $('bulletinAboutText').textContent = aboutFacts[0];
+  if (aboutTimer) clearInterval(aboutTimer);
+  aboutTimer = setInterval(() => {
+    aboutIdx = (aboutIdx + 1) % aboutFacts.length;
+    fadeSwapText('bulletinAboutText', aboutFacts[aboutIdx]);
   }, 5000);
+
+  const facts = shuffleArray([...NUT_FACTS]);
+  factIdx = 0;
+  $('bulletinFactText').textContent = facts[0];
+  if (factTimer) clearInterval(factTimer);
+  factTimer = setInterval(() => {
+    factIdx = (factIdx + 1) % facts.length;
+    fadeSwapText('bulletinFactText', facts[factIdx]);
+  }, 5000);
+
+  if (allProductsCache && allProductsCache.length > 0) {
+    const withImages = shuffleArray([...allProductsCache.filter(p => p.image)]);
+    if (withImages.length > 0) {
+      photoIdx = 0;
+      showBulletinPhoto(withImages);
+      if (photoTimer) clearInterval(photoTimer);
+      photoTimer = setInterval(() => {
+        photoIdx = (photoIdx + 1) % withImages.length;
+        showBulletinPhoto(withImages);
+      }, 4000);
+    }
+  }
 }
 
-function showBulletinSlide() {
-  const slide = bulletinSlides[bulletinIndex];
-  if (!slide) return;
-  const board = $('bulletinBoard');
-  const tagEl = board.querySelector('.bulletin-tag');
-  const textEl = $('bulletinText');
-  const imgEl = $('bulletinImage');
+function showBulletinPhoto(list) {
+  const p = list[photoIdx];
+  if (!p) return;
+  const imgEl = $('bulletinPhotoImg');
+  imgEl.style.opacity = '0';
+  setTimeout(() => {
+    imgEl.src = p.image;
+    $('bulletinPhotoCaption').textContent = p.product_name;
+    imgEl.style.opacity = '1';
+  }, 200);
+}
 
-  board.classList.remove('bulletin-fade');
-  void board.offsetWidth;
-  board.classList.add('bulletin-fade');
-
-  tagEl.textContent = slide.tag;
-  textEl.textContent = slide.text;
-  if (slide.type === 'image' && slide.image) {
-    imgEl.src = slide.image;
-    imgEl.style.display = 'block';
-  } else {
-    imgEl.style.display = 'none';
-  }
+function fadeSwapText(elId, newText) {
+  const el = $(elId);
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = newText; el.style.opacity = '1'; }, 200);
 }
 
 /* ============ THEME CARDS (dynamic from Tags + Member Discount) ============ */
@@ -2316,17 +2308,27 @@ function renderThemeCards() {
     const known = TAG_DISPLAY_MAP[key];
     const title = known ? known.title : `✨ ${label}`;
     const color = known ? known.color : TAG_FALLBACK_COLORS[colorIdx++ % TAG_FALLBACK_COLORS.length];
+    const sample = allProductsCache.find(p => (p.tags || []).some(t => t.toLowerCase() === key) && p.image);
+    const imgHTML = sample
+      ? `<img class="theme-card-img" src="${escapeHtml(sample.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`
+      : '';
     cardsHTML += `
       <div class="theme-card" style="background:${color}" onclick="filterByTag('${escapeHtml(key)}', '${escapeHtml(title.replace(/'/g, ""))}')">
         <p class="theme-card-title">${escapeHtml(title)}</p>
+        ${imgHTML}
       </div>`;
   });
 
   const hasDiscountDeals = allProductsCache.some(p => (p.member_discount || 0) >= MEMBER_DISCOUNT_THEME_THRESHOLD);
   if (hasDiscountDeals) {
+    const dealSample = allProductsCache.find(p => (p.member_discount || 0) >= MEMBER_DISCOUNT_THEME_THRESHOLD && p.image);
+    const dealImgHTML = dealSample
+      ? `<img class="theme-card-img" src="${escapeHtml(dealSample.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`
+      : '';
     cardsHTML += `
       <div class="theme-card" style="background:#1a5c3a" onclick="filterByMemberDiscountTheme()">
         <p class="theme-card-title">⭐ Member Deals ${MEMBER_DISCOUNT_THEME_THRESHOLD}%+ Off</p>
+        ${dealImgHTML}
       </div>`;
   }
 
@@ -2369,29 +2371,17 @@ function renderSubcategoryRows() {
 
   const rows = shuffleArray(Object.values(groups));
 
-  section.innerHTML = rows.map(row => {
-    // De-dupe by product name for the row preview (variants collapse to one card)
-    const seen = new Set();
-    const unique = row.products.filter(p => {
-      if (seen.has(p.product_name)) return false;
-      seen.add(p.product_name);
-      return true;
-    });
-
-    const cardsHTML = unique.map(p => {
-      const img = p.image || DEFAULT_PRODUCT_IMAGE;
-      return `
-        <div class="subrow-card" onclick="openProductFromSearch('${escapeHtml(row.category)}','${escapeHtml(row.subcategory)}')">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(p.product_name)}" loading="lazy" onerror="this.onerror=null;this.src='assets/placeholder.png';" />
-          <p class="subrow-card-name">${escapeHtml(p.product_name)}</p>
-          <p class="subrow-card-price">₹${p.price}</p>
-        </div>`;
-    }).join('');
-
+  section.innerHTML = rows.map((row, rowIdx) => {
+    // Pass the full variant list (not de-duped) so the card's variant
+    // dropdown, quantity stepper, and Add button all work exactly like
+    // the main shop grid.
+    const cardsHTML = buildProductCardsHTML(row.products, `subrow${rowIdx}`);
     return `
       <div class="subcategory-row">
         <h3 class="subrow-title">${escapeHtml(row.subcategory)}</h3>
         <div class="subrow-scroll">${cardsHTML}</div>
       </div>`;
   }).join('');
+
+  section.querySelectorAll('.product-card').forEach(el => { observeCard(el); initRipple(el); });
 }
