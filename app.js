@@ -2222,14 +2222,22 @@ let aboutTimer = null, factTimer = null, photoTimer = null;
 let aboutIdx = 0, factIdx = 0, photoIdx = 0;
 
 const ABOUT_FACTS = [
-  "CommunitE brings your apartment community wholesale prices on dry fruits, nuts, spices and more — bulk buying power, doorstep delivered.",
-  "Our mission: Trust sahi. Quality sahi. Price bhi sahi.",
-  "We're community-powered — buying together means better prices for everyone in your building.",
-  "From our shelves to your doorstep — no middlemen, no markup games."
+  '"Come Unite" — Collective commerce that brings your community wholesale prices, without the wholesale hassle.',
+  "450+ Members strong.",
+  "20+ Societies already shopping together.",
+  "Members save up to 40% off retail prices.",
+  "Our Mission: To harness the collective buying power of communities — so every member gets wholesale-quality prices on premium products, delivered to their door.",
+  "Our Vision: When a community shops together, everyone wins. We pool demand, cut out middlemen, and pass every rupee of savings directly to our members.",
+  "Trust sahi — Transparent sourcing, honest pricing, always.",
+  "Quality sahi — Every product meets the highest standards.",
+  "Price bhi sahi — Collective buying means real savings.",
+  "Community first — We exist because of our members, for our members.",
+  "What we offer: Dry Fruits, Dates, Whole Spices, Millets/Rice/Atta, Snacks, Tea & Coffee, Gift Boxes, Exotic Nuts, and Seeds.",
+  "Get in touch: Sameer Gupta, Founder & Managing Director — +91 89510 48013 or @dryfruits_communitE on Instagram."
 ];
 
 function renderBulletinBoard() {
-  const aboutFacts = shuffleArray([...ABOUT_FACTS]);
+  const aboutFacts = [...ABOUT_FACTS]; // real top-to-bottom order, cycles on repeat
   aboutIdx = 0;
   $('bulletinAboutText').textContent = aboutFacts[0];
   if (aboutTimer) clearInterval(aboutTimer);
