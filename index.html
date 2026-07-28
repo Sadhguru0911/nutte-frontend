@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=35" />
-  <script src="app.js?v=35" defer></script>
+  <link rel="stylesheet" href="style.css?v=38" />
+  <script src="app.js?v=38" defer></script>
 </head>
 <body>
 
@@ -74,57 +74,23 @@
         <canvas class="ripple-canvas"></canvas>
       </div>
 
-      <!-- BELOW: About, Join & Save, Watch us — in a row -->
-      <div class="hero-col-small">
-
-        <div class="hero-card hero-card--about ripple-card" onclick="openTambolaModal()">
-          <p class="hero-label">Play Tambola</p>
-          <div class="hero-card-bottom">
-            <span class="hero-icon-sm" style="font-size:1.4rem">🎲</span>
-            <p class="hero-stat-label">Tickets &amp; Live Caller</p>
-          </div>
-          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
-          <canvas class="ripple-canvas"></canvas>
-        </div>
-
-        <div class="hero-card hero-card--partners ripple-card" onclick="openPartnersModal()">
-          <p class="hero-label">Community Partners</p>
-          <div class="hero-card-bottom">
-            <span class="hero-icon-sm" style="font-size:1.4rem">🤝</span>
-            <p class="hero-stat-label">Meet Local Vendors</p>
-          </div>
-          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
-          <canvas class="ripple-canvas"></canvas>
-        </div>
-
-        <!-- Membership card — star lives OUTSIDE the card to avoid clipping -->
-        <div class="hero-member-wrap">
-          <div class="hero-card hero-card--member ripple-card" onclick="openMembershipModal()">
-            <p class="hero-label">Join &amp; Save</p>
-            <div class="hero-member-badge">⚡ Members save up to 40%</div>
-            <div class="hero-card-bottom">
-              <p class="hero-member-hint">From ₹400/mo</p>
-            </div>
-            <canvas class="ripple-canvas"></canvas>
-          </div>
-          <!-- Star outside card so overflow:hidden doesn't clip it -->
-          <span class="hero-member-star" id="memberStar"></span>
-        </div>
-
-        <div class="hero-card hero-card--fresh hero-card--reels ripple-card" onclick="openReels()">
-          <p class="hero-label">Watch us</p>
-          <div class="hero-card-bottom">
-            <i class="fab fa-instagram hero-icon-sm"></i>
-            <p class="hero-stat-label">Our Reels</p>
-          </div>
-          <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
-          <canvas class="ripple-canvas"></canvas>
-        </div>
-
-      </div>
-
     </div>
   </section>
+
+  <!-- BULLETIN BOARD — rotates between About snippets, Reels highlights, nut facts, random product photos -->
+  <div id="bulletinBoard" class="bulletin-board" onclick="openAbout()">
+    <div class="bulletin-tag">📌 Did you know?</div>
+    <div class="bulletin-content">
+      <img id="bulletinImage" class="bulletin-image" src="" alt="" style="display:none" />
+      <p id="bulletinText" class="bulletin-text">Loading...</p>
+    </div>
+  </div>
+
+  <!-- THEME CARDS — dynamic, generated from product Tags + Member Discount -->
+  <div class="theme-cards-section">
+    <h2 class="shop-section-label" style="padding:0 16px">Explore</h2>
+    <div id="themeCardsRow" class="theme-cards-row"></div>
+  </div>
 
   <!-- FEATURED PARTNER — only shows when a partner is marked Featured -->
   <div id="featuredPartnerBanner" class="featured-partner-banner" style="display:none" onclick="openPartnersModal(); showPartnerDetailByName(featuredPartnerNameForClick);">
@@ -186,10 +152,62 @@
     <!-- Products — appear below subcategories -->
     <div id="productSection" class="shop-products" style="display:none">
       <h2 class="shop-section-label" id="productTitle"></h2>
+      <div id="productFilterLabel" class="product-filter-label" style="display:none">
+        <span>🔍 Filtered view</span>
+        <button onclick="goBackToCategories()">Clear ✕</button>
+      </div>
       <div id="productContainer" class="product-grid"></div>
     </div>
 
   </section>
+
+  <!-- SECONDARY FEATURES — Tambola, Community Partners, Membership, Reels (smaller, below shopping) -->
+  <div class="secondary-features-section">
+    <div class="secondary-features-row">
+      <div class="secondary-feature-card sf--tambola ripple-card" onclick="openTambolaModal()">
+        <span class="sf-icon">🎲</span>
+        <p class="sf-label">Play Tambola</p>
+      </div>
+      <div class="secondary-feature-card sf--partners ripple-card" onclick="openPartnersModal()">
+        <span class="sf-icon">🤝</span>
+        <p class="sf-label">Community Partners</p>
+      </div>
+      <div class="secondary-feature-card sf--member ripple-card" onclick="openMembershipModal()">
+        <span class="sf-icon">👑</span>
+        <p class="sf-label">Join &amp; Save</p>
+      </div>
+      <div class="secondary-feature-card sf--reels ripple-card" onclick="openReels()">
+        <span class="sf-icon"><i class="fab fa-instagram"></i></span>
+        <p class="sf-label">Watch Us</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCOUNT TIER TILES -->
+  <div class="discount-tiles-section">
+    <h2 class="shop-section-label" style="padding:0 16px">Member Deals by Discount</h2>
+    <div class="discount-tiles-row">
+      <div class="discount-tile dt--high" onclick="filterByDiscountTier(40, 9999, 'More than 40% Off')">
+        <p class="dt-percent">40%+</p>
+        <p class="dt-label">Best Deals</p>
+      </div>
+      <div class="discount-tile dt--mid-high" onclick="filterByDiscountTier(20, 40, '20–40% Off')">
+        <p class="dt-percent">20–40%</p>
+        <p class="dt-label">Great Value</p>
+      </div>
+      <div class="discount-tile dt--mid" onclick="filterByDiscountTier(5, 20, '5–20% Off')">
+        <p class="dt-percent">5–20%</p>
+        <p class="dt-label">Good Savings</p>
+      </div>
+      <div class="discount-tile dt--low" onclick="filterByDiscountTier(0.01, 5, 'Up to 5% Off')">
+        <p class="dt-percent">Up to 5%</p>
+        <p class="dt-label">Small Savings</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBCATEGORY ROWS — endless scroll, shuffled order -->
+  <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
 
   <!-- FOOTER -->
   <footer class="site-footer">
@@ -617,7 +635,9 @@
         <!-- NUMBER CALLER PANEL -->
         <div id="tambolaCallerPanel" class="tambola-panel" style="display:none">
           <div class="caller-number-display" id="callerCurrentNumber">—</div>
+          <p class="caller-line-text" id="callerLineText"></p>
           <p class="caller-status" id="callerStatus">0 of 90 numbers called</p>
+          <button id="callerVoiceToggle" class="caller-voice-toggle" onclick="toggleCallerVoice()">🔊 Voice On</button>
           <div class="caller-actions">
             <button id="callNextBtn" class="btn-primary" onclick="callNextNumber()">🎲 Call Next!</button>
             <button class="btn-secondary" onclick="undoLastCall()">↩️ Undo</button>

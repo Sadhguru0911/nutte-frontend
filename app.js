@@ -164,7 +164,7 @@ async function loadCategories() {
     container.innerHTML = cats.map((c, i) => `
       <div class="category-grid-item" style="animation-delay:${i * 50}ms"
            onclick="selectCategory('${escapeHtml(c.name)}', this)">
-        <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" />
+        <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.onerror=null;this.src='assets/placeholder.png';" />
         <div class="category-grid-label">${escapeHtml(c.name)}</div>
       </div>
     `).join('');
@@ -210,7 +210,7 @@ async function selectCategory(category, el) {
       return `
         <div class="category-grid-item" style="animation-delay:${i * 50}ms"
              onclick="selectSubcategory('${escapeHtml(category)}','${escapeHtml(name)}', this)">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.onerror=null;this.src='assets/placeholder.png';" />
           <div class="category-grid-label">${escapeHtml(name)}</div>
         </div>
       `;
@@ -219,6 +219,64 @@ async function selectCategory(category, el) {
     console.error("selectCategory", e);
     $('subcategoryContainer').innerHTML = `<div style="padding:10px;color:var(--muted)">No subcategories found</div>`;
   }
+}
+
+/* Shared card builder — groups a flat product list by name into variants and
+   renders the same interactive card markup used everywhere (subcategory
+   browsing, theme cards, discount tiles, subcategory rows). */
+function buildProductCardsHTML(products, idPrefix) {
+  const grouped = {};
+  products.forEach(p => {
+    const key = p.product_name || p['Product Name'];
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(p);
+  });
+
+  return Object.keys(grouped).map((name, i) => {
+    const variants = grouped[name];
+    const first = variants[0];
+    const id = `${idPrefix}_${sanitizeId(name)}_${i}`;
+    const img = first.image || first.Image || DEFAULT_PRODUCT_IMAGE;
+    const firstPrice = first.price || first['Price (INR)'] || 0;
+    const firstMemberPrice = first.member_price || first['Member Price (INR)'] || null;
+    const priceHTML = buildPriceHTML(firstPrice, firstMemberPrice, `price_${id}`);
+
+    return `
+      <div class="product-card ripple-card" id="${id}" style="animation-delay:${i * 70}ms">
+        <div class="product-img-wrap">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.onerror=null;this.src='assets/placeholder.png';" />
+          <canvas class="ripple-canvas"></canvas>
+        </div>
+        <div class="product-card-body">
+          <div class="product-title">${escapeHtml(name)}</div>
+          <div class="product-desc">${escapeHtml(first.description || first['Product Description'] || '')}</div>
+          <div class="controls-row">
+            <select class="variant-select" id="variant_${id}" onchange="updateProductDisplay('${id}')">
+              ${variants.map(v => {
+                const variant = v.variant || v['Variant/Weight'] || 'Default';
+                const price = v.price || v['Price (INR)'] || v.Price || 0;
+                const memberPrice = v.member_price || v['Member Price (INR)'] || '';
+                const vimg = v.image || v.Image || '';
+                const desc = v.description || v['Product Description'] || '';
+                return `<option value="${escapeHtml(variant)}" data-price="${price}" data-member-price="${memberPrice}" data-img="${escapeHtml(vimg)}" data-desc="${escapeHtml(desc)}">${escapeHtml(variant)} — ₹${price}</option>`;
+              }).join('')}
+            </select>
+            <div class="qty-control">
+              <button onclick="changeQuantity('${id}', -1)">−</button>
+              <input id="qty_${id}" type="number" value="1" min="1" />
+              <button onclick="changeQuantity('${id}', 1)">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card-footer">
+          <div id="price_${id}">${priceHTML}</div>
+          <button class="add-btn" onclick="addToCartFromCard('${id}','${escapeHtml(name)}')">
+            <i class="fas fa-cart-plus"></i> Add
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 /* products */
@@ -231,6 +289,7 @@ async function selectSubcategory(category, subcat, el) {
 
   $('productSection').style.display = 'block';
   $('productTitle').innerText = subcat;
+  $('productFilterLabel').style.display = 'none';
   $('productContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Loading products...</div>`;
 
   setTimeout(() => $('productSection').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -241,67 +300,34 @@ async function selectSubcategory(category, subcat, el) {
       $('productContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">No products found.</div>`;
       return;
     }
-
-    const grouped = {};
-    products.forEach(p => {
-      const key = p.product_name || p['Product Name'];
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(p);
-    });
-
     const container = $('productContainer');
-    container.innerHTML = Object.keys(grouped).map((name, i) => {
-      const variants = grouped[name];
-      const first = variants[0];
-      const id = `prod_${sanitizeId(name)}_${i}`;
-      const img = first.image || first.Image || DEFAULT_PRODUCT_IMAGE;
-      const firstPrice = first.price || first['Price (INR)'] || 0;
-      const firstMemberPrice = first.member_price || first['Member Price (INR)'] || null;
-
-      const priceHTML = buildPriceHTML(firstPrice, firstMemberPrice, `price_${id}`);
-
-      return `
-        <div class="product-card ripple-card" id="${id}" style="animation-delay:${i * 70}ms">
-          <div class="product-img-wrap">
-            <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" />
-            <canvas class="ripple-canvas"></canvas>
-          </div>
-          <div class="product-card-body">
-            <div class="product-title">${escapeHtml(name)}</div>
-            <div class="product-desc">${escapeHtml(first.description || first['Product Description'] || '')}</div>
-            <div class="controls-row">
-              <select class="variant-select" id="variant_${id}" onchange="updateProductDisplay('${id}')">
-                ${variants.map(v => {
-                  const variant = v.variant || v['Variant/Weight'] || 'Default';
-                  const price = v.price || v['Price (INR)'] || v.Price || 0;
-                  const memberPrice = v.member_price || v['Member Price (INR)'] || '';
-                  const vimg = v.image || v.Image || '';
-                  const desc = v.description || v['Product Description'] || '';
-                  return `<option value="${escapeHtml(variant)}" data-price="${price}" data-member-price="${memberPrice}" data-img="${escapeHtml(vimg)}" data-desc="${escapeHtml(desc)}">${escapeHtml(variant)} — ₹${price}</option>`;
-                }).join('')}
-              </select>
-              <div class="qty-control">
-                <button onclick="changeQuantity('${id}', -1)">−</button>
-                <input id="qty_${id}" type="number" value="1" min="1" />
-                <button onclick="changeQuantity('${id}', 1)">+</button>
-              </div>
-            </div>
-          </div>
-          <div class="product-card-footer">
-            <div id="price_${id}">${priceHTML}</div>
-            <button class="add-btn" onclick="addToCartFromCard('${id}','${escapeHtml(name)}')">
-              <i class="fas fa-cart-plus"></i> Add
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
+    container.innerHTML = buildProductCardsHTML(products, 'prod');
     container.querySelectorAll('.product-card').forEach(el => { observeCard(el); initRipple(el); });
     scrollToSection('productSection');
   } catch (e) {
     console.error("selectSubcategory", e);
     $('productContainer').innerHTML = `<div style="padding:20px;color:var(--muted)">Error loading products</div>`;
   }
+}
+
+/* Renders any filtered product list (theme cards, discount tiles) into the
+   same product grid used for normal subcategory browsing. */
+function renderFilteredProducts(title, productList) {
+  $('categorySection').scrollIntoView; // no-op guard, kept for clarity
+  $('subcategorySection').style.display = 'none';
+  $('productSection').style.display = 'block';
+  $('productTitle').innerText = title;
+  $('productFilterLabel').style.display = 'flex';
+  $('backToCategoriesBtn').style.display = 'flex';
+
+  const container = $('productContainer');
+  if (!productList.length) {
+    container.innerHTML = `<div style="padding:20px;color:var(--muted)">No products found here yet.</div>`;
+  } else {
+    container.innerHTML = buildProductCardsHTML(productList, 'filt');
+    container.querySelectorAll('.product-card').forEach(el => { observeCard(el); initRipple(el); });
+  }
+  $('productSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* update display for variant selection */
@@ -979,7 +1005,7 @@ function buildConveyor(cats) {
   // Duplicate items for seamless infinite loop
   const html = [...cats, ...cats].map(c => `
     <div class="conveyor-item" onclick="openCategoryFromConveyor('${escapeHtml(c.name)}')">
-      <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" />
+      <img src="${escapeHtml(c.image)}" alt="${escapeHtml(c.name)}" loading="lazy" onerror="this.onerror=null;this.src='assets/placeholder.png';" />
       <div class="conveyor-item-label">${escapeHtml(c.name)}</div>
     </div>
   `).join('');
@@ -1024,9 +1050,17 @@ async function buildSearchIndex() {
       product_name: p.product_name,
       category: p.category,
       subcategory: p.sub_category,
+      variant: p.variant,
       price: p.price,
-      member_price: p.member_price || null
+      member_price: p.member_price || null,
+      image: p.image || '',
+      description: p.description || '',
+      tags: p.tags || [],
+      member_discount: (typeof p.member_discount === 'number') ? p.member_discount : null
     }));
+    renderThemeCards();
+    renderSubcategoryRows();
+    renderBulletinBoard();
   } catch (e) {
     console.warn('Search index build failed (non-critical):', e);
     allProductsCache = [];
@@ -1099,6 +1133,7 @@ function goBackToCategories() {
   // Hide subcategories and products
   $('subcategorySection').style.display = 'none';
   $('productSection').style.display = 'none';
+  $('productFilterLabel').style.display = 'none';
   $('backToCategoriesBtn').style.display = 'none';
 
   // Scroll back to category grid
@@ -1792,6 +1827,71 @@ function generateTambolaTickets() {
 let callerBoardBuilt = false;
 let callerRemaining = [];
 let callerCalled = [];
+let callerVoiceEnabled = true;
+
+/* Traditional Housie calls, given an Indian flavour — cricket, Bollywood,
+   Hindi number wordplay. Family-friendly throughout. */
+const CALLER_LINES = {
+  1: "Akela — Ekla Chalo Re", 2: "Do Ka Jodidar", 3: "Teen Deviyaan",
+  4: "Chaar Yaar", 5: "Paanch Pandav", 6: "Chakka!", 7: "Lucky Saat",
+  8: "Aath Din Saat Raat", 9: "Nau Do Gyarah", 10: "Dus Ka Dum",
+  11: "Chaddi Pehan Ke Phool Khila Hai", 12: "Baarah Baj Gaye",
+  13: "Terah — Yahan Manhoos Nahi!", 14: "Chaudah Ratna",
+  15: "Pandrah Din Mein Paisa Double", 16: "Solah Singaar",
+  17: "Satrah — Satrangi Ank", 18: "Atharah — Mahabharat Ki Kahani",
+  19: "Unnees Bees Ka Farak", 20: "Bees Saal Baad",
+  21: "Ekkis Toppon Ki Salaami", 22: "Do Batakh — Two Little Ducks",
+  23: "Teiis — Lucky Teiis", 24: "Chaubis Ghante",
+  25: "Pachchis — Sava Century Ka Raasta", 26: "Chhabbis January",
+  27: "Sattaees — Ekdum Fit", 28: "Athaees — Bas Thoda Aur",
+  29: "Unatees — Century Ke Kareeb", 30: "Tees Maar Khan",
+  31: "Ikatees — Ekdum Jawaan Ank", 32: "Battis Daant",
+  33: "Crore Devi Devta", 34: "Chauntis — Chalta Rahe Safar",
+  35: "Painttees — Aadha Sach", 36: "Chhattis Ka Aankda",
+  37: "Saintees — Lucky Number", 38: "Adtees — Bas Thoda Sabar",
+  39: "Untaalis — Chaalis Ke Darwaze Par", 40: "Alibaba Aur Chaalis Chor",
+  41: "Iktaalis — Ekdum Set", 42: "Bayaalis — Zindagi Ka Jawaab",
+  43: "Taintaalis — Aage Badho", 44: "Chauvaalis — Set Ho Gaya",
+  45: "Paintaalis — Aadha Safar", 46: "Chhiyaalis — Set Match",
+  47: "Saintaalis — Lucky Number", 48: "Adtaalis — Bas Aadha Ghanta",
+  49: "Unchaas — Pachaas Ke Darwaze Par", 50: "Half Century!",
+  51: "Ekyaawan — Shubh Ank", 52: "Taash Ka Poora Packet",
+  53: "Tirpan — Lucky Tirpan", 54: "Chauvan — Set Ho Gaya Match",
+  55: "Pachpan — Do Panje", 56: "Chhappan Bhog",
+  57: "Sattaawan — Sadaa Khush Raho", 58: "Athhaawan — Bas Thoda Sabar",
+  59: "Unsath — Saath Ke Darwaze Par", 60: "Saath Ka Pahaada",
+  61: "Iksath — Ekdum Set", 62: "Baasath — Aage Badho",
+  63: "Tirsath — Lucky Tirsath", 64: "Chausath Kalayen",
+  65: "Painsath — Aadha Century Aur", 66: "Chhiyasath — Ekdum Set",
+  67: "Sadsath — Lucky Number", 68: "Adhsath — Bas Thoda Sabar",
+  69: "Unhattar — Sattar Ke Darwaze Par", 70: "Sattar — Buzurgo Ka Ank",
+  71: "Ikhattar — Ekdum Jawaan", 72: "Bahattar — Aage Badho",
+  73: "Tihattar — Lucky Tihattar", 74: "Chauhattar — Set Ho Gaya",
+  75: "Pachattar — Teen Chaucha", 76: "Chhihattar — Trombone Bina Baja",
+  77: "Sadasattar — Double Lucky Saat Saat", 78: "Atthattar — Bas Thoda Sabar",
+  79: "Unaasi — Assi Ke Darwaze Par", 80: "Assi — Buddhe Baba",
+  81: "Ikaasi — Ekdum Jawaan Ank", 82: "Bayaasi — Aage Badho",
+  83: "Tirasi — Kapil Dev Ka World Cup!", 84: "Chaurasi Ka Chakkar",
+  85: "Pachaasi — Bas Thoda Sabar", 86: "Chhiyaasi — Set Ho Gaya",
+  87: "Sattaasi — Lucky Number", 88: "Do Mota Ladies",
+  89: "Nawaasi — Nabbe Ke Darwaze Par", 90: "Nabbe Paar, Bas Ab Aaram!"
+};
+
+function toggleCallerVoice() {
+  callerVoiceEnabled = !callerVoiceEnabled;
+  $('callerVoiceToggle').textContent = callerVoiceEnabled ? '🔊 Voice On' : '🔇 Voice Off';
+  if (!callerVoiceEnabled && window.speechSynthesis) speechSynthesis.cancel();
+}
+
+function speakCalledNumber(num, line) {
+  if (!callerVoiceEnabled || !window.speechSynthesis) return;
+  try {
+    speechSynthesis.cancel(); // don't let announcements pile up if tapped quickly
+    const utterance = new SpeechSynthesisUtterance(`${num}! ${line}`);
+    utterance.rate = 0.95;
+    speechSynthesis.speak(utterance);
+  } catch (e) { /* speech not supported — fail silently, line still shows visually */ }
+}
 
 function buildCallerBoard() {
   const board = $('callerBoard');
@@ -1812,7 +1912,9 @@ function newCallerGame() {
   callerCalled = [];
   document.querySelectorAll('.caller-cell').forEach(c => c.classList.remove('called'));
   $('callerCurrentNumber').textContent = '—';
+  $('callerLineText').textContent = '';
   $('callerStatus').textContent = '0 of 90 numbers called';
+  if (window.speechSynthesis) speechSynthesis.cancel();
 }
 
 function callNextNumber() {
@@ -1820,15 +1922,18 @@ function callNextNumber() {
   const idx = Math.floor(Math.random() * callerRemaining.length);
   const num = callerRemaining.splice(idx, 1)[0];
   callerCalled.push(num);
+  const line = CALLER_LINES[num] || '';
   const display = $('callerCurrentNumber');
   display.textContent = num;
   display.classList.remove('pop');
   void display.offsetWidth; // restart animation even if same number is called consecutively
   display.classList.add('pop');
   spawnConfetti(display);
+  $('callerLineText').textContent = line;
   $('callerStatus').textContent = `${callerCalled.length} of 90 numbers called`;
   const cell = $(`callerCell${num}`);
   if (cell) cell.classList.add('called');
+  speakCalledNumber(num, line);
 }
 
 /* Small emoji confetti burst around the caller number display */
@@ -2106,4 +2211,187 @@ async function copyPartnerApplyLink() {
   } catch (e) {
     prompt('Copy this link:', url);
   }
+}
+
+/* ============ BULLETIN BOARD ============ */
+
+const NUT_FACTS = [
+  "Almonds are technically seeds, not true nuts — they come from the fruit of the almond tree.",
+  "Cashews grow attached to the bottom of a fruit called the cashew apple.",
+  "Walnuts are one of the oldest tree foods known, dating back over 8,000 years.",
+  "Pistachios are sometimes called \"the smiling nut\" — their shells naturally split open as they ripen.",
+  "A single date palm tree can keep producing fruit for over 100 years.",
+  "Soaking almonds overnight makes their nutrients easier for the body to absorb.",
+  "Dried apricots pack more potassium, gram for gram, than a fresh banana.",
+  "Brazil nuts come from trees that can grow over 50 meters tall in the Amazon rainforest.",
+  "Raisins are simply dried grapes — no additives, just sunshine and time.",
+  "Walnuts are one of the few nuts with a good plant-based source of Omega-3s.",
+  "Figs were among the first fruits ever cultivated by humans — over 11,000 years ago.",
+  "Pine nuts are actually seeds from pine cones — some varieties take up to 3 years to mature.",
+  "A handful of dates a day has been a traditional energy staple for centuries.",
+  "Peanuts aren't technically nuts — they're legumes, related to beans and lentils.",
+  "Cashews are never sold in-shell — the shell contains an irritant oil that must be carefully removed first."
+];
+
+let bulletinSlides = [];
+let bulletinIndex = 0;
+let bulletinTimer = null;
+
+function renderBulletinBoard() {
+  bulletinSlides = [
+    { type: 'text', tag: '🏠 About Us', text: "CommunitE brings your apartment community wholesale prices on dry fruits, nuts, spices and more — bulk buying power, doorstep delivered." },
+    { type: 'text', tag: '🏠 About Us', text: "Trust sahi. Quality sahi. Price bhi sahi. — that's the whole idea behind CommunitE." },
+    { type: 'text', tag: '🎬 Watch Us', text: "Catch our latest reels — behind the scenes, product picks, and community moments. Tap to watch." },
+  ];
+  NUT_FACTS.forEach(fact => bulletinSlides.push({ type: 'text', tag: '📌 Did you know?', text: fact }));
+
+  // Sprinkle in a few random product photos, if we have product data yet
+  if (allProductsCache && allProductsCache.length > 0) {
+    const withImages = allProductsCache.filter(p => p.image);
+    const shuffled = shuffleArray([...withImages]).slice(0, 5);
+    shuffled.forEach(p => {
+      bulletinSlides.push({ type: 'image', tag: '🥜 From our shelves', text: p.product_name, image: p.image });
+    });
+  }
+
+  shuffleArray(bulletinSlides);
+  bulletinIndex = 0;
+  showBulletinSlide();
+
+  if (bulletinTimer) clearInterval(bulletinTimer);
+  bulletinTimer = setInterval(() => {
+    bulletinIndex = (bulletinIndex + 1) % bulletinSlides.length;
+    showBulletinSlide();
+  }, 5000);
+}
+
+function showBulletinSlide() {
+  const slide = bulletinSlides[bulletinIndex];
+  if (!slide) return;
+  const board = $('bulletinBoard');
+  const tagEl = board.querySelector('.bulletin-tag');
+  const textEl = $('bulletinText');
+  const imgEl = $('bulletinImage');
+
+  board.classList.remove('bulletin-fade');
+  void board.offsetWidth;
+  board.classList.add('bulletin-fade');
+
+  tagEl.textContent = slide.tag;
+  textEl.textContent = slide.text;
+  if (slide.type === 'image' && slide.image) {
+    imgEl.src = slide.image;
+    imgEl.style.display = 'block';
+  } else {
+    imgEl.style.display = 'none';
+  }
+}
+
+/* ============ THEME CARDS (dynamic from Tags + Member Discount) ============ */
+
+const TAG_DISPLAY_MAP = {
+  'best seller': { title: '🔥 Best Sellers', color: '#e8395a' },
+  'the elite': { title: '💪 Healthy Superpowers', color: '#2d8a5e' },
+  'daily handful': { title: '🥜 Daily Handful', color: '#d4a017' },
+};
+const TAG_FALLBACK_COLORS = ['#5a4fcf', '#e07b00', '#2f9e8f', '#c8395a', '#3d6b52'];
+const MEMBER_DISCOUNT_THEME_THRESHOLD = 20;
+
+function renderThemeCards() {
+  const row = $('themeCardsRow');
+  if (!allProductsCache || allProductsCache.length === 0) { row.innerHTML = ''; return; }
+
+  // Collect unique tags, case-insensitively, preserving a display label
+  const tagMap = new Map(); // lowercase key -> original-case label
+  allProductsCache.forEach(p => {
+    (p.tags || []).forEach(t => {
+      const key = t.toLowerCase();
+      if (!tagMap.has(key)) tagMap.set(key, t);
+    });
+  });
+
+  let cardsHTML = '';
+  let colorIdx = 0;
+  tagMap.forEach((label, key) => {
+    const known = TAG_DISPLAY_MAP[key];
+    const title = known ? known.title : `✨ ${label}`;
+    const color = known ? known.color : TAG_FALLBACK_COLORS[colorIdx++ % TAG_FALLBACK_COLORS.length];
+    cardsHTML += `
+      <div class="theme-card" style="background:${color}" onclick="filterByTag('${escapeHtml(key)}', '${escapeHtml(title.replace(/'/g, ""))}')">
+        <p class="theme-card-title">${escapeHtml(title)}</p>
+      </div>`;
+  });
+
+  const hasDiscountDeals = allProductsCache.some(p => (p.member_discount || 0) >= MEMBER_DISCOUNT_THEME_THRESHOLD);
+  if (hasDiscountDeals) {
+    cardsHTML += `
+      <div class="theme-card" style="background:#1a5c3a" onclick="filterByMemberDiscountTheme()">
+        <p class="theme-card-title">⭐ Member Deals ${MEMBER_DISCOUNT_THEME_THRESHOLD}%+ Off</p>
+      </div>`;
+  }
+
+  row.innerHTML = cardsHTML;
+}
+
+function filterByTag(tagKey, title) {
+  const filtered = allProductsCache.filter(p =>
+    (p.tags || []).some(t => t.toLowerCase() === tagKey)
+  );
+  renderFilteredProducts(title, filtered);
+}
+
+function filterByMemberDiscountTheme() {
+  const filtered = allProductsCache.filter(p => (p.member_discount || 0) >= MEMBER_DISCOUNT_THEME_THRESHOLD);
+  renderFilteredProducts(`⭐ Member Deals ${MEMBER_DISCOUNT_THEME_THRESHOLD}%+ Off`, filtered);
+}
+
+/* ============ DISCOUNT TIER TILES ============ */
+
+function filterByDiscountTier(min, max, title) {
+  const filtered = allProductsCache.filter(p =>
+    typeof p.member_discount === 'number' && p.member_discount >= min && p.member_discount <= max
+  );
+  renderFilteredProducts(title, filtered);
+}
+
+/* ============ SUBCATEGORY ROWS (endless scroll, shuffled) ============ */
+
+function renderSubcategoryRows() {
+  const section = $('subcategoryRowsSection');
+  if (!allProductsCache || allProductsCache.length === 0) { section.innerHTML = ''; return; }
+
+  const groups = {}; // "category|||subcategory" -> products[]
+  allProductsCache.forEach(p => {
+    const key = `${p.category}|||${p.subcategory}`;
+    if (!groups[key]) groups[key] = { category: p.category, subcategory: p.subcategory, products: [] };
+    groups[key].products.push(p);
+  });
+
+  const rows = shuffleArray(Object.values(groups));
+
+  section.innerHTML = rows.map(row => {
+    // De-dupe by product name for the row preview (variants collapse to one card)
+    const seen = new Set();
+    const unique = row.products.filter(p => {
+      if (seen.has(p.product_name)) return false;
+      seen.add(p.product_name);
+      return true;
+    });
+
+    const cardsHTML = unique.map(p => {
+      const img = p.image || DEFAULT_PRODUCT_IMAGE;
+      return `
+        <div class="subrow-card" onclick="openProductFromSearch('${escapeHtml(row.category)}','${escapeHtml(row.subcategory)}')">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(p.product_name)}" loading="lazy" onerror="this.onerror=null;this.src='assets/placeholder.png';" />
+          <p class="subrow-card-name">${escapeHtml(p.product_name)}</p>
+          <p class="subrow-card-price">₹${p.price}</p>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="subcategory-row">
+        <h3 class="subrow-title">${escapeHtml(row.subcategory)}</h3>
+        <div class="subrow-scroll">${cardsHTML}</div>
+      </div>`;
+  }).join('');
 }
