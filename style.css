@@ -1906,6 +1906,21 @@ main {
   .qty-control { gap: 4px; }
   .qty-control button { width: 24px; height: 24px; font-size: 0.9rem; }
   .qty-control input { width: 28px; font-size: 0.82rem; }
+
+  /* The mobile "list mode" above (110px image + content) only works at full
+     card width — override back to a normal vertical card inside the
+     horizontal scroll rows, where cards are much narrower. */
+  .subrow-scroll .product-card {
+    display: flex; flex-direction: column; grid-template-columns: unset;
+  }
+  .subrow-scroll .product-img-wrap {
+    grid-row: unset; border-radius: 16px 16px 0 0; aspect-ratio: 1; min-height: 0;
+  }
+  .subrow-scroll .product-img-wrap img { border-radius: 16px 16px 0 0; }
+  .subrow-scroll .product-card-body { padding: 10px 12px 4px; }
+  .subrow-scroll .product-desc { display: none; }
+  .subrow-scroll .product-card-footer { flex-wrap: wrap; padding: 6px 12px 12px; }
+  .subrow-scroll .controls-row { flex-wrap: wrap; }
   .cart-sidebar { width: 100%; right: 0; left: 0; border-left: none; border-top: 1px solid var(--border); border-radius: 20px 20px 0 0; top: auto; bottom: -100%; height: 88vh; transition: bottom 0.4s var(--ease-spring); }
   .cart-sidebar.open { bottom: 0; }
   .cart-content { padding: 16px 18px; }
@@ -2250,7 +2265,7 @@ body.overlay-open .floating-cart-bar {
 }
 
 /* ── CATEGORY GRID — Swiggy style ── */
-.shop-categories { margin-bottom: 32px; }
+.shop-categories { margin-bottom: 16px; }
 
 .category-grid {
   display: grid;
@@ -2357,11 +2372,11 @@ body.overlay-open .floating-cart-bar {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 960px) {
-  .shop-section { padding: 20px 20px 60px; }
+  .shop-section { padding: 20px 20px 24px; }
   .category-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
 }
 @media (max-width: 600px) {
-  .shop-section { padding: 10px 14px 80px; }
+  .shop-section { padding: 10px 14px 24px; }
   .shop-search { margin-bottom: 14px; }
   .category-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .category-grid-label { font-size: 0.72rem; padding: 6px 6px; }
@@ -2476,28 +2491,35 @@ body.overlay-open .floating-cart-bar {
 /* ============ THEME CARDS ============ */
 .theme-cards-section { max-width: 1280px; margin: 20px auto 0; }
 .theme-cards-row {
-  display: flex; gap: 12px; overflow-x: auto; padding: 8px 32px 6px;
-  scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 8px 32px 6px;
 }
-.theme-cards-row::-webkit-scrollbar { height: 4px; }
 .theme-card {
-  flex: 0 0 auto; min-width: 200px; min-height: 150px; border-radius: 16px; padding: 20px 18px;
-  color: #fff; cursor: pointer; scroll-snap-align: start; transition: transform 0.15s;
-  position: relative; overflow: hidden; display: flex; align-items: flex-start;
+  border-radius: 18px; padding: 20px 18px; color: #fff; cursor: pointer;
+  transition: transform 0.15s; position: relative; overflow: hidden;
+  min-height: 210px; display: flex; flex-direction: column; justify-content: space-between;
 }
 .theme-card:hover { transform: translateY(-2px); }
 .theme-card-title {
-  font-size: 1.05rem; font-weight: 800; margin: 0; line-height: 1.35; max-width: 62%;
+  font-size: 1.05rem; font-weight: 800; margin: 0 0 14px; line-height: 1.35;
   position: relative; z-index: 2; text-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
-.theme-card-img {
-  position: absolute; right: -8px; bottom: -8px; width: 100px; height: 100px; border-radius: 50%;
-  object-fit: cover; border: 3px solid rgba(255,255,255,0.55);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.28);
+.theme-card-collage {
+  display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);
+  gap: 6px; width: 100%; height: 100px;
+}
+.theme-card-collage-img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+
+@media (max-width: 560px) {
+  .theme-cards-row { gap: 10px; padding: 8px 16px 6px; }
+  .theme-card { min-height: 180px; padding: 16px 14px; }
+  .theme-card-collage { height: 84px; }
 }
 
 /* ============ SECONDARY FEATURES ROW (below shopping, still colorful) ============ */
-.secondary-features-section { max-width: 1280px; margin: 24px auto 0; padding: 0 32px; }
+.secondary-features-section { max-width: 1280px; margin: 12px auto 0; padding: 0 32px; }
 .secondary-features-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .secondary-feature-card {
   flex: 1 1 calc(25% - 9px); min-width: 100px; border-radius: 14px; padding: 18px 10px;
@@ -2511,6 +2533,7 @@ body.overlay-open .floating-cart-bar {
 .sf--reels    { background: linear-gradient(135deg, #f2a1b3, #e8395a); }
 .sf-icon { font-size: 1.7rem; display: block; margin-bottom: 8px; }
 .sf-label { font-size: 0.78rem; font-weight: 700; margin: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.sf-sublabel { font-size: 0.66rem; font-weight: 600; margin: 4px 0 0; opacity: 0.9; }
 
 @media (max-width: 480px) {
   .secondary-feature-card { flex: 1 1 calc(50% - 6px); }

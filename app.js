@@ -2308,31 +2308,38 @@ function renderThemeCards() {
     const known = TAG_DISPLAY_MAP[key];
     const title = known ? known.title : `✨ ${label}`;
     const color = known ? known.color : TAG_FALLBACK_COLORS[colorIdx++ % TAG_FALLBACK_COLORS.length];
-    const sample = allProductsCache.find(p => (p.tags || []).some(t => t.toLowerCase() === key) && p.image);
-    const imgHTML = sample
-      ? `<img class="theme-card-img" src="${escapeHtml(sample.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`
-      : '';
-    cardsHTML += `
-      <div class="theme-card" style="background:${color}" onclick="filterByTag('${escapeHtml(key)}', '${escapeHtml(title.replace(/'/g, ""))}')">
-        <p class="theme-card-title">${escapeHtml(title)}</p>
-        ${imgHTML}
-      </div>`;
+    const matches = allProductsCache.filter(p => (p.tags || []).some(t => t.toLowerCase() === key) && p.image);
+    cardsHTML += buildThemeCardHTML(title, color, matches, `filterByTag('${escapeHtml(key)}', '${escapeHtml(title.replace(/'/g, ""))}')`);
   });
 
   const hasDiscountDeals = allProductsCache.some(p => (p.member_discount || 0) >= MEMBER_DISCOUNT_THEME_THRESHOLD);
   if (hasDiscountDeals) {
-    const dealSample = allProductsCache.find(p => (p.member_discount || 0) >= MEMBER_DISCOUNT_THEME_THRESHOLD && p.image);
-    const dealImgHTML = dealSample
-      ? `<img class="theme-card-img" src="${escapeHtml(dealSample.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`
-      : '';
-    cardsHTML += `
-      <div class="theme-card" style="background:#1a5c3a" onclick="filterByMemberDiscountTheme()">
-        <p class="theme-card-title">⭐ Member Deals ${MEMBER_DISCOUNT_THEME_THRESHOLD}%+ Off</p>
-        ${dealImgHTML}
-      </div>`;
+    const dealMatches = allProductsCache.filter(p => (p.member_discount || 0) >= MEMBER_DISCOUNT_THEME_THRESHOLD && p.image);
+    cardsHTML += buildThemeCardHTML(`⭐ Member Deals ${MEMBER_DISCOUNT_THEME_THRESHOLD}%+ Off`, '#1a5c3a', dealMatches, 'filterByMemberDiscountTheme()');
   }
 
   row.innerHTML = cardsHTML;
+}
+
+/* Builds one theme card with a 2x2 collage of distinct matching product photos
+   (deduped by product name) so cards don't all show the same repeated image. */
+function buildThemeCardHTML(title, color, matches, onclickCall) {
+  const seen = new Set();
+  const unique = matches.filter(p => {
+    if (seen.has(p.product_name)) return false;
+    seen.add(p.product_name);
+    return true;
+  });
+  const photos = shuffleArray([...unique]).slice(0, 4);
+  const collageHTML = photos.map(p =>
+    `<img class="theme-card-collage-img" src="${escapeHtml(p.image)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" />`
+  ).join('');
+
+  return `
+    <div class="theme-card" style="background:${color}" onclick="${onclickCall}">
+      <p class="theme-card-title">${escapeHtml(title)}</p>
+      <div class="theme-card-collage">${collageHTML}</div>
+    </div>`;
 }
 
 function filterByTag(tagKey, title) {
