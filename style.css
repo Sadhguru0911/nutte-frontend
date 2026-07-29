@@ -145,6 +145,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   position: relative;
   overflow: hidden;
 }
+.hero::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 80px;
+  background: var(--white); clip-path: ellipse(55% 100% at 50% 100%);
+}
 .hero-eyebrow {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase;
   color: var(--rd-gold); margin-bottom: 18px; opacity: 0.9;
@@ -2625,9 +2629,10 @@ body.overlay-open .floating-cart-bar {
 }
 .section-title {
   font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: var(--rd-brown); margin-bottom: 6px;
+  white-space: normal; letter-spacing: normal; font-weight: 400;
 }
 .section-desc { font-size: 0.9rem; color: var(--rd-brown-light); line-height: 1.6; max-width: 480px; margin-bottom: 24px; }
-.how-section, .community-section { max-width: 900px; margin: 0 auto; padding: 48px 32px; }
+.how-section, .community-section { max-width: 900px; margin: 0 auto; padding: 56px 32px; background: var(--white); }
 
 /* ============ TAGLINE STRIP ============ */
 .tagline-strip { background: var(--rd-purple); padding: 40px 24px; text-align: center; }

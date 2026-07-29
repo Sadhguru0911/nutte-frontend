@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=44" />
-  <script src="app.js?v=44" defer></script>
+  <link rel="stylesheet" href="style.css?v=45" />
+  <script src="app.js?v=45" defer></script>
 </head>
 <body>
 
@@ -34,19 +34,17 @@
   <nav class="nav">
     <div class="nav-inner">
       <a class="nav-brand" href="#">
-        <img src="assets/NuttE_edited.png" alt="CommunitE" class="nav-logo" />
         <span class="nav-name">Communit<em>E</em></span>
       </a>
       <div class="nav-links">
         <span class="nav-tagline" onclick="scrollToSection('shopSection')" style="cursor:pointer">Shop</span>
-        <span class="nav-tagline" onclick="openAbout()" style="cursor:pointer">About Us</span>
         <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
           <span class="nav-emoji">👤</span>
           <span id="accountNavLabel">Login</span>
         </button>
         <button id="memberLoginBtn" class="member-login-btn" onclick="openMemberLogin()">
           <span class="nav-emoji">👑</span>
-          <span id="memberLoginLabel">Join Membership</span>
+          <span id="memberLoginLabel">Join</span>
         </button>
         <button id="openCartBtn" class="cart-btn">
           <span class="nav-emoji">🛍️</span>
@@ -68,14 +66,6 @@
       <button class="btn-gold" onclick="scrollToSection('shopSection')">Browse Products</button>
       <button class="btn-outline" onclick="openMembershipModal()">Join Membership</button>
     </div>
-    <div class="hero-product-strip">
-      <div class="hero-chip"><span class="hero-chip-emoji">🥜</span><span class="hero-chip-name">Cashews</span></div>
-      <div class="hero-chip"><span class="hero-chip-emoji">🌰</span><span class="hero-chip-name">Almonds</span></div>
-      <div class="hero-chip"><span class="hero-chip-emoji">🫘</span><span class="hero-chip-name">Dates</span></div>
-      <div class="hero-chip"><span class="hero-chip-emoji">🧂</span><span class="hero-chip-name">Spices</span></div>
-      <div class="hero-chip"><span class="hero-chip-emoji">🍵</span><span class="hero-chip-name">Tea</span></div>
-      <div class="hero-chip"><span class="hero-chip-emoji">🎁</span><span class="hero-chip-name">Gift Boxes</span></div>
-    </div>
   </section>
 
   <!-- TRUST BAR — pulled from real About Us stats, surfaced right up front -->
@@ -87,7 +77,7 @@
 
   <!-- THEME CARDS — dynamic, generated from product Tags + Member Discount -->
   <div class="theme-cards-section">
-    <h2 class="shop-section-label" style="padding:0 16px">Explore</h2>
+    <h2 class="shop-section-label" style="padding:0 16px">From Our Shelves</h2>
     <div id="themeCardsRow" class="theme-cards-row"></div>
   </div>
 
