@@ -34,8 +34,8 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  background: var(--white);
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: var(--rd-cream);
   color: var(--black);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -140,7 +140,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* ── HERO ── */
 .hero {
   max-width: 100%;
-  padding: 60px 32px 56px;
+  padding: 60px 32px 110px;
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 55%, var(--rd-purple-deep) 100%);
   position: relative;
   overflow: hidden;
@@ -150,7 +150,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: var(--white); clip-path: ellipse(55% 100% at 50% 100%);
 }
 .hero-eyebrow {
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
   color: var(--rd-gold); margin-bottom: 18px; opacity: 0.9;
 }
 .hero-subtitle {
@@ -375,7 +375,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .hero-brand-name { position: relative; z-index: 2; }
 .hero-title {
   font-family: 'DM Serif Display', serif;
-  font-size: clamp(2.6rem, 8vw, 4.5rem);
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
   font-weight: 400;
   line-height: 1.05;
   color: #fff;
@@ -2624,7 +2624,7 @@ body.overlay-open .floating-cart-bar {
 
 /* ============ SHARED SECTION HEADER STYLE (How It Works / Community) ============ */
 .section-eyebrow {
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
   color: var(--rd-gold); margin-bottom: 8px;
 }
 .section-title {
