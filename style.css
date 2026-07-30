@@ -140,7 +140,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* ── HERO ── */
 .hero {
   max-width: 100%;
-  padding: 60px 0 100px;
+  padding: 32px 0 100px;
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 55%, var(--rd-purple-deep) 100%);
   position: relative;
   overflow: hidden;
@@ -193,7 +193,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .trust-label { font-size: 0.72rem; color: var(--rd-brown-light); margin-top: 4px; font-weight: 500; }
 
 @media (min-width: 700px) {
-  .hero { padding: 80px 0 100px; }
+  .hero { padding: 40px 0 100px; }
 }
 
 /* Brand card on top (full width), 3 small cards in a row below —
@@ -2661,9 +2661,8 @@ body.overlay-open .floating-cart-bar {
 /* ============ MEMBERSHIP SECTION ============ */
 .membership-section {
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 100%);
-  border-radius: 24px; max-width: 900px; margin: 0 32px 48px; padding: 48px 24px; text-align: center;
+  border-radius: 24px; max-width: 1280px; margin: 0 auto 48px; padding: 48px 32px; text-align: center;
 }
-@media (min-width: 964px) { .membership-section { margin: 0 auto 48px; } }
 .membership-perks { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto 28px; }
 .perk { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.75); text-align: left; }
 .perk-icon {
