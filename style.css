@@ -140,13 +140,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* ── HERO ── */
 .hero {
   max-width: 100%;
-  padding: 60px 32px 110px;
+  padding: 60px 32px 150px;
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 55%, var(--rd-purple-deep) 100%);
   position: relative;
   overflow: hidden;
 }
 .hero::after {
-  content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 80px;
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 60px;
   background: var(--white); clip-path: ellipse(55% 100% at 50% 100%);
 }
 .hero-eyebrow {
@@ -1378,8 +1378,13 @@ main {
 .btn-text:hover { opacity: 0.75; }
 
 @media (max-width: 600px) {
-  .account-nav-btn span { display: none; }
-  .account-nav-btn { padding: 7px 10px; }
+  .nav-inner { gap: 8px; padding: 0 14px; }
+  .nav-links { gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-tagline { flex-shrink: 0; }
+  .account-nav-btn { padding: 7px 10px; flex-shrink: 0; }
+  .member-login-btn { padding: 7px 10px; flex-shrink: 0; }
+  .cart-btn { flex-shrink: 0; }
 }
 
 /* ── DUAL PRICING ON PRODUCT CARDS ── */
@@ -1927,7 +1932,6 @@ main {
 }
 
 @media (max-width: 600px) {
-  .hero { padding: 8px 10px 0; }
   .hero-grid { gap: 6px; }
   .hero-col-small { gap: 6px; }
   .hero-col-small .hero-card { padding: 8px 10px; }
@@ -1953,7 +1957,6 @@ main {
   .nav-inner { padding: 0 14px; height: 56px; gap: 8px; }
   .nav-logo { height: 30px; width: 30px; }
   .nav-name { font-size: 1rem; }
-  .member-login-btn span { display: none; }
   .member-login-btn { padding: 7px 10px; }
   .cart-btn { padding: 8px 12px; font-size: 0.82rem; }
   .back-btn { padding: 5px 10px; font-size: 0.78rem; }
@@ -2011,7 +2014,6 @@ main {
 @media (max-width: 380px) {
   .hero-title { font-size: 1.9rem; }
   .conveyor-item { width: 125px; height: 125px; }
-  .nav-name { display: none; }
 }
 
 
@@ -2662,21 +2664,21 @@ body.overlay-open .floating-cart-bar {
   flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.06);
   display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
 }
-.plans-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 400px; margin: 0 auto 24px; }
-.plan-card {
+.ms-plans-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 400px; margin: 0 auto 24px; }
+.ms-plan-card {
   background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 16px;
   padding: 24px 16px; text-align: center; position: relative;
 }
-.plan-card.featured { border-color: var(--rd-gold); background: rgba(201,168,76,0.08); }
-.plan-badge {
+.ms-plan-card.featured { border-color: var(--rd-gold); background: rgba(201,168,76,0.08); }
+.ms-plan-badge {
   position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--rd-gold);
   color: var(--rd-purple); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
   padding: 3px 10px; border-radius: 10px;
 }
-.plan-name { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
-.plan-price { font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: #fff; line-height: 1.2; }
-.plan-period { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
-.plan-note { font-size: 0.68rem; color: var(--rd-gold); margin-top: 8px; font-weight: 500; }
+.ms-plan-name { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+.ms-plan-price { font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: #fff; line-height: 1.2; }
+.ms-plan-period { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+.ms-plan-note { font-size: 0.68rem; color: var(--rd-gold); margin-top: 8px; font-weight: 500; }
 
 /* ============ COMMUNITY SECTION (redesigned as icon+text rows) ============ */
 .community-cards { display: flex; flex-direction: column; gap: 14px; }
