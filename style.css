@@ -140,11 +140,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* ── HERO ── */
 .hero {
   max-width: 100%;
-  padding: 60px 32px 100px;
+  padding: 60px 0 100px;
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 55%, var(--rd-purple-deep) 100%);
   position: relative;
   overflow: hidden;
 }
+.hero-content { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
 .hero::after {
   content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 60px;
   background: var(--white); clip-path: ellipse(55% 100% at 50% 100%);
@@ -192,7 +193,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .trust-label { font-size: 0.72rem; color: var(--rd-brown-light); margin-top: 4px; font-weight: 500; }
 
 @media (min-width: 700px) {
-  .hero { padding: 80px 48px 100px; }
+  .hero { padding: 80px 0 100px; }
 }
 
 /* Brand card on top (full width), 3 small cards in a row below —
@@ -2572,7 +2573,12 @@ body.overlay-open .floating-cart-bar {
 }
 
 /* ============ DISCOUNT TIER TILES ============ */
-.discount-tiles-section { max-width: 1280px; margin: 24px auto 0; }
+.discount-tiles-section { max-width: 1280px; margin: 0 auto; }
+
+.page-card {
+  max-width: 1280px; margin: 0 auto 32px; background: var(--white); border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); padding: 32px 0;
+}
 .discount-tiles-row { display: flex; gap: 10px; padding: 8px 32px; flex-wrap: wrap; }
 .discount-tile {
   flex: 1 1 calc(25% - 8px); min-width: 110px; border-radius: 12px; padding: 16px 10px;
@@ -2634,7 +2640,7 @@ body.overlay-open .floating-cart-bar {
   white-space: normal; letter-spacing: normal; font-weight: 400;
 }
 .section-desc { font-size: 0.9rem; color: var(--rd-brown-light); line-height: 1.6; max-width: 480px; margin-bottom: 24px; }
-.how-section, .community-section { max-width: 900px; margin: 0 auto; padding: 56px 32px; background: var(--white); }
+.how-section, .community-section { max-width: 1280px; margin: 0 auto; padding: 56px 32px; background: var(--white); }
 
 /* ============ TAGLINE STRIP ============ */
 .tagline-strip { background: var(--rd-purple); padding: 40px 24px; text-align: center; }
@@ -2683,10 +2689,10 @@ body.overlay-open .floating-cart-bar {
 /* ============ COMMUNITY SECTION (redesigned as icon+text rows) ============ */
 .community-cards { display: flex; flex-direction: column; gap: 14px; }
 .community-card {
-  display: flex; gap: 16px; align-items: center; padding: 20px; background: var(--rd-cream);
-  border-radius: 14px; cursor: pointer; transition: transform 0.15s;
+  display: flex; gap: 16px; align-items: center; padding: 20px; background: var(--rd-gold-light);
+  border: 1px solid rgba(201,168,76,0.35); border-radius: 14px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
 }
-.community-card:hover { transform: translateY(-2px); }
+.community-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
 .community-icon {
   flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px; background: var(--rd-gold-light);
   display: flex; align-items: center; justify-content: center; font-size: 1.35rem;

@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=51" />
-  <script src="app.js?v=51" defer></script>
+  <link rel="stylesheet" href="style.css?v=52" />
+  <script src="app.js?v=52" defer></script>
 </head>
 <body>
 
@@ -39,16 +39,14 @@
       <div class="nav-links">
         <span class="nav-tagline" onclick="scrollToSection('shopSection')" style="cursor:pointer">Shop</span>
         <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
-          <span class="nav-emoji">👤</span>
           <span id="accountNavLabel">Login</span>
         </button>
         <button id="memberLoginBtn" class="member-login-btn" onclick="openMemberLogin()">
-          <span class="nav-emoji">👑</span>
           <span id="memberLoginLabel">Join</span>
         </button>
       </div>
       <button id="openCartBtn" class="cart-btn">
-        <span class="nav-emoji">🛍️</span>
+        <i class="fas fa-bag-shopping"></i>
         <span id="cartCount" class="cart-count">0</span>
       </button>
       </div>
@@ -57,15 +55,17 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-eyebrow">Collective Commerce</div>
-    <h1 class="hero-title">
-      <span class="hero-title-come">Come</span>
-      <span class="hero-title-unite">Unite.</span>
-    </h1>
-    <p class="hero-subtitle">Wholesale prices on premium dry fruits, nuts, and spices for your apartment community. We pool demand. You save up to 40%.</p>
-    <div class="hero-cta-row">
-      <button class="btn-gold" onclick="scrollToSection('shopSection')">Browse Products</button>
-      <button class="btn-outline" onclick="openMembershipModal()">Join Membership</button>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Collective Commerce</div>
+      <h1 class="hero-title">
+        <span class="hero-title-come">Come</span>
+        <span class="hero-title-unite">Unite.</span>
+      </h1>
+      <p class="hero-subtitle">Wholesale prices on premium dry fruits, nuts, and spices for your apartment community. We pool demand. You save up to 40%.</p>
+      <div class="hero-cta-row">
+        <button class="btn-gold" onclick="scrollToSection('shopSection')">Browse Products</button>
+        <button class="btn-outline" onclick="openMembershipModal()">Join Membership</button>
+      </div>
     </div>
   </section>
 
@@ -256,39 +256,44 @@
   </section>
 
   <!-- DISCOUNT TIER TILES -->
-  <div class="discount-tiles-section">
-    <div style="padding:0 16px">
-      <div class="section-eyebrow">Savings</div>
-      <h2 class="section-title">Member Deals by Discount</h2>
-      <p class="section-desc">Bigger discounts, sorted for you.</p>
-    </div>
-    <div class="discount-tiles-row">
-      <div class="discount-tile dt--high" onclick="filterByDiscountTier(40, 9999, 'More than 40% Off')">
-        <p class="dt-percent">40%+</p>
-        <p class="dt-label">Best Deals</p>
+  <div class="page-card">
+    <div class="discount-tiles-section">
+      <div style="padding:0 16px">
+        <div class="section-eyebrow">Savings</div>
+        <h2 class="section-title">Member Deals by Discount</h2>
+        <p class="section-desc">Bigger discounts, sorted for you.</p>
       </div>
-      <div class="discount-tile dt--mid-high" onclick="filterByDiscountTier(20, 40, '20–40% Off')">
-        <p class="dt-percent">20–40%</p>
-        <p class="dt-label">Great Value</p>
-      </div>
-      <div class="discount-tile dt--mid" onclick="filterByDiscountTier(5, 20, '5–20% Off')">
-        <p class="dt-percent">5–20%</p>
-        <p class="dt-label">Good Savings</p>
-      </div>
-      <div class="discount-tile dt--low" onclick="filterByDiscountTier(0.01, 5, 'Up to 5% Off')">
-        <p class="dt-percent">Up to 5%</p>
-        <p class="dt-label">Small Savings</p>
+      <div class="discount-tiles-row">
+        <div class="discount-tile dt--high" onclick="filterByDiscountTier(40, 9999, 'More than 40% Off')">
+          <p class="dt-percent">40%+</p>
+          <p class="dt-label">Best Deals</p>
+        </div>
+        <div class="discount-tile dt--mid-high" onclick="filterByDiscountTier(20, 40, '20–40% Off')">
+          <p class="dt-percent">20–40%</p>
+          <p class="dt-label">Great Value</p>
+        </div>
+        <div class="discount-tile dt--mid" onclick="filterByDiscountTier(5, 20, '5–20% Off')">
+          <p class="dt-percent">5–20%</p>
+          <p class="dt-label">Good Savings</p>
+        </div>
+        <div class="discount-tile dt--low" onclick="filterByDiscountTier(0.01, 5, 'Up to 5% Off')">
+          <p class="dt-percent">Up to 5%</p>
+          <p class="dt-label">Small Savings</p>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- SUBCATEGORY ROWS — endless scroll, shuffled order -->
-  <div style="padding:0 16px 32px; max-width:1280px; margin:0 auto">
-    <div class="section-eyebrow">Keep Browsing</div>
-    <h2 class="section-title">More to explore</h2>
-    <p class="section-desc">Every category, one scroll at a time.</p>
+  <div class="page-card">
+    <div style="padding:0 16px 32px; max-width:1280px; margin:0 auto">
+      <div class="section-eyebrow">Keep Browsing</div>
+      <h2 class="section-title">More to explore</h2>
+      <p class="section-desc">Every category, one scroll at a time.</p>
+    </div>
+    <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
   </div>
-  <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
+
 
   <!-- MASCOT CALLOUT -->
   <div class="mascot-callout">
