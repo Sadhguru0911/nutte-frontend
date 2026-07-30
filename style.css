@@ -140,7 +140,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* ── HERO ── */
 .hero {
   max-width: 100%;
-  padding: 60px 32px 150px;
+  padding: 60px 32px 100px;
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 55%, var(--rd-purple-deep) 100%);
   position: relative;
   overflow: hidden;
@@ -192,7 +192,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .trust-label { font-size: 0.72rem; color: var(--rd-brown-light); margin-top: 4px; font-weight: 500; }
 
 @media (min-width: 700px) {
-  .hero { padding: 80px 48px 64px; }
+  .hero { padding: 80px 48px 100px; }
 }
 
 /* Brand card on top (full width), 3 small cards in a row below —
@@ -1379,7 +1379,7 @@ main {
 
 @media (max-width: 600px) {
   .nav-inner { gap: 8px; padding: 0 14px; }
-  .nav-links { gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .nav-links { gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-tagline { flex-shrink: 0; }
   .account-nav-btn { padding: 7px 10px; flex-shrink: 0; }

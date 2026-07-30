@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=50" />
-  <script src="app.js?v=50" defer></script>
+  <link rel="stylesheet" href="style.css?v=51" />
+  <script src="app.js?v=51" defer></script>
 </head>
 <body>
 
@@ -46,10 +46,11 @@
           <span class="nav-emoji">👑</span>
           <span id="memberLoginLabel">Join</span>
         </button>
-        <button id="openCartBtn" class="cart-btn">
-          <span class="nav-emoji">🛍️</span>
-          <span id="cartCount" class="cart-count">0</span>
-        </button>
+      </div>
+      <button id="openCartBtn" class="cart-btn">
+        <span class="nav-emoji">🛍️</span>
+        <span id="cartCount" class="cart-count">0</span>
+      </button>
       </div>
     </div>
   </nav>
@@ -77,7 +78,11 @@
 
   <!-- THEME CARDS — dynamic, generated from product Tags + Member Discount -->
   <div class="theme-cards-section">
-    <h2 class="shop-section-label" style="padding:0 16px">From Our Shelves</h2>
+    <div style="padding:0 16px">
+      <div class="section-eyebrow">Best Picks</div>
+      <h2 class="section-title">From Our Shelves</h2>
+      <p class="section-desc">Handpicked themes, updated as we go.</p>
+    </div>
     <div id="themeCardsRow" class="theme-cards-row"></div>
   </div>
 
@@ -252,7 +257,11 @@
 
   <!-- DISCOUNT TIER TILES -->
   <div class="discount-tiles-section">
-    <h2 class="shop-section-label" style="padding:0 16px">Member Deals by Discount</h2>
+    <div style="padding:0 16px">
+      <div class="section-eyebrow">Savings</div>
+      <h2 class="section-title">Member Deals by Discount</h2>
+      <p class="section-desc">Bigger discounts, sorted for you.</p>
+    </div>
     <div class="discount-tiles-row">
       <div class="discount-tile dt--high" onclick="filterByDiscountTier(40, 9999, 'More than 40% Off')">
         <p class="dt-percent">40%+</p>
@@ -274,6 +283,11 @@
   </div>
 
   <!-- SUBCATEGORY ROWS — endless scroll, shuffled order -->
+  <div style="padding:0 16px 32px; max-width:1280px; margin:0 auto">
+    <div class="section-eyebrow">Keep Browsing</div>
+    <h2 class="section-title">More to explore</h2>
+    <p class="section-desc">Every category, one scroll at a time.</p>
+  </div>
   <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
 
   <!-- MASCOT CALLOUT -->
