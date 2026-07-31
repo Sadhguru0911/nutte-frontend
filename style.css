@@ -2441,11 +2441,11 @@ body.overlay-open .floating-cart-bar {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 960px) {
-  .shop-section { padding: 20px 20px 24px; }
+  .shop-section { padding: 20px 32px 24px; }
   .category-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
 }
 @media (max-width: 600px) {
-  .shop-section { padding: 10px 14px 24px; }
+  .shop-section { padding: 10px 32px 24px; }
   .shop-search { margin-bottom: 14px; }
   .category-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .category-grid-label { font-size: 0.72rem; padding: 6px 6px; }
@@ -2621,14 +2621,9 @@ body.overlay-open .floating-cart-bar {
   background: none; border: none; color: #1a5c3a; font-weight: 700; cursor: pointer; font-size: 0.8rem;
 }
 
-/* Mobile: pull the new sections' side padding back down from the desktop 32px */
-@media (max-width: 640px) {
-  .theme-cards-row { padding-left: 16px; padding-right: 16px; }
-  .discount-tiles-row { padding-left: 16px; padding-right: 16px; }
-  .secondary-features-section { padding-left: 16px; padding-right: 16px; }
-  .subcategory-rows-section { padding-left: 16px; padding-right: 16px; }
-  .bulletin-board, .bulletin-board-row { margin-left: 10px; margin-right: 10px; padding-left: 14px; padding-right: 14px; }
-}
+/* Bulletin board / secondary-features-section are no longer used, and the
+   padding reductions below were causing headings (fixed at 32px) to misalign
+   with their own content rows on mobile — removed for consistency. */
 
 /* ============ SHARED SECTION HEADER STYLE (How It Works / Community) ============ */
 .section-eyebrow {
