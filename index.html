@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=54" />
-  <script src="app.js?v=54" defer></script>
+  <link rel="stylesheet" href="style.css?v=58" />
+  <script src="app.js?v=58" defer></script>
 </head>
 <body>
 
@@ -76,7 +76,7 @@
 
   <!-- THEME CARDS — dynamic, generated from product Tags + Member Discount -->
   <div class="theme-cards-section">
-    <div style="padding:0 16px">
+    <div style="padding:0 32px">
       <div class="section-eyebrow">Best Picks</div>
       <h2 class="section-title">From Our Shelves</h2>
       <p class="section-desc">Handpicked themes, updated as we go.</p>
@@ -254,43 +254,39 @@
   </section>
 
   <!-- DISCOUNT TIER TILES -->
-  <div class="page-card">
-    <div class="discount-tiles-section">
-      <div style="padding:0 16px">
-        <div class="section-eyebrow">Savings</div>
-        <h2 class="section-title">Member Deals by Discount</h2>
-        <p class="section-desc">Bigger discounts, sorted for you.</p>
+  <div class="discount-tiles-section">
+    <div style="padding:0 32px">
+      <div class="section-eyebrow">Savings</div>
+      <h2 class="section-title">Member Deals by Discount</h2>
+      <p class="section-desc">Bigger discounts, sorted for you.</p>
+    </div>
+    <div class="discount-tiles-row">
+      <div class="discount-tile dt--high" onclick="filterByDiscountTier(40, 9999, 'More than 40% Off')">
+        <p class="dt-percent">40%+</p>
+        <p class="dt-label">Best Deals</p>
       </div>
-      <div class="discount-tiles-row">
-        <div class="discount-tile dt--high" onclick="filterByDiscountTier(40, 9999, 'More than 40% Off')">
-          <p class="dt-percent">40%+</p>
-          <p class="dt-label">Best Deals</p>
-        </div>
-        <div class="discount-tile dt--mid-high" onclick="filterByDiscountTier(20, 40, '20–40% Off')">
-          <p class="dt-percent">20–40%</p>
-          <p class="dt-label">Great Value</p>
-        </div>
-        <div class="discount-tile dt--mid" onclick="filterByDiscountTier(5, 20, '5–20% Off')">
-          <p class="dt-percent">5–20%</p>
-          <p class="dt-label">Good Savings</p>
-        </div>
-        <div class="discount-tile dt--low" onclick="filterByDiscountTier(0.01, 5, 'Up to 5% Off')">
-          <p class="dt-percent">Up to 5%</p>
-          <p class="dt-label">Small Savings</p>
-        </div>
+      <div class="discount-tile dt--mid-high" onclick="filterByDiscountTier(20, 40, '20–40% Off')">
+        <p class="dt-percent">20–40%</p>
+        <p class="dt-label">Great Value</p>
+      </div>
+      <div class="discount-tile dt--mid" onclick="filterByDiscountTier(5, 20, '5–20% Off')">
+        <p class="dt-percent">5–20%</p>
+        <p class="dt-label">Good Savings</p>
+      </div>
+      <div class="discount-tile dt--low" onclick="filterByDiscountTier(0.01, 5, 'Up to 5% Off')">
+        <p class="dt-percent">Up to 5%</p>
+        <p class="dt-label">Small Savings</p>
       </div>
     </div>
   </div>
 
   <!-- SUBCATEGORY ROWS — endless scroll, shuffled order -->
-  <div class="page-card">
-    <div style="padding:0 16px 32px; max-width:1280px; margin:0 auto">
-      <div class="section-eyebrow">Keep Browsing</div>
-      <h2 class="section-title">More to explore</h2>
-      <p class="section-desc">Every category, one scroll at a time.</p>
-    </div>
-    <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
+  <div style="padding:0 32px 32px; max-width:1280px; margin:0 auto">
+    <div class="section-eyebrow">Keep Browsing</div>
+    <h2 class="section-title">More to explore</h2>
+    <p class="section-desc">Every category, one scroll at a time.</p>
   </div>
+  <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
 
 
   <!-- MASCOT CALLOUT -->
