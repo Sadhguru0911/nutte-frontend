@@ -1379,7 +1379,7 @@ main {
 .btn-text:hover { opacity: 0.75; }
 
 @media (max-width: 600px) {
-  .nav-inner { gap: 8px; padding: 0 14px; }
+  .nav-inner { gap: 8px; }
   .nav-links { gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-tagline { flex-shrink: 0; }
@@ -1955,7 +1955,7 @@ main {
   .conveyor-label { padding: 0 12px; margin-bottom: 10px; }
   .conveyor-item { width: 200px; height: 200px; border-radius: 18px; }
   .conveyor-item-label { font-size: 0.75rem; }
-  .nav-inner { padding: 0 14px; height: 56px; gap: 8px; }
+  .nav-inner { height: 56px; gap: 8px; }
   .nav-logo { height: 30px; width: 30px; }
   .nav-name { font-size: 1rem; }
   .member-login-btn { padding: 7px 10px; }
@@ -2279,7 +2279,7 @@ body.overlay-open .floating-cart-bar {
 .shop-section {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 28px 32px 60px;
+  padding: 28px 32px 40px;
 }
 
 /* Search bar — full width at top */
@@ -2523,7 +2523,7 @@ body.overlay-open .floating-cart-bar {
 }
 
 /* ============ THEME CARDS ============ */
-.theme-cards-section { max-width: 1280px; margin: 20px auto 0; }
+.theme-cards-section { max-width: 1280px; margin: 40px auto 0; }
 .theme-cards-row {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 8px 32px 6px;
 }
@@ -2576,7 +2576,7 @@ body.overlay-open .floating-cart-bar {
 .discount-tiles-section { max-width: 1280px; margin: 0 auto; }
 
 .page-card {
-  max-width: 1280px; margin: 0 auto 32px; background: var(--white); border-radius: 20px;
+  max-width: 1280px; margin: 0 auto 40px; background: var(--white); border-radius: 20px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); padding: 32px 0;
 }
 .discount-tiles-row { display: flex; gap: 10px; padding: 8px 32px; flex-wrap: wrap; }
@@ -2598,7 +2598,7 @@ body.overlay-open .floating-cart-bar {
 
 /* ============ SUBCATEGORY ROWS (endless scroll) ============ */
 .subcategory-rows-section { max-width: 1280px; margin: 28px auto 40px; padding: 0 32px; }
-.subcategory-row { margin-bottom: 24px; }
+.subcategory-row { margin-bottom: 24px; position: relative; }
 .subrow-title { font-size: 1rem; margin: 0 0 10px; color: var(--ink, #2b2b2b); }
 .subrow-scroll {
   display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px;
@@ -2606,6 +2606,13 @@ body.overlay-open .floating-cart-bar {
 }
 .subrow-scroll::-webkit-scrollbar { height: 4px; }
 .subrow-scroll .product-card { flex: 0 0 auto; width: 220px; }
+
+/* Right-edge fade — visual hint that the row scrolls further */
+.subcategory-row::after {
+  content: ''; position: absolute; top: 34px; right: 0; bottom: 6px; width: 40px;
+  background: linear-gradient(90deg, rgba(255,255,255,0), var(--white));
+  pointer-events: none;
+}
 
 @media (max-width: 480px) {
   .subrow-scroll .product-card { width: 180px; }
@@ -2661,7 +2668,7 @@ body.overlay-open .floating-cart-bar {
 /* ============ MEMBERSHIP SECTION ============ */
 .membership-section {
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 100%);
-  border-radius: 24px; max-width: 1280px; margin: 0 auto 48px; padding: 48px 32px; text-align: center;
+  border-radius: 24px; max-width: 1280px; margin: 0 auto 40px; padding: 48px 32px; text-align: center;
 }
 .membership-perks { display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 0 auto 28px; }
 .perk { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.75); text-align: left; }
