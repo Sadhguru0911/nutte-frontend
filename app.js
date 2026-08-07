@@ -1059,6 +1059,7 @@ async function buildSearchIndex() {
       member_discount: (typeof p.member_discount === 'number') ? p.member_discount : null
     }));
     renderThemeCards();
+    renderFestiveCards();
     renderSubcategoryRows();
   } catch (e) {
     console.warn('Search index build failed (non-critical):', e);
@@ -2263,6 +2264,65 @@ function buildThemeCardHTML(title, color, matches, onclickCall) {
 function filterByTag(tagKey, title) {
   const filtered = allProductsCache.filter(p =>
     (p.tags || []).some(t => t.toLowerCase() === tagKey)
+  );
+  renderFilteredProducts(title, filtered);
+}
+
+/* ============ FESTIVE THEME CARDS (from "Festive - <Name>" tags) ============ */
+
+const FESTIVE_DISPLAY_MAP = {
+  'raksha bandhan': { title: '🎗️ Raksha Bandhan', color: '#e85d75', message: 'Sweet gifts for the bond that matters.' },
+  'diwali':         { title: '🪔 Diwali',          color: '#e07b00', message: 'Light up your celebrations.' },
+  'christmas':      { title: '🎄 Christmas',       color: '#0f4c3a', message: 'Festive treats for the season.' },
+  'durga pooja':    { title: '🪘 Durga Pooja',     color: '#b83227', message: 'Celebrate the festival of Shakti.' },
+  'new year':       { title: '🎊 New Year',        color: 'var(--rd-purple)', message: 'Sweet beginnings for the year ahead.' },
+};
+const FESTIVE_FALLBACK_COLORS = ['#a0522d', '#6b8e23', '#8e44ad', '#c0392b', '#16697a'];
+
+function renderFestiveCards() {
+  const section = $('festiveCardsSection');
+  const row = $('festiveCardsRow');
+  if (!allProductsCache || allProductsCache.length === 0) { section.style.display = 'none'; return; }
+
+  // Collect "Festive - <Name>" tags, grouped by the festival name after the hyphen
+  const festivalMap = new Map(); // lowercase festival name -> display label
+  allProductsCache.forEach(p => {
+    (p.tags || []).forEach(t => {
+      const match = t.match(/^festive\s*-\s*(.+)$/i);
+      if (match) {
+        const name = match[1].trim();
+        const key = name.toLowerCase();
+        if (!festivalMap.has(key)) festivalMap.set(key, name);
+      }
+    });
+  });
+
+  if (festivalMap.size === 0) { section.style.display = 'none'; return; }
+
+  let cardsHTML = '';
+  let colorIdx = 0;
+  festivalMap.forEach((label, key) => {
+    const known = FESTIVE_DISPLAY_MAP[key];
+    const title = known ? known.title : `🎉 ${label}`;
+    const color = known ? known.color : FESTIVE_FALLBACK_COLORS[colorIdx++ % FESTIVE_FALLBACK_COLORS.length];
+    const matches = allProductsCache.filter(p =>
+      (p.tags || []).some(t => t.toLowerCase() === `festive - ${key}` || t.toLowerCase() === `festive-${key}`) && p.image
+    );
+    if (matches.length === 0) return;
+    cardsHTML += buildThemeCardHTML(title, color, matches, `filterByFestival('${escapeHtml(key)}', '${escapeHtml(title.replace(/'/g, ""))}')`);
+  });
+
+  if (!cardsHTML) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  row.innerHTML = cardsHTML;
+}
+
+function filterByFestival(festivalKey, title) {
+  const filtered = allProductsCache.filter(p =>
+    (p.tags || []).some(t => {
+      const m = t.match(/^festive\s*-\s*(.+)$/i);
+      return m && m[1].trim().toLowerCase() === festivalKey;
+    })
   );
   renderFilteredProducts(title, filtered);
 }
