@@ -2212,10 +2212,12 @@ function renderThemeCards() {
   const row = $('themeCardsRow');
   if (!allProductsCache || allProductsCache.length === 0) { row.innerHTML = ''; return; }
 
-  // Collect unique tags, case-insensitively, preserving a display label
+  // Collect unique tags, case-insensitively, preserving a display label —
+  // skip "Festive - X" tags entirely, those belong only in the Festive section
   const tagMap = new Map(); // lowercase key -> original-case label
   allProductsCache.forEach(p => {
     (p.tags || []).forEach(t => {
+      if (/^festive\s*-/i.test(t)) return;
       const key = t.toLowerCase();
       if (!tagMap.has(key)) tagMap.set(key, t);
     });
