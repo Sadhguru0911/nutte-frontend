@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=59" />
-  <script src="app.js?v=59" defer></script>
+  <link rel="stylesheet" href="style.css?v=60" />
+  <script src="app.js?v=60" defer></script>
 </head>
 <body>
 
@@ -82,6 +82,16 @@
       <p class="section-desc">Handpicked themes, updated as we go.</p>
     </div>
     <div id="themeCardsRow" class="theme-cards-row"></div>
+  </div>
+
+  <!-- FESTIVE CARDS — dynamic, generated from "Festive - <Name>" tags, hidden until populated -->
+  <div id="festiveCardsSection" class="theme-cards-section" style="display:none">
+    <div style="padding:0 32px">
+      <div class="section-eyebrow">Celebrate</div>
+      <h2 class="section-title">Festive Favorites</h2>
+      <p class="section-desc">Gifting made easy, one festival at a time.</p>
+    </div>
+    <div id="festiveCardsRow" class="theme-cards-row"></div>
   </div>
 
   <!-- FEATURED PARTNER — only shows when a partner is marked Featured -->
@@ -663,9 +673,18 @@
             purchase or communication is strictly between you and the vendor — CommunitE isn't responsible
             for the outcome.
           </div>
-          <p class="tambola-note">Small vendors from our community — say hi, and support each other's shops. Know someone who'd like to be listed here? <a href="#" onclick="closePartnersModal(); openBecomePartnerInfo(); return false;">Tap here to share the application link.</a></p>
+
+          <a href="apply-vendor.html" target="_blank" rel="noopener" class="become-partner-cta">
+            <span class="become-partner-cta-icon">🤝</span>
+            <span>
+              <strong>Run a local shop or stall?</strong>
+              <span class="become-partner-cta-sub">Tap here to apply and get listed →</span>
+            </span>
+          </a>
+
           <div id="partnersGrid" class="partners-grid"></div>
           <p id="partnersEmptyMsg" class="tambola-note" style="display:none">No partners listed yet — check back soon!</p>
+          <p class="tambola-note">Know a vendor who'd rather you send them the link? <a href="#" onclick="closePartnersModal(); openBecomePartnerInfo(); return false;">Tap here to copy the application link.</a></p>
         </div>
 
         <div id="partnerDetailView" style="display:none">
