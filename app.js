@@ -2217,7 +2217,7 @@ function renderThemeCards() {
   const tagMap = new Map(); // lowercase key -> original-case label
   allProductsCache.forEach(p => {
     (p.tags || []).forEach(t => {
-      if (/^festive\s*-/i.test(t)) return;
+      if (parseFestiveTag(t)) return;
       const key = t.toLowerCase();
       if (!tagMap.has(key)) tagMap.set(key, t);
     });
@@ -2281,6 +2281,17 @@ const FESTIVE_DISPLAY_MAP = {
 };
 const FESTIVE_FALLBACK_COLORS = ['#a0522d', '#6b8e23', '#8e44ad', '#c0392b', '#16697a'];
 
+/* Single source of truth for "is this a Festive tag, and if so what's the
+   festival name" — used identically for exclusion (theme cards) and
+   extraction (festive cards), so the two can never disagree. */
+function parseFestiveTag(rawTag) {
+  const tag = (rawTag || '').trim();
+  const match = tag.match(/^festive\s*-\s*(.+)$/i);
+  if (!match) return null;
+  const name = match[1].trim();
+  return name ? { name, key: name.toLowerCase() } : null;
+}
+
 function renderFestiveCards() {
   const section = $('festiveCardsSection');
   const row = $('festiveCardsRow');
@@ -2290,12 +2301,8 @@ function renderFestiveCards() {
   const festivalMap = new Map(); // lowercase festival name -> display label
   allProductsCache.forEach(p => {
     (p.tags || []).forEach(t => {
-      const match = t.match(/^festive\s*-\s*(.+)$/i);
-      if (match) {
-        const name = match[1].trim();
-        const key = name.toLowerCase();
-        if (!festivalMap.has(key)) festivalMap.set(key, name);
-      }
+      const parsed = parseFestiveTag(t);
+      if (parsed && !festivalMap.has(parsed.key)) festivalMap.set(parsed.key, parsed.name);
     });
   });
 
@@ -2308,7 +2315,7 @@ function renderFestiveCards() {
     const title = known ? known.title : `🎉 ${label}`;
     const color = known ? known.color : FESTIVE_FALLBACK_COLORS[colorIdx++ % FESTIVE_FALLBACK_COLORS.length];
     const matches = allProductsCache.filter(p =>
-      (p.tags || []).some(t => t.toLowerCase() === `festive - ${key}` || t.toLowerCase() === `festive-${key}`) && p.image
+      (p.tags || []).some(t => { const parsed = parseFestiveTag(t); return parsed && parsed.key === key; }) && p.image
     );
     if (matches.length === 0) return;
     cardsHTML += buildThemeCardHTML(title, color, matches, `filterByFestival('${escapeHtml(key)}', '${escapeHtml(title.replace(/'/g, ""))}')`);
@@ -2321,10 +2328,7 @@ function renderFestiveCards() {
 
 function filterByFestival(festivalKey, title) {
   const filtered = allProductsCache.filter(p =>
-    (p.tags || []).some(t => {
-      const m = t.match(/^festive\s*-\s*(.+)$/i);
-      return m && m[1].trim().toLowerCase() === festivalKey;
-    })
+    (p.tags || []).some(t => { const parsed = parseFestiveTag(t); return parsed && parsed.key === festivalKey; })
   );
   renderFilteredProducts(title, filtered);
 }
@@ -2365,7 +2369,7 @@ function renderSubcategoryRows() {
     const cardsHTML = buildProductCardsHTML(row.products, `subrow${rowIdx}`);
     return `
       <div class="subcategory-row">
-        <h3 class="subrow-title">${escapeHtml(row.subcategory)}</h3>
+        <h3 class="subrow-title">${escapeHtml(row.subcategory)} <span class="subrow-scroll-hint">Swipe →</span></h3>
         <div class="subrow-scroll">${cardsHTML}</div>
       </div>`;
   }).join('');

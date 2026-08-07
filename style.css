@@ -2591,12 +2591,13 @@ body.overlay-open .floating-cart-bar {
 .subcategory-rows-section { max-width: 1280px; margin: 28px auto 40px; padding: 0 32px; }
 .subcategory-row { margin-bottom: 24px; position: relative; }
 .subrow-title { font-size: 1rem; margin: 0 0 10px; color: var(--ink, #2b2b2b); }
+.subrow-scroll-hint { font-size: 0.72rem; font-weight: 500; color: var(--rd-brown-light, #8a8478); }
 .subrow-scroll {
   display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px;
   -webkit-overflow-scrolling: touch;
 }
 .subrow-scroll::-webkit-scrollbar { height: 4px; }
-.subrow-scroll .product-card { flex: 0 0 auto; width: 280px; }
+.subrow-scroll .product-card { flex: 0 0 auto; width: 190px; }
 
 /* Right-edge fade — visual hint that the row scrolls further */
 .subcategory-row::after {
@@ -2606,7 +2607,7 @@ body.overlay-open .floating-cart-bar {
 }
 
 @media (max-width: 480px) {
-  .subrow-scroll .product-card { width: 88vw; max-width: 320px; }
+  .subrow-scroll .product-card { width: 62vw; max-width: 200px; }
 }
 
 /* ============ PRODUCT FILTER LABEL (theme/discount filtered views) ============ */
