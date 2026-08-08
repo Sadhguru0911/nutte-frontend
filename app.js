@@ -2147,14 +2147,32 @@ function showPartnerDetail(index) {
   $('partnerDetailStory').textContent = p.story || '';
 
   const contactBtn = $('partnerDetailContact');
-  contactBtn.href = p.contact_link || '#';
-  if ((p.contact_link || '').includes('wa.me') || (p.contact_link || '').includes('whatsapp')) {
+  const normalizedContact = normalizeContactLink(p.contact_link);
+  contactBtn.href = normalizedContact || '#';
+  if ((p.contact_link || '').includes('wa.me') || (p.contact_link || '').includes('whatsapp') || /^[\d\s+\-()]+$/.test((p.contact_link || '').trim())) {
     contactBtn.textContent = 'Message on WhatsApp';
   } else if ((p.contact_link || '').includes('instagram')) {
     contactBtn.textContent = 'View on Instagram';
   } else {
     contactBtn.textContent = 'Contact Vendor';
   }
+}
+
+/* Vendors are invited to type a raw phone number or a scheme-less link
+   like "wa.me/91XXXXXXXXXX" — used directly as an href, that becomes a
+   relative link on our own site and 404s. Normalize into something that
+   always resolves to an actual external link. */
+function normalizeContactLink(raw) {
+  const link = (raw || '').trim();
+  if (!link) return '';
+  if (/^https?:\/\//i.test(link)) return link; // already a full URL
+  if (/^[\d\s+\-()]+$/.test(link)) {
+    // Looks like a bare phone number — turn it into a WhatsApp link
+    const digits = link.replace(/\D/g, '');
+    return digits ? `https://wa.me/${digits}` : '';
+  }
+  // Scheme-less domain/path, e.g. "wa.me/91..." or "instagram.com/..."
+  return `https://${link.replace(/^\/+/, '')}`;
 }
 
 function showPartnerDetailByName(name) {
