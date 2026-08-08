@@ -2472,6 +2472,14 @@ body.overlay-open .floating-cart-bar {
   background-position: center; display: flex; align-items: center; justify-content: center;
   font-size: 3rem; margin-bottom: 14px;
 }
+.partner-detail-gallery {
+  display: flex; gap: 8px; overflow-x: auto; margin-bottom: 14px; -webkit-overflow-scrolling: touch;
+}
+.partner-detail-gallery::-webkit-scrollbar { height: 4px; }
+.partner-gallery-img {
+  flex: 0 0 auto; width: 78%; max-width: 260px; aspect-ratio: 16/9; object-fit: cover;
+  border-radius: 10px; background: #f2f0ea; scroll-snap-align: start;
+}
 .partner-detail-name { font-size: 1.15rem; margin: 0 0 2px; }
 .partner-detail-category { font-size: 0.8rem; color: var(--muted, #888); margin: 0 0 12px; }
 .partner-detail-story { font-size: 0.9rem; line-height: 1.6; margin: 0 0 18px; }

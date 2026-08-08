@@ -22,6 +22,16 @@
   }
   textarea{ resize:vertical; min-height:80px; }
   .field{ margin-bottom:16px; }
+  .photo-link-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .photo-link-row input{ margin-bottom:0; }
+  .removePhotoBtn{
+    flex-shrink:0; width:32px; height:32px; border-radius:8px; border:1.5px solid #ddd;
+    background:#fff; color:#a33; font-size:1.1rem; line-height:1; cursor:pointer; padding:0;
+  }
+  .btn-secondary{
+    width:auto; display:inline-block; background:none; border:1.5px dashed #bbb; color:var(--green);
+    font-size:0.85rem; font-weight:600; padding:8px 14px; border-radius:8px; margin-top:2px;
+  }
   button{
     width:100%; padding:13px; border:none; border-radius:24px; background:var(--green); color:#fff;
     font-size:0.95rem; font-weight:700; cursor:pointer; margin-top:6px;
@@ -68,9 +78,12 @@
         <input id="vendorContact" type="text" placeholder="e.g. https://wa.me/919876543210" />
       </div>
       <div class="field">
-        <label>Photo link (optional)</label>
-        <div class="hint">A link to a photo of your shop/products (Google Drive, Instagram post, etc.)</div>
-        <input id="vendorPhoto" type="text" placeholder="https://..." />
+        <label>Photo links (optional)</label>
+        <div class="hint">Add links to photos of your shop or products — Google Drive, GitHub, OneDrive, Instagram, anywhere with a direct shareable link. Add as many as you like.</div>
+        <div id="photoLinksWrap">
+          <input class="photoLinkInput" type="text" placeholder="https://..." />
+        </div>
+        <button type="button" id="addPhotoBtn" class="btn-secondary" onclick="addPhotoField()">+ Add another photo</button>
       </div>
       <button id="submitBtn" onclick="submitApplication()">Submit Application</button>
       <div id="resultMsg" class="result"></div>
@@ -88,12 +101,27 @@
 <script>
   const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
 
+  function addPhotoField() {
+    const wrap = document.getElementById('photoLinksWrap');
+    if (wrap.querySelectorAll('.photoLinkInput').length >= 6) return;
+    const row = document.createElement('div');
+    row.className = 'photo-link-row';
+    row.innerHTML = `<input class="photoLinkInput" type="text" placeholder="https://..." />
+      <button type="button" class="removePhotoBtn" onclick="this.parentElement.remove()">×</button>`;
+    wrap.appendChild(row);
+    document.getElementById('addPhotoBtn').style.display =
+      wrap.querySelectorAll('.photoLinkInput').length >= 6 ? 'none' : 'inline-block';
+  }
+
   async function submitApplication() {
     const vendor_name = document.getElementById('vendorName').value.trim();
     const category = document.getElementById('vendorCategory').value.trim();
     const story = document.getElementById('vendorStory').value.trim();
     const contact_link = document.getElementById('vendorContact').value.trim();
-    const photo_url = document.getElementById('vendorPhoto').value.trim();
+    const photo_urls = Array.from(document.querySelectorAll('.photoLinkInput'))
+      .map(el => el.value.trim())
+      .filter(v => v.length > 0)
+      .join(', ');
 
     const resultEl = document.getElementById('resultMsg');
     resultEl.className = 'result';
@@ -113,7 +141,7 @@
       const res = await fetch(`${apiBase}/api/apply-partner`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vendor_name, category, story, contact_link, photo_url })
+        body: JSON.stringify({ vendor_name, category, story, contact_link, photo_urls })
       });
       const data = await res.json();
       if (res.ok && data.success) {

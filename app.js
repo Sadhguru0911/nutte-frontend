@@ -2123,9 +2123,25 @@ function showPartnerDetail(index) {
   $('partnersListView').style.display = 'none';
   $('partnerDetailView').style.display = 'block';
 
+  const photos = (p.photo_urls && p.photo_urls.length) ? p.photo_urls : (p.photo_url ? [p.photo_url] : []);
   const photoEl = $('partnerDetailPhoto');
-  photoEl.style.backgroundImage = p.photo_url ? `url('${p.photo_url}')` : '';
-  photoEl.textContent = p.photo_url ? '' : '🏪';
+  const galleryEl = $('partnerDetailGallery');
+
+  if (photos.length > 1) {
+    // Multiple photos — show a horizontal scrolling gallery instead of the single hero photo
+    photoEl.style.display = 'none';
+    galleryEl.style.display = 'flex';
+    galleryEl.innerHTML = photos.map(url =>
+      `<img src="${url}" class="partner-gallery-img" onerror="this.style.display='none'" />`
+    ).join('');
+  } else {
+    galleryEl.style.display = 'none';
+    galleryEl.innerHTML = '';
+    photoEl.style.display = 'flex';
+    photoEl.style.backgroundImage = photos[0] ? `url('${photos[0]}')` : '';
+    photoEl.textContent = photos[0] ? '' : '🏪';
+  }
+
   $('partnerDetailName').textContent = p.vendor_name || 'Vendor';
   $('partnerDetailCategory').textContent = p.category || '';
   $('partnerDetailStory').textContent = p.story || '';
