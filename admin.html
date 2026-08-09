@@ -149,11 +149,25 @@
 
     <!-- ORDERS TAB -->
     <div class="tab-panel active" id="tab-orders">
+
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong>Sales summary by delivery date</strong>
+        <table id="salesSummaryTable" style="margin-top:10px">
+          <thead><tr><th>Delivery Date</th><th>Orders</th><th>Total Value</th></tr></thead>
+          <tbody id="salesSummaryBody"></tbody>
+        </table>
+        <div id="salesSummaryEmpty" class="empty-note" style="display:none">No orders yet.</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px">
           <strong>Recent orders</strong>
-          <button class="btn-outline" onclick="loadOrders()">↻ Refresh</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="orderDateFilter" onchange="filterOrdersByDate(this.value)"><option value="">All delivery dates</option></select>
+            <button class="btn-outline" onclick="loadOrders()">↻ Refresh</button>
+          </div>
         </div>
+        <div id="orderFilterTotal" class="summary-warning" style="display:none;background:#e6f4ea;color:var(--green-dark)"></div>
         <div id="ordersLoading" class="loading-note">Loading orders…</div>
         <table id="ordersTable" style="display:none">
           <thead>
@@ -174,6 +188,7 @@
         <strong>Packing list by delivery date</strong>
         <div class="summary-controls" style="margin-top:12px">
           <select id="deliveryDateSelect"><option value="">Loading dates…</option></select>
+          <button class="btn-outline" onclick="loadDeliveryDates()">↻ Refresh dates</button>
           <button class="btn-primary" onclick="loadDeliverySummary()">Generate Summary</button>
         </div>
 
@@ -311,6 +326,14 @@ function handleAuthFailure(data) {
 }
 
 /* ---- Orders tab ---- */
+let allOrdersCache = [];
+let currentOrderDateFilter = '';
+
+function parseAmount(v) {
+  const n = parseFloat(String(v ?? '').replace(/[^0-9.-]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+
 async function loadOrders() {
   document.getElementById('ordersLoading').style.display = 'block';
   document.getElementById('ordersTable').style.display = 'none';
@@ -322,12 +345,73 @@ async function loadOrders() {
     document.getElementById('ordersLoading').style.display = 'none';
     if (!data.success || !data.orders || data.orders.length === 0) {
       document.getElementById('ordersEmpty').style.display = 'block';
+      allOrdersCache = [];
+      renderSalesSummary();
+      populateOrderDateFilter();
       return;
     }
-    renderOrders(data.orders);
+    allOrdersCache = data.orders;
+    populateOrderDateFilter();
+    renderSalesSummary();
+    filterOrdersByDate(currentOrderDateFilter); // re-apply whatever filter was active, if any
   } catch (e) {
     document.getElementById('ordersLoading').textContent = 'Could not load orders.';
   }
+}
+
+function populateOrderDateFilter() {
+  const select = document.getElementById('orderDateFilter');
+  const dates = [...new Set(allOrdersCache.map(o => o.delivery_date).filter(Boolean))].sort().reverse();
+  const prevValue = select.value;
+  select.innerHTML = '<option value="">All delivery dates</option>' + dates.map(d => `<option value="${d}">${d}</option>`).join('');
+  if (dates.includes(prevValue)) select.value = prevValue;
+}
+
+function filterOrdersByDate(date) {
+  currentOrderDateFilter = date;
+  const filtered = date ? allOrdersCache.filter(o => o.delivery_date === date) : allOrdersCache;
+
+  const totalEl = document.getElementById('orderFilterTotal');
+  if (date) {
+    const totalValue = filtered.reduce((sum, o) => sum + parseAmount(o.total_amount), 0);
+    totalEl.style.display = 'block';
+    totalEl.textContent = `${filtered.length} order(s) for ${date} — Total value: ₹${totalValue.toLocaleString('en-IN')}`;
+  } else {
+    totalEl.style.display = 'none';
+  }
+
+  if (filtered.length === 0) {
+    document.getElementById('ordersTable').style.display = 'none';
+    document.getElementById('ordersEmpty').style.display = 'block';
+  } else {
+    document.getElementById('ordersEmpty').style.display = 'none';
+    renderOrders(filtered);
+  }
+}
+
+function renderSalesSummary() {
+  const byDate = {};
+  allOrdersCache.forEach(o => {
+    const d = o.delivery_date || '(no date)';
+    if (!byDate[d]) byDate[d] = { count: 0, total: 0 };
+    byDate[d].count += 1;
+    byDate[d].total += parseAmount(o.total_amount);
+  });
+  const rows = Object.keys(byDate).sort().reverse();
+
+  if (rows.length === 0) {
+    document.getElementById('salesSummaryTable').style.display = 'none';
+    document.getElementById('salesSummaryEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('salesSummaryTable').style.display = 'table';
+  document.getElementById('salesSummaryEmpty').style.display = 'none';
+  document.getElementById('salesSummaryBody').innerHTML = rows.map(d => `
+    <tr>
+      <td data-label="Delivery Date"><a href="#" onclick="document.getElementById('orderDateFilter').value='${d}';filterOrdersByDate('${d}');return false;">${escapeHtml(d)}</a></td>
+      <td data-label="Orders">${byDate[d].count}</td>
+      <td data-label="Total Value">₹${byDate[d].total.toLocaleString('en-IN')}</td>
+    </tr>`).join('');
 }
 
 function renderOrders(orders) {
@@ -351,6 +435,7 @@ function renderOrders(orders) {
   }).join('');
   document.getElementById('ordersTable').style.display = 'table';
 }
+
 
 async function verifyPayment(rowNumber, orderId, btnEl) {
   btnEl.disabled = true;
