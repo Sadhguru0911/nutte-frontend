@@ -2147,11 +2147,12 @@ function showPartnerDetail(index) {
   $('partnerDetailStory').textContent = p.story || '';
 
   const contactBtn = $('partnerDetailContact');
-  const normalizedContact = normalizeContactLink(p.contact_link);
+  const contactRaw = String(p.contact_link == null ? '' : p.contact_link).trim();
+  const normalizedContact = normalizeContactLink(contactRaw);
   contactBtn.href = normalizedContact || '#';
-  if ((p.contact_link || '').includes('wa.me') || (p.contact_link || '').includes('whatsapp') || /^[\d\s+\-()]+$/.test((p.contact_link || '').trim())) {
+  if (contactRaw.includes('wa.me') || contactRaw.includes('whatsapp') || /^[\d\s+\-()]+$/.test(contactRaw)) {
     contactBtn.textContent = 'Message on WhatsApp';
-  } else if ((p.contact_link || '').includes('instagram')) {
+  } else if (contactRaw.includes('instagram')) {
     contactBtn.textContent = 'View on Instagram';
   } else {
     contactBtn.textContent = 'Contact Vendor';
@@ -2163,7 +2164,7 @@ function showPartnerDetail(index) {
    relative link on our own site and 404s. Normalize into something that
    always resolves to an actual external link. */
 function normalizeContactLink(raw) {
-  const link = (raw || '').trim();
+  const link = String(raw == null ? '' : raw).trim();
   if (!link) return '';
   if (/^https?:\/\//i.test(link)) return link; // already a full URL
   if (/^[\d\s+\-()]+$/.test(link)) {
