@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>CommunitE Admin</title>
+<style>
+  :root{
+    --green:#2d8a5e; --green-dark:#1a5c3a; --ink:#2b2b2b; --bg:#faf8f4;
+    --muted:#888; --border:#e2e0da; --white:#fff; --gold:#d4a017;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink);
+    margin:0; padding:0 0 60px;
+  }
+  header{
+    background:var(--ink); color:#fff; padding:16px 20px; display:flex; align-items:center;
+    justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  header h1{ font-size:1.1rem; margin:0; }
+  header .sub{ font-size:0.75rem; opacity:0.6; }
+  #logoutBtn{
+    background:none; border:1px solid rgba(255,255,255,0.3); color:#fff; padding:6px 12px;
+    border-radius:8px; font-size:0.78rem; cursor:pointer;
+  }
+
+  /* ---- Login gate ---- */
+  #loginScreen{
+    max-width:360px; margin:80px auto; padding:0 20px; text-align:center;
+  }
+  #loginScreen h2{ margin-bottom:6px; }
+  #loginScreen p{ color:var(--muted); font-size:0.88rem; margin-bottom:20px; }
+  #passcodeInput{
+    width:100%; padding:12px 14px; border:1.5px solid #ccc; border-radius:8px; font-size:1rem;
+    text-align:center; letter-spacing:2px; margin-bottom:10px;
+  }
+  #loginBtn{
+    width:100%; padding:12px; border:none; border-radius:24px; background:var(--green); color:#fff;
+    font-size:0.95rem; font-weight:700; cursor:pointer;
+  }
+  #loginError{ color:#c0392b; font-size:0.82rem; margin-top:10px; display:none; }
+
+  /* ---- Dashboard shell ---- */
+  #dashboard{ display:none; max-width:1100px; margin:0 auto; padding:0 20px; }
+  .tabs{ display:flex; gap:6px; margin:20px 0; flex-wrap:wrap; }
+  .tab-btn{
+    padding:9px 16px; border-radius:999px; border:1.5px solid var(--border); background:#fff;
+    font-size:0.85rem; font-weight:600; cursor:pointer; color:var(--ink);
+  }
+  .tab-btn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .tab-badge{
+    display:inline-block; background:var(--gold); color:#3a2a00; font-size:0.68rem; font-weight:800;
+    border-radius:999px; padding:1px 6px; margin-left:5px;
+  }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px; }
+  .empty-note{ color:var(--muted); font-size:0.88rem; padding:20px; text-align:center; }
+  .loading-note{ color:var(--muted); font-size:0.85rem; padding:14px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:0.85rem; }
+  th{ text-align:left; padding:8px 10px; border-bottom:2px solid var(--border); font-size:0.75rem;
+      text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); }
+  td{ padding:10px; border-bottom:1px solid #f0efe9; vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+
+  .badge{ display:inline-block; padding:3px 9px; border-radius:999px; font-size:0.72rem; font-weight:700; }
+  .badge--pending{ background:#fff3cd; color:#8a6416; }
+  .badge--verified, .badge--active, .badge--approved{ background:#e6f4ea; color:var(--green-dark); }
+
+  .btn-sm{
+    padding:6px 12px; border-radius:999px; border:none; background:var(--green); color:#fff;
+    font-size:0.78rem; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .btn-sm:hover{ background:var(--green-dark); }
+  .btn-sm:disabled{ background:#ccc; cursor:default; }
+  .btn-outline{
+    padding:6px 12px; border-radius:999px; border:1.5px solid var(--border); background:#fff;
+    font-size:0.78rem; font-weight:600; cursor:pointer;
+  }
+
+  .items-cell{ max-width:220px; white-space:pre-line; font-size:0.78rem; color:#555; }
+  .rr-cell{ font-family:monospace; font-size:0.82rem; }
+
+  /* ---- Delivery summary tab ---- */
+  .summary-controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  .summary-controls select{ padding:9px 12px; border-radius:8px; border:1.5px solid var(--border); font-size:0.88rem; }
+  .summary-stats{ display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+  .summary-stat{ background:#f6f5f0; border-radius:10px; padding:10px 16px; font-size:0.82rem; }
+  .summary-stat strong{ display:block; font-size:1.3rem; font-family:Georgia, serif; }
+  .summary-warning{ background:#fff3cd; color:#8a6416; border-radius:8px; padding:8px 12px; font-size:0.82rem; margin-bottom:12px; }
+  #summaryTextarea{
+    width:100%; min-height:220px; padding:12px; border:1.5px solid var(--border); border-radius:10px;
+    font-family:monospace; font-size:0.85rem; margin-bottom:12px; resize:vertical;
+  }
+  .vendor-phone-row{ display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+  .vendor-phone-row input{ padding:9px 12px; border-radius:8px; border:1.5px solid var(--border); font-size:0.88rem; flex:1; min-width:180px; }
+  .summary-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .btn-primary{
+    padding:11px 20px; border-radius:999px; border:none; background:var(--green); color:#fff;
+    font-size:0.88rem; font-weight:700; cursor:pointer;
+  }
+  .btn-primary:hover{ background:var(--green-dark); }
+
+  .partner-story{ font-size:0.8rem; color:#555; max-width:280px; }
+  .partner-photos{ display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+  .partner-photos img{ width:44px; height:44px; object-fit:cover; border-radius:6px; }
+
+  @media (max-width: 720px){
+    table, thead, tbody, tr, th, td{ display:block; }
+    thead{ display:none; }
+    tr{ border:1px solid var(--border); border-radius:10px; margin-bottom:10px; padding:8px 10px; }
+    td{ border:none; padding:4px 0; }
+    td::before{ content: attr(data-label); font-weight:700; font-size:0.7rem; text-transform:uppercase;
+                color:var(--muted); display:block; margin-bottom:2px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- LOGIN GATE -->
+  <div id="loginScreen">
+    <h2>🔐 CommunitE Admin</h2>
+    <p>Enter the admin passcode to continue.</p>
+    <input id="passcodeInput" type="password" placeholder="Passcode" autocomplete="off" />
+    <button id="loginBtn">Enter Dashboard</button>
+    <p id="loginError">Incorrect passcode — please try again.</p>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard">
+    <header>
+      <div>
+        <h1>CommunitE Admin</h1>
+        <div class="sub">Orders · Delivery · Memberships · Listings</div>
+      </div>
+      <button id="logoutBtn">Log out</button>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="orders">Orders</button>
+      <button class="tab-btn" data-tab="delivery">Delivery Summary</button>
+      <button class="tab-btn" data-tab="memberships">Memberships <span id="membershipBadge" class="tab-badge" style="display:none">0</span></button>
+      <button class="tab-btn" data-tab="partners">Community Listings <span id="partnerBadge" class="tab-badge" style="display:none">0</span></button>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="tab-panel active" id="tab-orders">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong>Recent orders</strong>
+          <button class="btn-outline" onclick="loadOrders()">↻ Refresh</button>
+        </div>
+        <div id="ordersLoading" class="loading-note">Loading orders…</div>
+        <table id="ordersTable" style="display:none">
+          <thead>
+            <tr>
+              <th>Order</th><th>Customer</th><th>Delivery</th><th>Items</th>
+              <th>Total</th><th>UPI RR #</th><th>Payment</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+        <div id="ordersEmpty" class="empty-note" style="display:none">No orders yet.</div>
+      </div>
+    </div>
+
+    <!-- DELIVERY SUMMARY TAB -->
+    <div class="tab-panel" id="tab-delivery">
+      <div class="card">
+        <strong>Packing list by delivery date</strong>
+        <div class="summary-controls" style="margin-top:12px">
+          <select id="deliveryDateSelect"><option value="">Loading dates…</option></select>
+          <button class="btn-primary" onclick="loadDeliverySummary()">Generate Summary</button>
+        </div>
+
+        <div id="summaryResults" style="display:none">
+          <div class="summary-stats">
+            <div class="summary-stat"><strong id="summaryOrderCount">0</strong>Total orders</div>
+            <div class="summary-stat"><strong id="summaryVerifiedCount">0</strong>Payment verified</div>
+            <div class="summary-stat"><strong id="summaryPendingCount">0</strong>Still pending</div>
+          </div>
+          <div id="summaryWarning" class="summary-warning" style="display:none"></div>
+
+          <div class="vendor-phone-row">
+            <label for="vendorPhoneInput" style="font-size:0.82rem;font-weight:600">Vendor WhatsApp #:</label>
+            <input id="vendorPhoneInput" type="text" placeholder="e.g. 919876543210 (with country code, no +)" />
+          </div>
+
+          <textarea id="summaryTextarea" readonly></textarea>
+
+          <div class="summary-actions">
+            <button class="btn-primary" onclick="sendSummaryToWhatsApp()">📲 Send via WhatsApp</button>
+            <button class="btn-outline" onclick="copySummaryText()">Copy Text</button>
+          </div>
+        </div>
+        <div id="summaryEmpty" class="empty-note" style="display:none">No orders found for that delivery date.</div>
+      </div>
+    </div>
+
+    <!-- MEMBERSHIPS TAB -->
+    <div class="tab-panel" id="tab-memberships">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong>Pending membership requests</strong>
+          <button class="btn-outline" onclick="loadMemberships()">↻ Refresh</button>
+        </div>
+        <div id="membershipsLoading" class="loading-note">Loading…</div>
+        <table id="membershipsTable" style="display:none">
+          <thead>
+            <tr><th>Name</th><th>Mobile</th><th>Plan</th><th>Amount</th><th>RR Number</th><th>Submitted</th><th></th></tr>
+          </thead>
+          <tbody id="membershipsBody"></tbody>
+        </table>
+        <div id="membershipsEmpty" class="empty-note" style="display:none">No pending membership requests. 🎉</div>
+      </div>
+    </div>
+
+    <!-- PARTNERS TAB -->
+    <div class="tab-panel" id="tab-partners">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong>Pending Community Listing applications</strong>
+          <button class="btn-outline" onclick="loadPartners()">↻ Refresh</button>
+        </div>
+        <div id="partnersLoading" class="loading-note">Loading…</div>
+        <table id="partnersTable" style="display:none">
+          <thead>
+            <tr><th>Vendor</th><th>Category</th><th>Story</th><th>Contact</th><th>Photos</th><th>Submitted</th><th></th></tr>
+          </thead>
+          <tbody id="partnersBody"></tbody>
+        </table>
+        <div id="partnersEmpty" class="empty-note" style="display:none">No pending applications.</div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
+let ADMIN_PASSCODE = sessionStorage.getItem('communite_admin_passcode') || '';
+
+/* ---- auth ---- */
+document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+document.getElementById('passcodeInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('communite_admin_passcode');
+  ADMIN_PASSCODE = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'block';
+});
+
+async function attemptLogin() {
+  const val = document.getElementById('passcodeInput').value.trim();
+  if (!val) return;
+  // Validate against a cheap, harmless GET so we don't guess client-side —
+  // the server is the source of truth for whether this passcode is correct.
+  try {
+    const res = await fetch(`${apiBase}/api/admin/delivery-dates?passcode=${encodeURIComponent(val)}`);
+    const data = await res.json();
+    if (res.status === 403) {
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    ADMIN_PASSCODE = val;
+    sessionStorage.setItem('communite_admin_passcode', val);
+    enterDashboard();
+  } catch (e) {
+    document.getElementById('loginError').textContent = 'Could not reach the server — check your connection.';
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function enterDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadOrders();
+  loadDeliveryDates();
+  loadMemberships();
+  loadPartners();
+}
+
+/* Auto-enter if we already have a passcode from this session */
+if (ADMIN_PASSCODE) enterDashboard();
+
+/* ---- tabs ---- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function handleAuthFailure(data) {
+  if (data && data.message === 'Invalid passcode') {
+    alert('Your session passcode was rejected — please log in again.');
+    sessionStorage.removeItem('communite_admin_passcode');
+    location.reload();
+    return true;
+  }
+  return false;
+}
+
+/* ---- Orders tab ---- */
+async function loadOrders() {
+  document.getElementById('ordersLoading').style.display = 'block';
+  document.getElementById('ordersTable').style.display = 'none';
+  document.getElementById('ordersEmpty').style.display = 'none';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/orders?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    document.getElementById('ordersLoading').style.display = 'none';
+    if (!data.success || !data.orders || data.orders.length === 0) {
+      document.getElementById('ordersEmpty').style.display = 'block';
+      return;
+    }
+    renderOrders(data.orders);
+  } catch (e) {
+    document.getElementById('ordersLoading').textContent = 'Could not load orders.';
+  }
+}
+
+function renderOrders(orders) {
+  const body = document.getElementById('ordersBody');
+  body.innerHTML = orders.map(o => {
+    const isVerified = String(o.payment_status).toLowerCase() === 'verified';
+    const badgeClass = isVerified ? 'badge--verified' : 'badge--pending';
+    return `
+      <tr>
+        <td data-label="Order">${escapeHtml(o.order_id)}<br><span style="color:var(--muted);font-size:0.75rem">${escapeHtml(o.timestamp)}</span></td>
+        <td data-label="Customer">${escapeHtml(o.full_name)}<br><span style="color:var(--muted);font-size:0.75rem">${escapeHtml(o.mobile_number)}</span></td>
+        <td data-label="Delivery">${escapeHtml(o.delivery_date)}</td>
+        <td data-label="Items" class="items-cell">${escapeHtml(o.cart_items)}</td>
+        <td data-label="Total">₹${escapeHtml(o.total_amount)}</td>
+        <td data-label="UPI RR #" class="rr-cell">${escapeHtml(o.upi_rr_number || '—')}</td>
+        <td data-label="Payment"><span class="badge ${badgeClass}">${escapeHtml(o.payment_status || 'Pending')}</span></td>
+        <td data-label="">
+          ${isVerified ? '' : `<button class="btn-sm" onclick="verifyPayment(${o.row_number}, '${escapeHtml(o.order_id)}', this)">Verify</button>`}
+        </td>
+      </tr>`;
+  }).join('');
+  document.getElementById('ordersTable').style.display = 'table';
+}
+
+async function verifyPayment(rowNumber, orderId, btnEl) {
+  btnEl.disabled = true;
+  btnEl.textContent = 'Verifying…';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/verify-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE, row_number: rowNumber, order_id: orderId })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (data.success) {
+      loadOrders();
+    } else {
+      alert(data.message || 'Could not verify payment.');
+      btnEl.disabled = false;
+      btnEl.textContent = 'Verify';
+    }
+  } catch (e) {
+    alert('Network error — please try again.');
+    btnEl.disabled = false;
+    btnEl.textContent = 'Verify';
+  }
+}
+
+/* ---- Delivery summary tab ---- */
+async function loadDeliveryDates() {
+  const select = document.getElementById('deliveryDateSelect');
+  try {
+    const res = await fetch(`${apiBase}/api/admin/delivery-dates?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (!data.success || !data.dates || data.dates.length === 0) {
+      select.innerHTML = '<option value="">No upcoming delivery dates</option>';
+      return;
+    }
+    select.innerHTML = data.dates.map(d => `<option value="${d}">${d}</option>`).join('');
+  } catch (e) {
+    select.innerHTML = '<option value="">Could not load dates</option>';
+  }
+}
+
+let lastSummaryText = '';
+
+async function loadDeliverySummary() {
+  const date = document.getElementById('deliveryDateSelect').value;
+  if (!date) return;
+  document.getElementById('summaryResults').style.display = 'none';
+  document.getElementById('summaryEmpty').style.display = 'none';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/delivery-summary?passcode=${encodeURIComponent(ADMIN_PASSCODE)}&date=${encodeURIComponent(date)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (!data.success || !data.items || data.items.length === 0) {
+      document.getElementById('summaryEmpty').style.display = 'block';
+      return;
+    }
+    document.getElementById('summaryOrderCount').textContent = data.order_count;
+    document.getElementById('summaryVerifiedCount').textContent = data.verified_count;
+    document.getElementById('summaryPendingCount').textContent = data.pending_count;
+
+    const warningEl = document.getElementById('summaryWarning');
+    if (data.pending_count > 0) {
+      warningEl.style.display = 'block';
+      warningEl.textContent = `⚠️ ${data.pending_count} order(s) in this batch still have unverified payments — check the Orders tab before shipping.`;
+    } else {
+      warningEl.style.display = 'none';
+    }
+
+    lastSummaryText = data.whatsapp_text;
+    document.getElementById('summaryTextarea').value = data.whatsapp_text;
+    document.getElementById('summaryResults').style.display = 'block';
+  } catch (e) {
+    alert('Could not load the summary — please try again.');
+  }
+}
+
+function copySummaryText() {
+  const textarea = document.getElementById('summaryTextarea');
+  textarea.select();
+  navigator.clipboard?.writeText(textarea.value).catch(() => document.execCommand('copy'));
+  alert('Copied to clipboard.');
+}
+
+function sendSummaryToWhatsApp() {
+  const phone = document.getElementById('vendorPhoneInput').value.trim().replace(/\D/g, '');
+  if (!phone) {
+    alert('Enter the vendor\'s WhatsApp number first (with country code, digits only).');
+    return;
+  }
+  localStorage.setItem('communite_vendor_phone', phone);
+  const text = document.getElementById('summaryTextarea').value;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+/* Remember the vendor's number between visits — convenience only, not sensitive data */
+const savedVendorPhone = localStorage.getItem('communite_vendor_phone');
+if (savedVendorPhone) document.getElementById('vendorPhoneInput').value = savedVendorPhone;
+
+/* ---- Memberships tab ---- */
+async function loadMemberships() {
+  document.getElementById('membershipsLoading').style.display = 'block';
+  document.getElementById('membershipsTable').style.display = 'none';
+  document.getElementById('membershipsEmpty').style.display = 'none';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/memberships/pending?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    document.getElementById('membershipsLoading').style.display = 'none';
+    const list = data.memberships || [];
+    const badge = document.getElementById('membershipBadge');
+    if (list.length > 0) { badge.textContent = list.length; badge.style.display = 'inline-block'; }
+    else { badge.style.display = 'none'; }
+
+    if (!data.success || list.length === 0) {
+      document.getElementById('membershipsEmpty').style.display = 'block';
+      return;
+    }
+    renderMemberships(list);
+  } catch (e) {
+    document.getElementById('membershipsLoading').textContent = 'Could not load membership requests.';
+  }
+}
+
+function renderMemberships(list) {
+  const body = document.getElementById('membershipsBody');
+  body.innerHTML = list.map(m => `
+    <tr>
+      <td data-label="Name">${escapeHtml(m.full_name || '—')}</td>
+      <td data-label="Mobile">${escapeHtml(m.mobile_number)}</td>
+      <td data-label="Plan">${escapeHtml(m.plan)}</td>
+      <td data-label="Amount">₹${escapeHtml(m.amount_paid)}</td>
+      <td data-label="RR Number" class="rr-cell">${escapeHtml(m.rr_number || '—')}</td>
+      <td data-label="Submitted">${escapeHtml(m.submitted_on)}</td>
+      <td data-label=""><button class="btn-sm" onclick="approveMembership('${escapeHtml(m.mobile_number)}', this)">Approve</button></td>
+    </tr>`).join('');
+  document.getElementById('membershipsTable').style.display = 'table';
+}
+
+async function approveMembership(mobile, btnEl) {
+  btnEl.disabled = true;
+  btnEl.textContent = 'Approving…';
+  try {
+    const res = await fetch(`${apiBase}/api/activate-membership`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE, mobile_number: mobile })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (data.success) {
+      loadMemberships();
+    } else {
+      alert(data.message || 'Could not approve this membership.');
+      btnEl.disabled = false;
+      btnEl.textContent = 'Approve';
+    }
+  } catch (e) {
+    alert('Network error — please try again.');
+    btnEl.disabled = false;
+    btnEl.textContent = 'Approve';
+  }
+}
+
+/* ---- Partners tab ---- */
+async function loadPartners() {
+  document.getElementById('partnersLoading').style.display = 'block';
+  document.getElementById('partnersTable').style.display = 'none';
+  document.getElementById('partnersEmpty').style.display = 'none';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/partners/pending?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    document.getElementById('partnersLoading').style.display = 'none';
+    const list = data.partners || [];
+    const badge = document.getElementById('partnerBadge');
+    if (list.length > 0) { badge.textContent = list.length; badge.style.display = 'inline-block'; }
+    else { badge.style.display = 'none'; }
+
+    if (!data.success || list.length === 0) {
+      document.getElementById('partnersEmpty').style.display = 'block';
+      return;
+    }
+    renderPartners(list);
+  } catch (e) {
+    document.getElementById('partnersLoading').textContent = 'Could not load applications.';
+  }
+}
+
+function renderPartners(list) {
+  const body = document.getElementById('partnersBody');
+  body.innerHTML = list.map(p => `
+    <tr>
+      <td data-label="Vendor">${escapeHtml(p.vendor_name)}</td>
+      <td data-label="Category">${escapeHtml(p.category)}</td>
+      <td data-label="Story" class="partner-story">${escapeHtml(p.story)}</td>
+      <td data-label="Contact"><a href="${escapeHtml(p.contact_link)}" target="_blank" rel="noopener">Open link</a></td>
+      <td data-label="Photos"><div class="partner-photos">${(p.photo_urls || []).map(u => `<img src="${escapeHtml(u)}" onerror="this.style.display='none'" />`).join('')}</div></td>
+      <td data-label="Submitted">${escapeHtml(p.submitted_on)}</td>
+      <td data-label=""><button class="btn-sm" onclick="approvePartner(${p.row_number}, '${escapeHtml(p.vendor_name).replace(/'/g, "\\'")}', this)">Approve</button></td>
+    </tr>`).join('');
+  document.getElementById('partnersTable').style.display = 'table';
+}
+
+async function approvePartner(rowNumber, vendorName, btnEl) {
+  btnEl.disabled = true;
+  btnEl.textContent = 'Approving…';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/partners/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE, row_number: rowNumber, vendor_name: vendorName })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (data.success) {
+      loadPartners();
+    } else {
+      alert(data.message || 'Could not approve this listing.');
+      btnEl.disabled = false;
+      btnEl.textContent = 'Approve';
+    }
+  } catch (e) {
+    alert('Network error — please try again.');
+    btnEl.disabled = false;
+    btnEl.textContent = 'Approve';
+  }
+}
+</script>
+</body>
+</html>
