@@ -66,6 +66,7 @@
       text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); }
   td{ padding:10px; border-bottom:1px solid #f0efe9; vertical-align:top; }
   tr:last-child td{ border-bottom:none; }
+  tr.total-row td{ font-weight:800; border-top:2px solid var(--border); }
 
   .badge{ display:inline-block; padding:3px 9px; border-radius:999px; font-size:0.72rem; font-weight:700; }
   .badge--pending{ background:#fff3cd; color:#8a6416; }
@@ -143,21 +144,13 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="orders">Orders</button>
       <button class="tab-btn" data-tab="delivery">Delivery Summary</button>
+      <button class="tab-btn" data-tab="sales">Sales Summary</button>
       <button class="tab-btn" data-tab="memberships">Memberships <span id="membershipBadge" class="tab-badge" style="display:none">0</span></button>
       <button class="tab-btn" data-tab="partners">Community Listings <span id="partnerBadge" class="tab-badge" style="display:none">0</span></button>
     </div>
 
     <!-- ORDERS TAB -->
     <div class="tab-panel active" id="tab-orders">
-
-      <div class="card">
-        <strong>Sales summary by delivery date</strong>
-        <table id="salesSummaryTable" style="margin-top:10px">
-          <thead><tr><th>Delivery Date</th><th>Orders</th><th>Total Value</th></tr></thead>
-          <tbody id="salesSummaryBody"></tbody>
-        </table>
-        <div id="salesSummaryEmpty" class="empty-note" style="display:none">No orders yet.</div>
-      </div>
 
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px">
@@ -214,6 +207,33 @@
         </div>
         <div id="summaryEmpty" class="empty-note" style="display:none">No orders found for that delivery date.</div>
       </div>
+    </div>
+
+    <!-- SALES SUMMARY TAB -->
+    <div class="tab-panel" id="tab-sales">
+      <div class="card">
+        <div class="summary-controls" style="margin-top:0">
+          <label for="yearFilter" style="font-size:0.82rem;font-weight:600;color:var(--muted)">Year</label>
+          <select id="yearFilter" onchange="onSalesYearChange()"><option value="">Loading…</option></select>
+          <label for="monthFilter" style="font-size:0.82rem;font-weight:600;color:var(--muted)">Month</label>
+          <select id="monthFilter" onchange="renderSalesSummaryTable()"><option value="">All months</option></select>
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:6px">Pick a year, then optionally narrow to one month. Leave month on "All months" to see every date in that year at once.</div>
+      </div>
+
+      <div id="salesTabContent" style="display:none">
+        <div class="summary-stats">
+          <div class="summary-stat"><strong id="statOrderCount">0</strong>Orders in view</div>
+          <div class="summary-stat"><strong id="statTotalValue">₹0</strong>Total value</div>
+        </div>
+        <div class="card">
+          <table id="salesSummaryTable">
+            <thead><tr><th>Delivery Date</th><th>Orders</th><th>Total Value</th></tr></thead>
+            <tbody id="salesSummaryBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="salesTabEmpty" class="empty-note" style="display:none">No orders yet.</div>
     </div>
 
     <!-- MEMBERSHIPS TAB -->
@@ -346,13 +366,13 @@ async function loadOrders() {
     if (!data.success || !data.orders || data.orders.length === 0) {
       document.getElementById('ordersEmpty').style.display = 'block';
       allOrdersCache = [];
-      renderSalesSummary();
       populateOrderDateFilter();
+      populateSalesYearFilter();
       return;
     }
     allOrdersCache = data.orders;
     populateOrderDateFilter();
-    renderSalesSummary();
+    populateSalesYearFilter();
     filterOrdersByDate(currentOrderDateFilter); // re-apply whatever filter was active, if any
   } catch (e) {
     document.getElementById('ordersLoading').textContent = 'Could not load orders.';
@@ -389,29 +409,97 @@ function filterOrdersByDate(date) {
   }
 }
 
-function renderSalesSummary() {
+/* ---- Sales Summary tab — shares allOrdersCache with the Orders tab above,
+   so this never needs its own fetch; it just re-slices the same data. ---- */
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function populateSalesYearFilter() {
+  const yearSelect = document.getElementById('yearFilter');
+  const years = [...new Set(
+    allOrdersCache.map(o => (o.delivery_date || '').slice(0, 4)).filter(y => /^\d{4}$/.test(y))
+  )].sort().reverse();
+
+  if (years.length === 0) {
+    yearSelect.innerHTML = '<option value="">No orders yet</option>';
+    document.getElementById('monthFilter').innerHTML = '<option value="">All months</option>';
+    document.getElementById('monthFilter').disabled = true;
+    renderSalesSummaryTable();
+    return;
+  }
+  const prevYear = yearSelect.value;
+  yearSelect.innerHTML = '<option value="">All years</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+  yearSelect.value = years.includes(prevYear) ? prevYear : years[0]; // default to most recent year with orders
+  onSalesYearChange();
+}
+
+function onSalesYearChange() {
+  const year = document.getElementById('yearFilter').value;
+  const monthSelect = document.getElementById('monthFilter');
+
+  if (!year) {
+    monthSelect.innerHTML = '<option value="">All months</option>';
+    monthSelect.disabled = true;
+  } else {
+    const monthsInYear = [...new Set(
+      allOrdersCache
+        .filter(o => (o.delivery_date || '').slice(0, 4) === year)
+        .map(o => (o.delivery_date || '').slice(5, 7))
+    )].sort();
+    monthSelect.disabled = false;
+    monthSelect.innerHTML = '<option value="">All months</option>' +
+      monthsInYear.map(m => `<option value="${m}">${MONTH_NAMES[parseInt(m, 10) - 1]}</option>`).join('');
+  }
+  renderSalesSummaryTable();
+}
+
+function renderSalesSummaryTable() {
+  const year = document.getElementById('yearFilter').value;
+  const month = document.getElementById('monthFilter').value;
+
+  let filtered = allOrdersCache;
+  if (year) filtered = filtered.filter(o => (o.delivery_date || '').slice(0, 4) === year);
+  if (year && month) filtered = filtered.filter(o => (o.delivery_date || '').slice(5, 7) === month);
+
+  if (filtered.length === 0) {
+    document.getElementById('salesTabContent').style.display = 'none';
+    document.getElementById('salesTabEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('salesTabEmpty').style.display = 'none';
+  document.getElementById('salesTabContent').style.display = 'block';
+
   const byDate = {};
-  allOrdersCache.forEach(o => {
+  filtered.forEach(o => {
     const d = o.delivery_date || '(no date)';
     if (!byDate[d]) byDate[d] = { count: 0, total: 0 };
     byDate[d].count += 1;
     byDate[d].total += parseAmount(o.total_amount);
   });
-  const rows = Object.keys(byDate).sort().reverse();
+  const dates = Object.keys(byDate).sort().reverse();
 
-  if (rows.length === 0) {
-    document.getElementById('salesSummaryTable').style.display = 'none';
-    document.getElementById('salesSummaryEmpty').style.display = 'block';
-    return;
-  }
-  document.getElementById('salesSummaryTable').style.display = 'table';
-  document.getElementById('salesSummaryEmpty').style.display = 'none';
-  document.getElementById('salesSummaryBody').innerHTML = rows.map(d => `
+  const grandTotalOrders = filtered.length;
+  const grandTotalValue = dates.reduce((sum, d) => sum + byDate[d].total, 0);
+
+  document.getElementById('statOrderCount').textContent = grandTotalOrders;
+  document.getElementById('statTotalValue').textContent = `₹${grandTotalValue.toLocaleString('en-IN')}`;
+
+  const rowsHtml = dates.map(d => `
     <tr>
-      <td data-label="Delivery Date"><a href="#" onclick="document.getElementById('orderDateFilter').value='${d}';filterOrdersByDate('${d}');return false;">${escapeHtml(d)}</a></td>
+      <td data-label="Delivery Date">${escapeHtml(d)}</td>
       <td data-label="Orders">${byDate[d].count}</td>
       <td data-label="Total Value">₹${byDate[d].total.toLocaleString('en-IN')}</td>
     </tr>`).join('');
+
+  const totalLabel = year && month ? `${MONTH_NAMES[parseInt(month, 10) - 1]} ${year} Total`
+                     : year ? `${year} Total`
+                     : 'Grand Total';
+
+  document.getElementById('salesSummaryBody').innerHTML = rowsHtml + `
+    <tr class="total-row">
+      <td data-label="">${totalLabel}</td>
+      <td data-label="">${grandTotalOrders}</td>
+      <td data-label="">₹${grandTotalValue.toLocaleString('en-IN')}</td>
+    </tr>`;
 }
 
 function renderOrders(orders) {
