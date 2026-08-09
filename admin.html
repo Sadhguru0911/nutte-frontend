@@ -165,7 +165,7 @@
         <table id="ordersTable" style="display:none">
           <thead>
             <tr>
-              <th>Order</th><th>Customer</th><th>Delivery</th><th>Items</th>
+              <th>Order</th><th>Customer</th><th>Address</th><th>Delivery</th><th>Items</th>
               <th>Total</th><th>UPI RR #</th><th>Payment</th><th></th>
             </tr>
           </thead>
@@ -511,6 +511,7 @@ function renderOrders(orders) {
       <tr>
         <td data-label="Order">${escapeHtml(o.order_id)}<br><span style="color:var(--muted);font-size:0.75rem">${escapeHtml(o.timestamp)}</span></td>
         <td data-label="Customer">${escapeHtml(o.full_name)}<br><span style="color:var(--muted);font-size:0.75rem">${escapeHtml(o.mobile_number)}</span></td>
+        <td data-label="Address">${escapeHtml(o.apt_number)}${o.apt_number && o.community ? ', ' : ''}${escapeHtml(o.community)}</td>
         <td data-label="Delivery">${escapeHtml(o.delivery_date)}</td>
         <td data-label="Items" class="items-cell">${escapeHtml(o.cart_items)}</td>
         <td data-label="Total">₹${escapeHtml(o.total_amount)}</td>
