@@ -721,6 +721,20 @@
     </div>
   </div>
 
+  <!-- PRODUCT DETAIL MODAL — shared by every product card; populated on click -->
+  <div id="productDetailModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box modal-box--product-detail">
+      <div class="modal-header">
+        <h2 class="modal-title" id="productDetailModalTitle">Product</h2>
+        <button class="icon-btn" aria-label="Close" onclick="closeProductDetailModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <img id="productDetailModalImg" class="product-detail-modal-img" src="" alt="" />
+        <p id="productDetailModalDesc" class="product-detail-modal-desc"></p>
+      </div>
+    </div>
+  </div>
+
   <!-- TAMBOLA MODAL -->
   <div id="tambolaModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box modal-box--tambola">

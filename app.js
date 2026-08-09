@@ -139,6 +139,7 @@ function bindUI() {
     if ($('sharedTicketModal') && $('sharedTicketModal').style.display !== 'none') closeSharedTicketModal();
     if ($('partnersModal') && $('partnersModal').style.display !== 'none') closePartnersModal();
     if ($('becomePartnerModal') && $('becomePartnerModal').style.display !== 'none') closeBecomePartnerInfo();
+    if ($('productDetailModal') && $('productDetailModal').style.display !== 'none') closeProductDetailModal();
   });
 }
 
@@ -240,6 +241,8 @@ function buildProductCardsHTML(products, idPrefix) {
     const firstPrice = first.price || first['Price (INR)'] || 0;
     const firstMemberPrice = first.member_price || first['Member Price (INR)'] || null;
     const priceHTML = buildPriceHTML(firstPrice, firstMemberPrice, `price_${id}`);
+    const desc = first.description || first['Product Description'] || '';
+    const anyVariantHasDesc = variants.some(v => (v.description || v['Product Description'] || '').trim());
 
     return `
       <div class="product-card ripple-card" id="${id}" style="animation-delay:${i * 70}ms">
@@ -249,7 +252,8 @@ function buildProductCardsHTML(products, idPrefix) {
         </div>
         <div class="product-card-body">
           <div class="product-title">${escapeHtml(name)}</div>
-          <div class="product-desc">${escapeHtml(first.description || first['Product Description'] || '')}</div>
+          <div class="product-desc">${escapeHtml(desc)}</div>
+          ${anyVariantHasDesc ? `<button type="button" class="product-details-link" onclick="showProductDetail('${id}')"><i class="fas fa-circle-info"></i> Details</button>` : ''}
           <div class="controls-row">
             <select class="variant-select" id="variant_${id}" onchange="updateProductDisplay('${id}')">
               ${variants.map(v => {
@@ -345,6 +349,38 @@ function updateProductDisplay(unique) {
   if (imgEl && img) imgEl.src = img;
   const descEl = document.querySelector(`#${unique} .product-desc`);
   if (descEl && desc !== undefined) descEl.textContent = desc;
+}
+
+/* Product description now lives hidden in the card (see .product-desc CSS) so
+   the card stays compact on every screen size — this opens it in a shared
+   modal on demand instead. Reads whatever's currently in that hidden div, so
+   it always reflects the selected variant. */
+function showProductDetail(id) {
+  const card = $(id);
+  if (!card) return;
+  const name = card.querySelector('.product-title')?.textContent || 'Product';
+  const desc = card.querySelector('.product-desc')?.textContent?.trim() || 'No description available yet.';
+  const imgEl = card.querySelector('.product-img-wrap img');
+
+  $('productDetailModalTitle').textContent = name;
+  $('productDetailModalDesc').textContent = desc;
+  const modalImg = $('productDetailModalImg');
+  if (imgEl && imgEl.src) {
+    modalImg.src = imgEl.src;
+    modalImg.style.display = '';
+  } else {
+    modalImg.style.display = 'none';
+  }
+
+  $('overlay').style.display = 'block';
+  $('productDetailModal').style.display = 'flex';
+  $('productDetailModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeProductDetailModal() {
+  $('overlay').style.display = 'none';
+  $('productDetailModal').style.display = 'none';
+  $('productDetailModal').setAttribute('aria-hidden', 'true');
 }
 
 /* Build price HTML — shows dual price or single */

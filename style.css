@@ -593,7 +593,15 @@ main {
 .product-card:hover img { transform: scale(1.04); }
 .product-card-body { padding: 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .product-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
-.product-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; min-height: 38px; }
+.product-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; display: none; }
+.product-details-link {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-size: 0.78rem; font-weight: 600; color: var(--muted);
+  display: inline-flex; align-items: center; gap: 5px; align-self: flex-start;
+  transition: color 0.15s;
+}
+.product-details-link i { font-size: 0.76rem; }
+.product-details-link:hover { color: var(--green); }
 .product-price { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.2rem; color: var(--green); }
 
 .controls-row {
@@ -1196,6 +1204,12 @@ main {
 
 /* Tambola modal */
 .modal-box--tambola { max-width: 620px; max-height: 85vh; overflow-y: auto; }
+
+.modal-box--product-detail { max-width: 440px; }
+.product-detail-modal-img {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 12px; margin-bottom: 14px;
+}
+.product-detail-modal-desc { font-size: 0.92rem; line-height: 1.6; color: var(--black, #2b2b2b); }
 
 .dice-bounce {
   display: inline-block; margin-right: 8px; font-size: 1.2em;
@@ -1969,7 +1983,6 @@ main {
   .product-img-wrap img { border-radius: 16px 16px 0 0; }
   .product-card-body { padding: 12px 14px 6px; }
   .product-title { font-size: 0.9rem; }
-  .product-desc { display: none; }
   .product-card-footer { padding: 8px 14px 14px; flex-direction: column; align-items: stretch; gap: 10px; }
   .add-btn { padding: 10px 14px; font-size: 0.85rem; gap: 6px; width: 100%; justify-content: center; }
   .controls-row { flex-wrap: wrap; }
@@ -2606,6 +2619,17 @@ body.overlay-open .floating-cart-bar {
 }
 .subrow-scroll::-webkit-scrollbar { height: 4px; }
 .subrow-scroll .product-card { flex: 0 0 auto; width: 190px; }
+
+/* These cards are always narrower than the main grid, so the variant
+   dropdown and quantity stepper never fit on one line — stack them instead
+   of letting the quantity buttons get clipped off the right edge. */
+.subrow-scroll .controls-row { flex-wrap: wrap; row-gap: 8px; }
+.subrow-scroll .variant-select { flex: 1 1 100%; }
+.subrow-scroll .qty-control { flex: 1 1 100%; justify-content: center; }
+
+@media (min-width: 961px) {
+  .subrow-scroll .product-card { width: 220px; }
+}
 
 /* Right-edge fade — visual hint that the row scrolls further */
 .subcategory-row::after {
