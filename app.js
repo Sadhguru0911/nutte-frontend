@@ -2405,9 +2405,45 @@ function renderSubcategoryRows() {
     return `
       <div class="subcategory-row">
         <h3 class="subrow-title">${escapeHtml(row.subcategory)} <span class="subrow-scroll-hint">Swipe →</span></h3>
-        <div class="subrow-scroll">${cardsHTML}</div>
+        <button class="subrow-arrow subrow-arrow--prev" aria-label="Scroll left" onclick="scrollSubrow(${rowIdx}, -1)">‹</button>
+        <div class="subrow-scroll" id="subrowScroll${rowIdx}" onscroll="updateSubrowArrows(${rowIdx})">${cardsHTML}</div>
+        <button class="subrow-arrow subrow-arrow--next" aria-label="Scroll right" onclick="scrollSubrow(${rowIdx}, 1)">›</button>
       </div>`;
   }).join('');
 
   section.querySelectorAll('.product-card').forEach(el => { observeCard(el); initRipple(el); });
+
+  // Desktop-only: hide/disable arrows appropriately once layout has settled
+  rows.forEach((_, rowIdx) => updateSubrowArrows(rowIdx));
+}
+
+/* Scroll a subcategory row ~2 card-widths in the given direction (-1 = left, 1 = right).
+   Desktop-only control — mobile still uses native swipe. */
+function scrollSubrow(rowIdx, direction) {
+  const track = $(`subrowScroll${rowIdx}`);
+  if (!track) return;
+  const card = track.querySelector('.product-card');
+  const step = card ? (card.offsetWidth + 14) * 2 : 400; // 14px = row gap
+  track.scrollBy({ left: step * direction, behavior: 'smooth' });
+  setTimeout(() => updateSubrowArrows(rowIdx), 350);
+}
+
+/* Disable prev/next arrows at scroll edges; hide both if the row doesn't overflow at all */
+function updateSubrowArrows(rowIdx) {
+  const track = $(`subrowScroll${rowIdx}`);
+  if (!track) return;
+  const row = track.closest('.subcategory-row');
+  const prevBtn = row.querySelector('.subrow-arrow--prev');
+  const nextBtn = row.querySelector('.subrow-arrow--next');
+  const maxScroll = track.scrollWidth - track.clientWidth;
+
+  if (maxScroll <= 4) {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    return;
+  }
+  prevBtn.style.display = '';
+  nextBtn.style.display = '';
+  prevBtn.disabled = track.scrollLeft <= 4;
+  nextBtn.disabled = track.scrollLeft >= maxScroll - 4;
 }

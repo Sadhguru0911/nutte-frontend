@@ -2618,6 +2618,39 @@ body.overlay-open .floating-cart-bar {
   .subrow-scroll .product-card { width: 62vw; max-width: 200px; }
 }
 
+/* Desktop-only prev/next arrows for subcategory rows — mouse users have no
+   swipe gesture, so the row needs a visible way to scroll further */
+.subrow-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  z-index: 5;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  transition: background 0.2s, transform 0.15s;
+}
+.subrow-arrow:hover { background: var(--green); }
+.subrow-arrow--prev { left: -14px; }
+.subrow-arrow--next { right: -14px; }
+.subrow-arrow[disabled] { opacity: 0.25; cursor: default; pointer-events: none; }
+
+/* Only show on real desktops with a mouse — mobile keeps the swipe gesture */
+@media (min-width: 961px) and (hover: hover) and (pointer: fine) {
+  .subrow-arrow { display: flex; }
+  .subrow-scroll-hint { display: none; }
+}
+
 /* ============ PRODUCT FILTER LABEL (theme/discount filtered views) ============ */
 .product-filter-label {
   display: flex; align-items: center; justify-content: space-between;

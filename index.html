@@ -94,9 +94,9 @@
     <div id="festiveCardsRow" class="theme-cards-row"></div>
   </div>
 
-  <!-- FEATURED PARTNER — only shows when a partner is marked Featured -->
+  <!-- FEATURED LISTING — only shows when a listing is marked Featured -->
   <div id="featuredPartnerBanner" class="featured-partner-banner" style="display:none" onclick="openPartnersModal(); showPartnerDetailByName(featuredPartnerNameForClick);">
-    <span class="featured-partner-tag">🌟 Featured Community Partner</span>
+    <span class="featured-partner-tag">🌟 Featured Community Listing</span>
     <div class="featured-partner-body">
       <img id="featuredPartnerPhoto" class="featured-partner-photo" src="" alt="" />
       <div>
@@ -233,7 +233,7 @@
     </div>
   </section>
 
-  <!-- COMMUNITY — Tambola, Community Partners, Reels (membership now has its own section above) -->
+  <!-- COMMUNITY — Tambola, Community Listings, Reels (membership now has its own section above) -->
   <section class="community-section">
     <div class="section-eyebrow">More Than Shopping</div>
     <div class="section-title">Your community hub</div>
@@ -249,8 +249,8 @@
       <div class="community-card" onclick="openPartnersModal()">
         <div class="community-icon">🤝</div>
         <div>
-          <h3>Community Partners</h3>
-          <p>Discover local vendors from your neighborhood. Small businesses, supported by your community.</p>
+          <h3>Community Listings</h3>
+          <p>Small businesses who list with CommunitE.</p>
         </div>
       </div>
       <div class="community-card" onclick="openReels()">
@@ -316,7 +316,7 @@
       <span onclick="scrollToSection('shopSection')" style="cursor:pointer">Shop</span>
       <span onclick="openMembershipModal()" style="cursor:pointer">Membership</span>
       <span onclick="openAbout()" style="cursor:pointer">About Us</span>
-      <span onclick="openPartnersModal()" style="cursor:pointer">Community Partners</span>
+      <span onclick="openPartnersModal()" style="cursor:pointer">Community Listings</span>
       <a href="https://instagram.com/dryfruits_communitE" target="_blank" rel="noopener">Instagram</a>
     </div>
     <div class="footer-divider"></div>
@@ -655,18 +655,18 @@
     </div>
   </div>
 
-  <!-- COMMUNITY PARTNERS MODAL -->
+  <!-- COMMUNITY LISTINGS MODAL -->
   <div id="partnersModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box modal-box--tambola">
       <div class="modal-header">
-        <h2 class="modal-title">🤝 Community Partners</h2>
+        <h2 class="modal-title">🤝 Community Listings</h2>
         <button class="icon-btn" aria-label="Close" onclick="closePartnersModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
 
         <div id="partnersListView">
           <div class="partners-disclaimer">
-            ⚠️ <strong>Community Partners are independent local vendors</strong> — not employees, agents,
+            ⚠️ <strong>Community Listings are independent vendors</strong> — not employees, agents,
             or business partners of CommunitE. Listing here isn't an endorsement or guarantee of quality,
             safety, or any claims made by the vendor (including food safety licensing). Descriptions and
             contact details are provided directly by the vendor and aren't independently verified. Any
@@ -677,18 +677,18 @@
           <a href="apply-vendor.html" target="_blank" rel="noopener" class="become-partner-cta">
             <span class="become-partner-cta-icon">🤝</span>
             <span>
-              <strong>Run a local shop or stall?</strong>
+              <strong>Run a shop or stall?</strong>
               <span class="become-partner-cta-sub">Tap here to apply and get listed →</span>
             </span>
           </a>
 
           <div id="partnersGrid" class="partners-grid"></div>
-          <p id="partnersEmptyMsg" class="tambola-note" style="display:none">No partners listed yet — check back soon!</p>
+          <p id="partnersEmptyMsg" class="tambola-note" style="display:none">No listings yet — check back soon!</p>
           <p class="tambola-note">Know a vendor who'd rather you send them the link? <a href="#" onclick="closePartnersModal(); openBecomePartnerInfo(); return false;">Tap here to copy the application link.</a></p>
         </div>
 
         <div id="partnerDetailView" style="display:none">
-          <button class="btn-text" style="margin-bottom:12px" onclick="showPartnersListView()">← Back to all partners</button>
+          <button class="btn-text" style="margin-bottom:12px" onclick="showPartnersListView()">← Back to all listings</button>
           <div id="partnerDetailPhoto" class="partner-detail-photo"></div>
           <div id="partnerDetailGallery" class="partner-detail-gallery" style="display:none"></div>
           <h3 id="partnerDetailName" class="partner-detail-name"></h3>
@@ -704,7 +704,7 @@
     </div>
   </div>
 
-  <!-- BECOME A PARTNER INFO MODAL — shows the shareable application link -->
+  <!-- SHARE LISTING APPLICATION MODAL — shows the shareable application link -->
   <div id="becomePartnerModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box">
       <div class="modal-header">
@@ -712,7 +712,7 @@
         <button class="icon-btn" aria-label="Close" onclick="closeBecomePartnerInfo()"><span class="icon-x" aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
-        <p class="tambola-note">Send this link to any vendor who'd like to be listed as a Community Partner. They fill it in themselves — it lands as pending until you review and approve it.</p>
+        <p class="tambola-note">Send this link to any vendor who'd like to be added to Community Listings. They fill it in themselves — it lands as pending until you review and approve it.</p>
         <div class="inline-row">
           <input id="partnerApplyLinkInput" class="field-input" type="text" readonly />
           <button class="btn-secondary" onclick="copyPartnerApplyLink()">Copy</button>
