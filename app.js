@@ -140,6 +140,7 @@ function bindUI() {
     if ($('partnersModal') && $('partnersModal').style.display !== 'none') closePartnersModal();
     if ($('becomePartnerModal') && $('becomePartnerModal').style.display !== 'none') closeBecomePartnerInfo();
     if ($('productDetailModal') && $('productDetailModal').style.display !== 'none') closeProductDetailModal();
+    if ($('returnsPolicyModal') && $('returnsPolicyModal').style.display !== 'none') closeReturnsPolicyModal();
   });
 }
 
@@ -381,6 +382,18 @@ function closeProductDetailModal() {
   $('overlay').style.display = 'none';
   $('productDetailModal').style.display = 'none';
   $('productDetailModal').setAttribute('aria-hidden', 'true');
+}
+
+function openReturnsPolicyModal() {
+  $('overlay').style.display = 'block';
+  $('returnsPolicyModal').style.display = 'flex';
+  $('returnsPolicyModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeReturnsPolicyModal() {
+  $('overlay').style.display = 'none';
+  $('returnsPolicyModal').style.display = 'none';
+  $('returnsPolicyModal').setAttribute('aria-hidden', 'true');
 }
 
 /* Build price HTML — shows dual price or single */

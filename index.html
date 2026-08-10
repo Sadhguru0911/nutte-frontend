@@ -124,6 +124,10 @@
   <!-- SHOP SECTION — Search + Categories + Subcategories + Products -->
   <section id="shopSection" class="shop-section">
 
+    <div class="storage-tip-banner">
+      🌿 <strong>Keeping it fresh:</strong> Store in an airtight container, away from sunlight and heat. In humid weather, refrigerating extends freshness — most nuts and dried fruits stay good for 3–4 months this way.
+    </div>
+
     <!-- Search bar — TOP, full width -->
     <div class="shop-search">
       <div class="search-always-inner">
@@ -317,6 +321,7 @@
       <span onclick="openMembershipModal()" style="cursor:pointer">Membership</span>
       <span onclick="openAbout()" style="cursor:pointer">About Us</span>
       <span onclick="openPartnersModal()" style="cursor:pointer">Community Listings</span>
+      <span onclick="openReturnsPolicyModal()" style="cursor:pointer">Returns Policy</span>
       <a href="https://instagram.com/dryfruits_communitE" target="_blank" rel="noopener">Instagram</a>
     </div>
     <div class="footer-divider"></div>
@@ -456,6 +461,10 @@
             <label class="field-label">UPI Transaction ID / RR Number <span style="color:var(--green)">*</span></label>
             <input id="orderRRNumber" class="field-input" type="text" inputmode="numeric" maxlength="12" placeholder="12-digit transaction ID" oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)" />
           </div>
+          <p class="checkout-policy-note">
+            By confirming, you agree to our <a href="#" onclick="openReturnsPolicyModal(); return false;">Returns Policy</a> —
+            replacement within 10 days of delivery for quality issues.
+          </p>
           <div class="payment-step-actions">
             <button class="btn-secondary" onclick="backToDetailsStep()"><i class="fas fa-arrow-left"></i> Back</button>
             <button id="confirmOrderBtn" class="btn-primary" onclick="submitOrderWithPayment()">Confirm Order <i class="fas fa-check"></i></button>
@@ -731,6 +740,30 @@
       <div class="modal-body">
         <img id="productDetailModalImg" class="product-detail-modal-img" src="" alt="" />
         <p id="productDetailModalDesc" class="product-detail-modal-desc"></p>
+        <p class="product-detail-storage-tip">🌿 <strong>Storage tip:</strong> Keep in an airtight container, away from sunlight and heat. Refrigerate in humid weather for longer freshness.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETURNS POLICY MODAL -->
+  <div id="returnsPolicyModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">↩️ Returns Policy</h2>
+        <button class="icon-btn" aria-label="Close" onclick="closeReturnsPolicyModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="policy-note">
+          Since we deal in food items, we don't accept returns for change of mind or personal taste preference.
+        </p>
+        <p class="policy-note">
+          If a product arrives damaged, is the wrong item, or has a genuine quality issue, we'll replace it —
+          just reach out within <strong>10 days of delivery</strong> with a photo of the product. Once we confirm
+          the issue, we'll arrange a replacement with your next delivery cycle.
+        </p>
+        <p class="policy-note">
+          To report an issue, message us on WhatsApp or call <a href="tel:+918951048013">+91 89510 48013</a>.
+        </p>
       </div>
     </div>
   </div>

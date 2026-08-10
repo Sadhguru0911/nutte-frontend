@@ -1210,6 +1210,27 @@ main {
   width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 12px; margin-bottom: 14px;
 }
 .product-detail-modal-desc { font-size: 0.92rem; line-height: 1.6; color: var(--black, #2b2b2b); }
+.product-detail-storage-tip {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border, #e2e0da);
+  font-size: 0.78rem; line-height: 1.55; color: var(--muted, #888);
+}
+.product-detail-storage-tip strong { color: var(--black, #2b2b2b); }
+
+.storage-tip-banner {
+  background: #eef7f0; border: 1px solid #cfe8d6; border-radius: 10px;
+  padding: 12px 16px; font-size: 0.82rem; line-height: 1.55; color: #1a5c3a;
+  margin: 0 0 20px;
+}
+.storage-tip-banner strong { color: #123f28; }
+
+.checkout-policy-note {
+  font-size: 0.76rem; color: var(--muted, #888); line-height: 1.5; margin: 12px 0 4px; text-align: center;
+}
+.checkout-policy-note a { color: var(--green); text-decoration: underline; }
+
+.policy-note { font-size: 0.9rem; line-height: 1.65; margin: 0 0 14px; }
+.policy-note:last-child { margin-bottom: 0; }
+.policy-note a { color: var(--green); }
 
 .dice-bounce {
   display: inline-block; margin-right: 8px; font-size: 1.2em;
