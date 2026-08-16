@@ -1662,6 +1662,28 @@ main {
   justify-content: center;
   gap: 8px;
 }
+.upi-ios-app-buttons {
+  display: none; /* toggled to flex by JS on iOS */
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.upi-app-btn {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 10px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+.upi-ios-note {
+  font-size: 0.76rem;
+  color: var(--muted, #888);
+  line-height: 1.5;
+  text-align: center;
+  margin: 0 0 14px;
+}
 .upi-id-box {
   display: flex;
   align-items: center;

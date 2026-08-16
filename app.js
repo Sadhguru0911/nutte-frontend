@@ -1521,11 +1521,32 @@ function addMembershipToCart(plan) {
   showCartToast(`🌟 Member pricing applied! ₹${membershipFeeAmount} membership fee added.`);
 }
 
+/* iOS (unlike Android) has no system-wide chooser for a generic upi://
+   link — whichever single app has registered that URL scheme just opens
+   directly. WhatsApp registers itself as a upi://pay handler as part of
+   WhatsApp Payments, so on iPhones with WhatsApp installed, tapping a plain
+   upi:// link opens WhatsApp instead of the customer's actual UPI app —
+   and since the vendor isn't set up to receive WhatsApp Payments, WhatsApp
+   shows "you can't pay this vendor" instead of completing anything. */
+function isIOS() {
+  const ua = navigator.userAgent;
+  const isIOSDevice = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  const isIPadOS13Plus = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  return isIOSDevice || isIPadOS13Plus;
+}
+
 /* Build a upi://pay deep link with the amount pre-filled, render it as a
-   QR code into `containerId`, and point the "Pay via UPI App" button at it.
-   note: 'note' becomes the transaction note shown in the customer's UPI app. */
+   QR code into `containerId`, and point the payment buttons at it.
+   note: 'note' becomes the transaction note shown in the customer's UPI app.
+
+   btnId follows a naming convention this function relies on to find its
+   sibling elements — e.g. btnId 'upiPayAppBtn' implies 'upiIosAppButtons',
+   'upiGpayBtn', 'upiPhonepeBtn', 'upiIosNote' also exist in the DOM (see
+   the two call sites below and their matching HTML blocks). If you add a
+   third payment step, follow the same '<prefix>PayAppBtn' pattern. */
 function renderUpiQr(containerId, btnId, amount, note) {
-  const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_VPA)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note || 'CommunitE Order')}`;
+  const noteParam = encodeURIComponent(note || 'CommunitE Order');
+  const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_VPA)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${noteParam}`;
 
   const container = $(containerId);
   if (container) {
@@ -1538,8 +1559,31 @@ function renderUpiQr(containerId, btnId, amount, note) {
     }
   }
 
+  const prefix = btnId.replace('PayAppBtn', '');
   const btn = $(btnId);
-  if (btn) btn.href = upiLink;
+  const iosGroup = $(`${prefix}IosAppButtons`);
+  const gpayBtn = $(`${prefix}GpayBtn`);
+  const phonepeBtn = $(`${prefix}PhonepeBtn`);
+  const iosNote = $(`${prefix}IosNote`);
+
+  if (isIOS()) {
+    // A plain upi:// link is unreliable on iOS (see isIOS() comment above),
+    // so instead of that single generic button, point people at each app's
+    // own URL scheme directly — confirmed against Google's official iOS
+    // integration docs (gpay://upi/pay) and a live sample deep link from a
+    // payment gateway's own backend (phonepe://upi/pay). Together these two
+    // cover most of India's UPI market; the QR code and UPI ID below remain
+    // the fallback for Paytm, BHIM, or any other app.
+    if (btn) btn.style.display = 'none';
+    if (gpayBtn) gpayBtn.href = `gpay://upi/pay?pa=${encodeURIComponent(UPI_VPA)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${noteParam}`;
+    if (phonepeBtn) phonepeBtn.href = `phonepe://upi/pay?pa=${encodeURIComponent(UPI_VPA)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${noteParam}`;
+    if (iosGroup) iosGroup.style.display = 'flex';
+    if (iosNote) iosNote.style.display = 'block';
+  } else {
+    if (btn) { btn.style.display = ''; btn.href = upiLink; }
+    if (iosGroup) iosGroup.style.display = 'none';
+    if (iosNote) iosNote.style.display = 'none';
+  }
 
   const amountLabel = $('upiPayAmount');
   if (amountLabel) amountLabel.textContent = amount;
