@@ -519,10 +519,68 @@ function renderOrders(orders) {
         <td data-label="Payment"><span class="badge ${badgeClass}">${escapeHtml(o.payment_status || 'Pending')}</span></td>
         <td data-label="">
           ${isVerified ? '' : `<button class="btn-sm" onclick="verifyPayment(${o.row_number}, '${escapeHtml(o.order_id)}', this)">Verify</button>`}
+          <button class="btn-outline" onclick="sendInvoiceWhatsApp(${o.row_number})" style="margin-left:4px">Invoice</button>
         </td>
       </tr>`;
   }).join('');
   document.getElementById('ordersTable').style.display = 'table';
+}
+
+/* ---- Invoice generation ---- */
+const INVOICE_TRANSACTION_CHARGE = 50;
+
+/* Reuses the same 'Cart Items' text format the backend writes (see
+   _parse_cart_items in google_integration.py) — keep these in sync if that
+   format ever changes. Unlike the backend's version, this keeps each line's
+   amount since the invoice needs to show per-item pricing. */
+function parseCartItemsWithAmounts(cartString) {
+  const items = [];
+  const pattern = /^(.*?)\s*\((.*?)\)\s*-\s*Qty:(\d+)\s*-\s*₹?([\d.]+)\s*$/;
+  String(cartString || '').split('\n').forEach(line => {
+    line = line.trim();
+    if (!line) return;
+    const m = line.match(pattern);
+    if (m) {
+      items.push({ name: m[1].trim(), variant: m[2].trim(), qty: parseInt(m[3], 10), amount: parseFloat(m[4]) });
+    } else {
+      items.push({ name: line, variant: '', qty: 0, amount: 0, unparsed: true });
+    }
+  });
+  return items;
+}
+
+function generateInvoiceText(order) {
+  const items = parseCartItemsWithAmounts(order.cart_items);
+  const lines = [`🧾 CommunitE Invoice — Order ${order.order_id}`, `Date: ${order.timestamp}`, ''];
+
+  let itemsTotal = 0;
+  items.forEach(it => {
+    itemsTotal += it.amount;
+    const variantPart = it.variant ? ` (${it.variant})` : '';
+    lines.push(`${it.name}${variantPart} x${it.qty} — ₹${it.amount.toLocaleString('en-IN')}`);
+  });
+
+  lines.push('');
+  lines.push(`Transaction Charge: ₹${INVOICE_TRANSACTION_CHARGE}`);
+  lines.push('');
+  lines.push(`Total: ₹${(itemsTotal + INVOICE_TRANSACTION_CHARGE).toLocaleString('en-IN')}`);
+  lines.push('');
+  lines.push('Thank you for shopping with CommunitE! 🙏');
+  return lines.join('\n');
+}
+
+function sendInvoiceWhatsApp(rowNumber) {
+  const order = allOrdersCache.find(o => o.row_number === rowNumber);
+  if (!order) { alert('Could not find this order — try refreshing the Orders tab.'); return; }
+
+  const digits = String(order.mobile_number || '').replace(/\D/g, '');
+  if (!digits) { alert('This order has no mobile number on file.'); return; }
+  // Indian numbers are stored as 10 digits without a country code; wa.me
+  // needs the full international format to open the right chat.
+  const fullPhone = digits.length === 10 ? `91${digits}` : digits;
+
+  const text = generateInvoiceText(order);
+  window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 
