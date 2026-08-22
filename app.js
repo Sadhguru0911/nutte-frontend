@@ -1546,7 +1546,12 @@ function isIOS() {
    third payment step, follow the same '<prefix>PayAppBtn' pattern. */
 function renderUpiQr(containerId, btnId, amount, note) {
   const noteParam = encodeURIComponent(note || 'CommunitE Order');
-  const upiLink = `upi://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${noteParam}`;
+  // NPCI's UPI linking spec calls for 'am' as a strict decimal string (e.g.
+  // "72.00") — a bare integer like "72" causes some apps to fail parsing
+  // the whole link, sometimes surfacing a misleading error (e.g. "receiver
+  // not available") instead of an amount-specific one.
+  const amountFormatted = Number(amount).toFixed(2);
+  const upiLink = `upi://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amountFormatted}&cu=INR&tn=${noteParam}`;
 
   const container = $(containerId);
   if (container) {
@@ -1575,8 +1580,8 @@ function renderUpiQr(containerId, btnId, amount, note) {
     // cover most of India's UPI market; the QR code and UPI ID below remain
     // the fallback for Paytm, BHIM, or any other app.
     if (btn) btn.style.display = 'none';
-    if (gpayBtn) gpayBtn.href = `gpay://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${noteParam}`;
-    if (phonepeBtn) phonepeBtn.href = `phonepe://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${noteParam}`;
+    if (gpayBtn) gpayBtn.href = `gpay://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amountFormatted}&cu=INR&tn=${noteParam}`;
+    if (phonepeBtn) phonepeBtn.href = `phonepe://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amountFormatted}&cu=INR&tn=${noteParam}`;
     if (iosGroup) iosGroup.style.display = 'flex';
     if (iosNote) iosNote.style.display = 'block';
   } else {
