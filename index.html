@@ -786,6 +786,24 @@
     </div>
   </div>
 
+  <!-- ADMIN EDIT-ORDER REVIEW MODAL — only ever reached via admin.html's Edit
+       button (index.html?editOrder=...&passcode=...). Deliberately skips
+       customer-details and payment/RR-number steps since we already have
+       that info and aren't collecting a new payment here. -->
+  <div id="editOrderModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">✏️ Review Updated Order</h2>
+        <button class="icon-btn" aria-label="Close" onclick="closeEditOrderReviewModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <div id="editOrderReviewBody"></div>
+        <p class="checkout-policy-note">This updates the existing order and resets Payment Status to Pending for re-verification. The customer will be emailed the new summary.</p>
+        <button id="confirmOrderUpdateBtn" class="btn-primary btn-block" onclick="submitOrderUpdate()">Update Order <i class="fas fa-check"></i></button>
+      </div>
+    </div>
+  </div>
+
   <!-- TAMBOLA MODAL -->
   <div id="tambolaModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box modal-box--tambola">

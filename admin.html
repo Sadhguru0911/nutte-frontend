@@ -520,6 +520,7 @@ function renderOrders(orders) {
         <td data-label="">
           ${isVerified ? '' : `<button class="btn-sm" onclick="verifyPayment(${o.row_number}, '${escapeHtml(o.order_id)}', this)">Verify</button>`}
           <button class="btn-outline" onclick="sendInvoiceWhatsApp(${o.row_number})" style="margin-left:4px">Invoice</button>
+          <button class="btn-outline" onclick="editOrder('${escapeHtml(o.order_id)}')" style="margin-left:4px">Edit</button>
         </td>
       </tr>`;
   }).join('');
@@ -581,6 +582,15 @@ function sendInvoiceWhatsApp(rowNumber) {
 
   const text = generateInvoiceText(order);
   window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+/* Opens the actual shop page in a special admin edit mode (see the
+   matching handling in app.js), passing the order id and the admin
+   passcode so it can fetch that order's existing cart and, on submit,
+   update the same order rather than creating a new one. */
+function editOrder(orderId) {
+  const url = `index.html?editOrder=${encodeURIComponent(orderId)}&passcode=${encodeURIComponent(ADMIN_PASSCODE)}`;
+  window.open(url, '_blank');
 }
 
 

@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfileFromSavedMobile(); // silently recognize a returning customer, updates nav badge
   checkForSharedTicketLink(); // if opened from a shared Tambola ticket link, show it immediately
   loadFeaturedPartnerOnBoot(); // show the homepage Featured Partner banner if one is set
+  checkForAdminEditOrder(); // if opened from the admin dashboard's Edit button, load that order into the cart
   // Init ripple on hero cards
   setTimeout(() => {
     document.querySelectorAll('.ripple-card').forEach(card => initRipple(card));
@@ -141,6 +142,7 @@ function bindUI() {
     if ($('becomePartnerModal') && $('becomePartnerModal').style.display !== 'none') closeBecomePartnerInfo();
     if ($('productDetailModal') && $('productDetailModal').style.display !== 'none') closeProductDetailModal();
     if ($('returnsPolicyModal') && $('returnsPolicyModal').style.display !== 'none') closeReturnsPolicyModal();
+    if ($('editOrderModal') && $('editOrderModal').style.display !== 'none') closeEditOrderReviewModal();
   });
 }
 
@@ -598,7 +600,131 @@ function toggleCart() {
 function proceedToCheckout() {
   if (cart.length === 0) { alert('Your cart is empty!'); return; }
   toggleCart();
-  openCustomerModal();
+  if (window.editModeOrderId) {
+    showEditOrderReviewModal();
+  } else {
+    openCustomerModal();
+  }
+}
+
+/* ============================================================
+   ADMIN EDIT-ORDER MODE
+   Reached via admin.html's "Edit" button, which opens this same shop
+   page as index.html?editOrder=<id>&passcode=<pc>. Loads that order's
+   existing cart (from the Cart JSON column, via the backend) so the
+   admin can add/remove items using the normal shop UI, then submits
+   through a separate, simpler review step that updates the SAME order
+   (same Order ID) rather than creating a new one — skipping the
+   customer-details and payment/RR-number steps entirely, since we
+   already have that information and aren't collecting a new payment.
+   ============================================================ */
+async function checkForAdminEditOrder() {
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('editOrder');
+  const passcode = params.get('passcode');
+  if (!orderId) return;
+
+  try {
+    const res = await fetch(`${apiBase}/api/admin/orders/${encodeURIComponent(orderId)}?passcode=${encodeURIComponent(passcode || '')}`);
+    const data = await res.json();
+    if (!data.success) {
+      alert(`Could not load order ${orderId}: ${data.message || 'unknown error'}`);
+      return;
+    }
+
+    window.editModeOrderId = orderId;
+    window.editModePasscode = passcode;
+    window.editModeOrder = data.order;
+
+    cart = Array.isArray(data.order.cart) ? [...data.order.cart] : [];
+    updateCartCount();
+    renderCart();
+    showEditModeBanner(data.order);
+  } catch (e) {
+    alert('Could not reach the server to load this order for editing.');
+  }
+}
+
+function showEditModeBanner(order) {
+  const banner = document.createElement('div');
+  banner.id = 'editModeBanner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a5c3a;color:#fff;' +
+    'text-align:center;padding:10px 16px;font-size:0.85rem;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
+  banner.innerHTML = `✏️ Admin Edit Mode — Editing Order <strong>${escapeHtml(order.order_id)}</strong> for ${escapeHtml(order.full_name)}. Add or remove items, then open your cart and tap "Proceed to Checkout."`;
+  document.body.prepend(banner);
+  document.body.style.paddingTop = `${banner.offsetHeight}px`;
+}
+
+function showEditOrderReviewModal() {
+  renderEditOrderReview();
+  $('overlay').style.display = 'block';
+  $('editOrderModal').style.display = 'flex';
+  $('editOrderModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeEditOrderReviewModal() {
+  $('overlay').style.display = 'none';
+  $('editOrderModal').style.display = 'none';
+  $('editOrderModal').setAttribute('aria-hidden', 'true');
+}
+
+function renderEditOrderReview() {
+  const productItems = cart.filter(i => !i._isMembershipFee);
+  const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
+  const total = subtotal + DELIVERY_CHARGE;
+
+  const rowsHtml = productItems.map(i => `
+    <tr>
+      <td>${escapeHtml(i.product_name)} (${escapeHtml(i.variant)})</td>
+      <td style="text-align:center">x${i.quantity}</td>
+      <td style="text-align:right">₹${i.total_price}</td>
+    </tr>`).join('');
+
+  $('editOrderReviewBody').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-bottom:14px">
+      ${rowsHtml}
+    </table>
+    <div style="text-align:right;font-size:0.9rem;line-height:1.8">
+      Subtotal: ₹${subtotal}<br>
+      Delivery Charge: ₹${DELIVERY_CHARGE}<br>
+      <strong style="font-size:1.05rem">New Total: ₹${total}</strong>
+    </div>`;
+}
+
+async function submitOrderUpdate() {
+  const productItems = cart.filter(i => !i._isMembershipFee);
+  if (productItems.length === 0) { alert('The cart is empty — add at least one item before updating.'); return; }
+
+  const btn = $('confirmOrderUpdateBtn');
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+  try {
+    const res = await fetch(`${apiBase}/api/admin/orders/${encodeURIComponent(window.editModeOrderId)}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        passcode: window.editModePasscode,
+        cart: productItems,
+        delivery_charge: DELIVERY_CHARGE,
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const emailNote = data.email_sent ? 'The customer has been emailed the updated order.' : 'Note: the update email could not be sent — check the customer\'s email on file.';
+      alert(`Order ${data.order_id} updated successfully. ${emailNote}\n\nPayment status has been reset to Pending for re-verification.`);
+      window.close(); // this tab was opened specifically for this edit — safe to close
+      closeEditOrderReviewModal();
+    } else {
+      alert(data.message || 'Could not update this order.');
+    }
+  } catch (e) {
+    alert('Network error — please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
 }
 
 /* Remember the customer's mobile number across visits so returning
