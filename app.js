@@ -2458,13 +2458,22 @@ function renderFeaturedPartnerBanner() {
   featuredPartnerNameForClick = featured.vendor_name;
   $('featuredPartnerName').textContent = featured.vendor_name || 'Vendor';
   $('featuredPartnerCategory').textContent = featured.category || '';
+
+  // Show a taste of the vendor's story right on the homepage — this is meant
+  // to read like an actual ad, not just a name/category floating in space.
+  const story = String(featured.story || '').trim();
+  const excerpt = story.length > 140 ? story.slice(0, 140).trim() + '…' : story;
+  $('featuredPartnerStory').textContent = excerpt;
+  $('featuredPartnerStory').style.display = excerpt ? 'block' : 'none';
+
   const photoEl = $('featuredPartnerPhoto');
+  const photoWrap = $('featuredPartnerPhotoWrap');
   if (featured.photo_url) {
-    photoEl.src = driveUrlAtSize(featured.photo_url, 600);
-    photoEl.style.display = 'block';
-    photoEl.onerror = () => { photoEl.style.display = 'none'; };
+    photoEl.src = driveUrlAtSize(featured.photo_url, 900);
+    photoWrap.style.display = 'block';
+    photoEl.onerror = () => { photoWrap.style.display = 'none'; };
   } else {
-    photoEl.style.display = 'none';
+    photoWrap.style.display = 'none';
   }
   banner.style.display = 'flex';
 }

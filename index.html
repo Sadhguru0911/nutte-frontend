@@ -98,12 +98,15 @@
   <div id="featuredPartnerBanner" class="featured-partner-banner" style="display:none" onclick="openPartnersModal(); showPartnerDetailByName(featuredPartnerNameForClick);">
     <span class="featured-partner-tag">🌟 Featured Community Listing</span>
     <div class="featured-partner-body">
-      <img id="featuredPartnerPhoto" class="featured-partner-photo" src="" alt="" />
-      <div>
+      <div id="featuredPartnerPhotoWrap" class="featured-partner-photo-wrap">
+        <img id="featuredPartnerPhoto" class="featured-partner-photo" src="" alt="" />
+      </div>
+      <div class="featured-partner-content">
         <p id="featuredPartnerName" class="featured-partner-name"></p>
         <p id="featuredPartnerCategory" class="featured-partner-category"></p>
+        <p id="featuredPartnerStory" class="featured-partner-story"></p>
+        <span class="featured-partner-cta">View Listing <i class="fas fa-arrow-right"></i></span>
       </div>
-      <span class="hero-card-arrow"><i class="fas fa-arrow-right"></i></span>
     </div>
   </div>
 
