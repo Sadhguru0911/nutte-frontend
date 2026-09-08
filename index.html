@@ -731,6 +731,12 @@
     </div>
   </div>
 
+  <!-- LISTING PHOTO LIGHTBOX — tap any Community Listing photo to view it full-screen -->
+  <div id="partnerLightbox" class="partner-lightbox" style="display:none" onclick="closePartnerPhotoLightbox()">
+    <button class="partner-lightbox-close" aria-label="Close" onclick="closePartnerPhotoLightbox()">&times;</button>
+    <img id="partnerLightboxImg" src="" alt="" onclick="event.stopPropagation()" />
+  </div>
+
   <!-- SHARE LISTING APPLICATION MODAL — shows the shareable application link -->
   <div id="becomePartnerModal" class="modal" style="display:none" aria-hidden="true">
     <div class="modal-box">

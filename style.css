@@ -2516,25 +2516,28 @@ body.overlay-open .floating-cart-bar {
 }
 .partner-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
 .partner-card-photo {
-  width: 100%; aspect-ratio: 1; border-radius: 8px; background-color: #f2f0ea; background-size: cover;
-  background-position: center; display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem; margin-bottom: 8px;
+  width: 100%; aspect-ratio: 1; border-radius: 8px; background-color: #f2f0ea;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin-bottom: 8px; overflow: hidden;
 }
+.partner-card-photo img { width: 100%; height: 100%; object-fit: cover; }
 .partner-card-name { font-size: 0.85rem; font-weight: 700; margin: 0 0 2px; }
 .partner-card-category { font-size: 0.72rem; color: var(--muted, #888); margin: 0; }
 
 .partner-detail-photo {
-  width: 100%; aspect-ratio: 16/9; border-radius: 10px; background-color: #f2f0ea; background-size: cover;
-  background-position: center; display: flex; align-items: center; justify-content: center;
-  font-size: 3rem; margin-bottom: 14px;
+  width: 100%; min-height: 220px; max-height: 420px; border-radius: 10px; background-color: #f2f0ea;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; margin-bottom: 14px; overflow: hidden;
 }
+/* Full image visible, not cropped — tap opens the true full-screen lightbox */
+.partner-detail-photo img { width: 100%; max-height: 420px; object-fit: contain; cursor: zoom-in; }
 .partner-detail-gallery {
   display: flex; gap: 8px; overflow-x: auto; margin-bottom: 14px; -webkit-overflow-scrolling: touch;
 }
 .partner-detail-gallery::-webkit-scrollbar { height: 4px; }
 .partner-gallery-img {
-  flex: 0 0 auto; width: 78%; max-width: 260px; aspect-ratio: 16/9; object-fit: cover;
-  border-radius: 10px; background: #f2f0ea; scroll-snap-align: start;
+  flex: 0 0 auto; width: 78%; max-width: 320px; height: 240px; object-fit: contain;
+  border-radius: 10px; background: #f2f0ea; scroll-snap-align: start; cursor: zoom-in;
 }
 .partner-detail-name { font-size: 1.15rem; margin: 0 0 2px; }
 .partner-detail-category { font-size: 0.8rem; color: var(--muted, #888); margin: 0 0 12px; }
@@ -2567,15 +2570,34 @@ body.overlay-open .floating-cart-bar {
   font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
   color: #8a6200; display: block; margin-bottom: 8px;
 }
-.featured-partner-body { display: flex; align-items: center; gap: 12px; }
+.featured-partner-body { display: flex; align-items: center; gap: 18px; }
 .featured-partner-photo {
-  width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+  width: 110px; height: 110px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
 }
 .featured-partner-name { font-weight: 700; font-size: 0.92rem; margin: 0; }
 .featured-partner-category { font-size: 0.78rem; color: var(--muted, #888); margin: 0; }
 .featured-partner-body > div { flex: 1; }
 
+/* Full-screen photo lightbox */
+.partner-lightbox {
+  position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.92);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  cursor: zoom-out;
+}
+.partner-lightbox img {
+  max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px;
+  cursor: default;
+}
+.partner-lightbox-close {
+  position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.15);
+  border: none; color: #fff; font-size: 1.8rem; line-height: 1; width: 44px; height: 44px;
+  border-radius: 50%; cursor: pointer;
+}
+.partner-lightbox-close:hover { background: rgba(255,255,255,0.28); }
+
 @media (max-width: 600px) {
+  .featured-partner-photo { width: 84px; height: 84px; }
   .partners-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
   .featured-partner-banner { margin: 10px 10px 0; padding: 10px 14px; }
 }

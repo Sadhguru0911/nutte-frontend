@@ -37,6 +37,22 @@ const DEFAULT_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1488459716781-
 const DEFAULT_SUBCATEGORY_IMAGE = "https://images.unsplash.com/photo-1490818387583-1baba5e638af?q=80&w=800&auto=format&fit=crop";
 const DEFAULT_PRODUCT_IMAGE = "assets/placeholder.png";
 
+/* Google Drive's /thumbnail?id=X&sz=wN endpoint is what vendor photos use
+   (via drive.google.com/thumbnail links). It's designed for hotlinking
+   (unlike drive.google.com/uc?export=view, which Google has made
+   increasingly unreliable for this exact use), but the requested size still
+   matters a lot — the listing grid can use a small, fast-loading size, while
+   opening a listing's detail view should ask for a much larger one so it
+   doesn't look like a blown-up thumbnail. */
+function extractDriveFileId(url) {
+  const m = String(url || '').match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+function driveUrlAtSize(url, sizePx) {
+  const id = extractDriveFileId(url);
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w${sizePx}` : url;
+}
+
 /* helpers */
 const $ = id => document.getElementById(id);
 const escapeHtml = s => (s || "").toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2327,8 +2343,9 @@ async function loadPartnersDirectory() {
       const card = document.createElement('div');
       card.className = 'partner-card';
       card.onclick = () => showPartnerDetail(i);
+      const cardPhotoSrc = p.photo_url ? driveUrlAtSize(p.photo_url, 300) : '';
       card.innerHTML = `
-        <div class="partner-card-photo" style="${p.photo_url ? `background-image:url('${p.photo_url}')` : ''}">${p.photo_url ? '' : '🏪'}</div>
+        <div class="partner-card-photo">${cardPhotoSrc ? `<img src="${cardPhotoSrc}" alt="${p.vendor_name || 'Vendor'}" loading="lazy" onerror="this.parentElement.innerHTML='🏪'" />` : '🏪'}</div>
         <p class="partner-card-name">${p.vendor_name || 'Vendor'}</p>
         <p class="partner-card-category">${p.category || ''}</p>
       `;
@@ -2350,20 +2367,27 @@ function showPartnerDetail(index) {
   const photos = (p.photo_urls && p.photo_urls.length) ? p.photo_urls : (p.photo_url ? [p.photo_url] : []);
   const photoEl = $('partnerDetailPhoto');
   const galleryEl = $('partnerDetailGallery');
+  // Detail view should look like an actual photo, not a stretched thumbnail —
+  // request a much larger render from Drive's thumbnail service than the grid does.
+  const fullSizePhotos = photos.map(url => driveUrlAtSize(url, 1600));
 
-  if (photos.length > 1) {
+  if (fullSizePhotos.length > 1) {
     // Multiple photos — show a horizontal scrolling gallery instead of the single hero photo
     photoEl.style.display = 'none';
     galleryEl.style.display = 'flex';
-    galleryEl.innerHTML = photos.map(url =>
-      `<img src="${url}" class="partner-gallery-img" onerror="this.style.display='none'" />`
+    galleryEl.innerHTML = fullSizePhotos.map((url, i) =>
+      `<img src="${url}" class="partner-gallery-img" onclick="openPartnerPhotoLightbox(${index}, ${i})" onerror="this.style.display='none'" />`
     ).join('');
   } else {
     galleryEl.style.display = 'none';
     galleryEl.innerHTML = '';
-    photoEl.style.display = 'flex';
-    photoEl.style.backgroundImage = photos[0] ? `url('${photos[0]}')` : '';
-    photoEl.textContent = photos[0] ? '' : '🏪';
+    if (fullSizePhotos[0]) {
+      photoEl.style.display = 'block';
+      photoEl.innerHTML = `<img src="${fullSizePhotos[0]}" alt="${p.vendor_name || 'Vendor'}" onclick="openPartnerPhotoLightbox(${index}, 0)" onerror="this.parentElement.innerHTML='🏪'" />`;
+    } else {
+      photoEl.style.display = 'flex';
+      photoEl.innerHTML = '🏪';
+    }
   }
 
   $('partnerDetailName').textContent = p.vendor_name || 'Vendor';
@@ -2382,6 +2406,26 @@ function showPartnerDetail(index) {
     contactBtn.textContent = 'Contact Vendor';
   }
 }
+
+/* Full-screen lightbox — tapping any listing photo opens it as large as the
+   screen allows (requesting an even larger render than the detail view
+   already uses), addressing "pictures need to open full size". */
+function openPartnerPhotoLightbox(partnerIndex, photoIndex) {
+  const p = partnersCache[partnerIndex];
+  if (!p) return;
+  const photos = (p.photo_urls && p.photo_urls.length) ? p.photo_urls : (p.photo_url ? [p.photo_url] : []);
+  const url = photos[photoIndex];
+  if (!url) return;
+
+  $('partnerLightboxImg').src = driveUrlAtSize(url, 2400);
+  $('partnerLightbox').style.display = 'flex';
+}
+
+function closePartnerPhotoLightbox() {
+  $('partnerLightbox').style.display = 'none';
+  $('partnerLightboxImg').src = '';
+}
+
 
 /* Vendors are invited to type a raw phone number or a scheme-less link
    like "wa.me/91XXXXXXXXXX" — used directly as an href, that becomes a
@@ -2415,8 +2459,13 @@ function renderFeaturedPartnerBanner() {
   $('featuredPartnerName').textContent = featured.vendor_name || 'Vendor';
   $('featuredPartnerCategory').textContent = featured.category || '';
   const photoEl = $('featuredPartnerPhoto');
-  photoEl.src = featured.photo_url || '';
-  photoEl.style.display = featured.photo_url ? 'block' : 'none';
+  if (featured.photo_url) {
+    photoEl.src = driveUrlAtSize(featured.photo_url, 600);
+    photoEl.style.display = 'block';
+    photoEl.onerror = () => { photoEl.style.display = 'none'; };
+  } else {
+    photoEl.style.display = 'none';
+  }
   banner.style.display = 'flex';
 }
 
