@@ -230,7 +230,21 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .hero-product-blend { width: 240px; height: 240px; top: 14px; right: 24px; opacity: 0.9; }
 }
 @media (max-width: 600px) {
-  .hero-product-blend { width: 175px; height: 175px; top: 6px; right: 16px; opacity: 0.85; filter: brightness(1.2) saturate(1.15); }
+  /* Not enough width at phone size to float this beside the headline
+     without colliding with it — stack it in normal flow above the text
+     instead of overlaying it. */
+  .hero-product-blend {
+    position: static;
+    display: block;
+    width: 150px;
+    height: 150px;
+    margin: 4px auto 16px;
+    top: auto; right: auto;
+    opacity: 0.95;
+    filter: brightness(1.15) saturate(1.12);
+    -webkit-mask-image: radial-gradient(circle at 50% 42%, black 50%, rgba(0,0,0,0.6) 66%, transparent 80%);
+    mask-image: radial-gradient(circle at 50% 42%, black 50%, rgba(0,0,0,0.6) 66%, transparent 80%);
+  }
 }
 .hero-eyebrow {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
@@ -2101,7 +2115,7 @@ main {
   .conveyor-label { padding: 0 12px; margin-bottom: 10px; }
   .conveyor-item { width: 200px; height: 200px; border-radius: 18px; }
   .conveyor-item-label { font-size: 0.75rem; }
-  .nav-inner { height: 56px; gap: 8px; }
+  .nav-inner { min-height: 56px; gap: 8px; }
   .member-login-btn { padding: 7px 10px; }
   .cart-btn { padding: 8px 12px; font-size: 0.82rem; }
   .back-btn { padding: 5px 10px; font-size: 0.78rem; }
