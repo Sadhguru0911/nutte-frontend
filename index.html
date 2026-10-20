@@ -221,6 +221,20 @@
         <div class="perk"><span class="perk-icon">🤝</span> Support community-powered commerce</div>
       </div>
 
+      <div class="roi-badge">⚡ Buy ~1.7kg of best-sellers a month and your membership is basically free</div>
+
+      <div class="roi-calc">
+        <div class="roi-calc-top">See it for your own basket</div>
+        <div class="roi-calc-control">
+          <button class="roi-step" onclick="roiAdjustKg(-0.5)" aria-label="Fewer kg">−</button>
+          <div class="roi-calc-kg"><span id="roiKgValue">2.5</span><span class="roi-calc-unit">kg / month</span></div>
+          <button class="roi-step" onclick="roiAdjustKg(0.5)" aria-label="More kg">+</button>
+        </div>
+        <div class="roi-calc-output">
+          Breaks even in <strong id="roiMonths">8.0</strong> months — <span id="roiYearNet">+₹1,971 back in your pocket in Year 1</span>
+        </div>
+      </div>
+
       <div class="ms-plans-row">
         <div class="ms-plan-card">
           <div class="ms-plan-name">Monthly</div>

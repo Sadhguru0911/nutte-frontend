@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindUI();
   loadCategories();
   initScrollAnimations();
+  initRoiCalc();
   const closeAboutBtn = document.getElementById('closeAboutBtn');
   if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
   const closeReelsBtn = document.getElementById('closeReelsBtn');
@@ -1431,8 +1432,46 @@ function scrollReels(direction) {
 }
 
 /* ══════════════════════════════════════════
-   MEMBERSHIP MODAL FUNCTIONS
+   MEMBERSHIP ROI CALCULATOR
+   Avg ₹ saved per kg across Best Seller / Daily Handful items (from catalog analysis)
    ══════════════════════════════════════════ */
+const ROI_SAVINGS_PER_KG = 199;
+const ROI_ANNUAL_FEE = 3999;
+const ROI_MONTHLY_FEE = 400;
+let roiKg = 2.5;
+
+function roiAdjustKg(delta) {
+  roiKg = Math.max(0.5, Math.min(8, roiKg + delta));
+  roiKg = Math.round(roiKg * 2) / 2;
+  updateRoiCalc();
+}
+
+function updateRoiCalc() {
+  const kgEl = $('roiKgValue');
+  if (!kgEl) return; // section not on this page
+  kgEl.textContent = roiKg % 1 === 0 ? roiKg.toFixed(0) : roiKg.toFixed(1);
+
+  const monthlySavings = roiKg * ROI_SAVINGS_PER_KG;
+  const monthsToBreakeven = ROI_ANNUAL_FEE / monthlySavings;
+  const yearSavings = monthlySavings * 12;
+  const yearNet = yearSavings - ROI_ANNUAL_FEE;
+
+  const monthsEl = $('roiMonths');
+  if (monthsEl) monthsEl.textContent = monthsToBreakeven > 24 ? '24+' : monthsToBreakeven.toFixed(1);
+
+  const netEl = $('roiYearNet');
+  if (netEl) {
+    const covered = yearNet >= 0;
+    netEl.textContent = covered
+      ? `+₹${Math.round(yearNet).toLocaleString('en-IN')} back in your pocket in Year 1`
+      : `₹${Math.round(Math.abs(yearNet)).toLocaleString('en-IN')} short of covering the full year — still saving on every order`;
+    netEl.classList.toggle('roi-negative', !covered);
+  }
+}
+
+function initRoiCalc() {
+  updateRoiCalc();
+}
 
 function openMembershipModal() {
   resetMembershipModal();
