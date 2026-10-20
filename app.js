@@ -76,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
   bindUI();
   loadCategories();
   initScrollAnimations();
-  initRoiCalc();
   const closeAboutBtn = document.getElementById('closeAboutBtn');
   if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
   const closeReelsBtn = document.getElementById('closeReelsBtn');
@@ -806,9 +805,21 @@ async function lookupCustomerFromModal() {
 
 /* Apply membership state from customer record */
 function applyMembershipStatus(customer, mobile) {
-  const status = (customer.membership_status || '').toLowerCase();
+  let status = (customer.membership_status || '').toLowerCase();
   const plan = (customer.membership_plan || '').toLowerCase();
   const expiry = customer.membership_expiry || null;
+
+  // Safety net: the backend only flips Active → Expired once a day (Cloud
+  // Scheduler cron). If the expiry date has already passed but the sheet
+  // hasn't been updated yet, don't let the site keep charging member prices —
+  // treat it as expired here too, immediately, regardless of the stored status.
+  if (status === 'active' && expiry) {
+    const expiryDate = new Date(expiry + 'T00:00:00');
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    if (!isNaN(expiryDate.getTime()) && expiryDate < today) {
+      status = 'expired';
+    }
+  }
 
   memberState = {
     isMember: status === 'active',
@@ -1078,6 +1089,15 @@ async function submitOrderWithPayment() {
   const productItems = cart.filter(i => !i._isMembershipFee);
   const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
 
+  // Real savings this order actually got from member pricing (unit_price was already
+  // set to member_price at add-to-cart time if the shopper was a member then)
+  const memberSavingsThisOrder = productItems.reduce((s, i) => {
+    if (i.member_price && i.regular_price && i.unit_price <= i.member_price && i.member_price < i.regular_price) {
+      return s + ((i.regular_price - i.member_price) * i.quantity);
+    }
+    return s;
+  }, 0);
+
   const order = {
     customer: { full_name: fullName, mobile_number: mobileNumber, email, apt_number: aptNumber, community },
     cart: productItems,
@@ -1140,7 +1160,9 @@ async function submitOrderWithPayment() {
       showOrderSuccessModal({
         orderId: resp.order_id,
         deliveryDate: formatDate(resp.delivery_date),
-        email
+        email,
+        memberSavings: memberSavingsThisOrder,
+        isMember: order.is_member
       });
     } else {
       alert('Could not submit order: ' + (resp.message || 'Unknown error'));
@@ -1155,10 +1177,21 @@ async function submitOrderWithPayment() {
 }
 
 /* Order success modal — mascot, order id, delivery date, email confirmation */
-function showOrderSuccessModal({ orderId, deliveryDate, email }) {
+function showOrderSuccessModal({ orderId, deliveryDate, email, memberSavings, isMember }) {
   $('successOrderId').textContent = orderId || '—';
   $('successDeliveryDate').textContent = deliveryDate || '—';
   $('successEmail').textContent = email || '—';
+
+  const savingsRow = $('successMemberSavingsRow');
+  if (savingsRow) {
+    if (isMember && memberSavings > 0) {
+      $('successMemberSavings').textContent = `₹${memberSavings}`;
+      savingsRow.style.display = 'flex';
+    } else {
+      savingsRow.style.display = 'none';
+    }
+  }
+
   $('overlay').style.display = 'block';
   $('orderSuccessModal').style.display = 'flex';
   $('orderSuccessModal').setAttribute('aria-hidden', 'false');
@@ -1306,6 +1339,27 @@ function clearSearch() {
   $('searchClear').style.display = 'none';
 }
 
+/* Mobile nav search toggle — the search box lives in the nav itself
+   (sticky), so on narrow screens it's hidden behind a search icon that
+   expands it as a dropdown panel under the nav bar. */
+function toggleNavSearch() {
+  const el = $('navSearch');
+  if (!el) return;
+  const opening = !el.classList.contains('open');
+  el.classList.toggle('open', opening);
+  if (opening) {
+    setTimeout(() => { const input = $('searchInput'); if (input) input.focus(); }, 50);
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const navSearch = $('navSearch');
+  const toggleBtn = $('navSearchToggle');
+  if (!navSearch || !navSearch.classList.contains('open')) return;
+  if (navSearch.contains(e.target) || (toggleBtn && toggleBtn.contains(e.target))) return;
+  navSearch.classList.remove('open');
+});
+
 async function openProductFromSearch(category, subcategory) {
   clearSearch();
   $('backToCategoriesBtn').style.display = 'flex';
@@ -1429,48 +1483,6 @@ function closeReels() {
 function scrollReels(direction) {
   const strip = $('reelsStrip');
   if (strip) strip.scrollBy({ left: direction * 260, behavior: 'smooth' });
-}
-
-/* ══════════════════════════════════════════
-   MEMBERSHIP ROI CALCULATOR
-   Avg ₹ saved per kg across Best Seller / Daily Handful items (from catalog analysis)
-   ══════════════════════════════════════════ */
-const ROI_SAVINGS_PER_KG = 199;
-const ROI_ANNUAL_FEE = 3999;
-const ROI_MONTHLY_FEE = 400;
-let roiKg = 2.5;
-
-function roiAdjustKg(delta) {
-  roiKg = Math.max(0.5, Math.min(8, roiKg + delta));
-  roiKg = Math.round(roiKg * 2) / 2;
-  updateRoiCalc();
-}
-
-function updateRoiCalc() {
-  const kgEl = $('roiKgValue');
-  if (!kgEl) return; // section not on this page
-  kgEl.textContent = roiKg % 1 === 0 ? roiKg.toFixed(0) : roiKg.toFixed(1);
-
-  const monthlySavings = roiKg * ROI_SAVINGS_PER_KG;
-  const monthsToBreakeven = ROI_ANNUAL_FEE / monthlySavings;
-  const yearSavings = monthlySavings * 12;
-  const yearNet = yearSavings - ROI_ANNUAL_FEE;
-
-  const monthsEl = $('roiMonths');
-  if (monthsEl) monthsEl.textContent = monthsToBreakeven > 24 ? '24+' : monthsToBreakeven.toFixed(1);
-
-  const netEl = $('roiYearNet');
-  if (netEl) {
-    const covered = yearNet >= 0;
-    netEl.textContent = covered
-      ? `+₹${Math.round(yearNet).toLocaleString('en-IN')} back in your pocket in Year 1`
-      : `₹${Math.round(Math.abs(yearNet)).toLocaleString('en-IN')} short of covering the full year — still saving on every order`;
-    netEl.classList.toggle('roi-negative', !covered);
-  }
-}
-
-function initRoiCalc() {
-  updateRoiCalc();
 }
 
 function openMembershipModal() {

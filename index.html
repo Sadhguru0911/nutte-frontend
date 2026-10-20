@@ -34,9 +34,27 @@
   <nav class="nav">
     <div class="nav-inner">
       <a class="nav-brand" href="#">
+        <img src="assets/CoverImage-icon.jpg" alt="Dry fruits and nuts" class="nav-product-icon" />
         <span class="nav-name">Communit<em>E</em></span>
       </a>
+
+      <div class="nav-search" id="navSearch">
+        <div class="search-always-inner">
+          <i class="fas fa-search search-icon"></i>
+          <input id="searchInput" class="search-input" type="text"
+            placeholder="Search dry fruits, nuts, spices…"
+            autocomplete="off" oninput="handleSearch()" />
+          <button class="search-clear" id="searchClear" style="display:none" onclick="clearSearch()">
+            <span class="icon-x" aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div id="searchResults" class="search-results" style="display:none"></div>
+      </div>
+
       <div class="nav-links">
+        <button class="nav-search-toggle" id="navSearchToggle" onclick="toggleNavSearch()" aria-label="Search">
+          <i class="fas fa-search"></i>
+        </button>
         <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
           <span id="accountNavLabel">Login</span>
         </button>
@@ -131,21 +149,6 @@
       🌿 <strong>Keeping it fresh:</strong> Store in an airtight container, away from sunlight and heat. In humid weather, refrigerating extends freshness — most nuts and dried fruits stay good for 3–4 months this way.
     </div>
 
-    <!-- Search bar — TOP, full width -->
-    <div class="shop-search">
-      <div class="search-always-inner">
-        <i class="fas fa-search search-icon"></i>
-        <input id="searchInput" class="search-input" type="text"
-          placeholder="Search Products — e.g. type 'Wal' for Walnuts"
-          autocomplete="off" oninput="handleSearch()" />
-        <button class="search-clear" id="searchClear" style="display:none" onclick="clearSearch()">
-          <span class="icon-x" aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="search-hint">💡 Type at least 3 letters — e.g. "Wal" shows all Walnut products</div>
-      <div id="searchResults" class="search-results" style="display:none"></div>
-    </div>
-
     <!-- Categories grid — always visible -->
     <div id="categorySection" class="shop-categories">
       <div class="section-eyebrow">Categories</div>
@@ -221,20 +224,6 @@
         <div class="perk"><span class="perk-icon">🤝</span> Support community-powered commerce</div>
       </div>
 
-      <div class="roi-badge">⚡ Buy ~1.7kg of best-sellers a month and your membership is basically free</div>
-
-      <div class="roi-calc">
-        <div class="roi-calc-top">See it for your own basket</div>
-        <div class="roi-calc-control">
-          <button class="roi-step" onclick="roiAdjustKg(-0.5)" aria-label="Fewer kg">−</button>
-          <div class="roi-calc-kg"><span id="roiKgValue">2.5</span><span class="roi-calc-unit">kg / month</span></div>
-          <button class="roi-step" onclick="roiAdjustKg(0.5)" aria-label="More kg">+</button>
-        </div>
-        <div class="roi-calc-output">
-          Breaks even in <strong id="roiMonths">8.0</strong> months — <span id="roiYearNet">+₹1,971 back in your pocket in Year 1</span>
-        </div>
-      </div>
-
       <div class="ms-plans-row">
         <div class="ms-plan-card">
           <div class="ms-plan-name">Monthly</div>
@@ -251,6 +240,7 @@
         </div>
       </div>
       <button class="btn-gold" onclick="openMembershipModal()">Join CommunitE</button>
+      <div class="ms-reassurance">Not sure it's worth it? Cancel anytime.</div>
     </div>
   </section>
 
@@ -1012,6 +1002,11 @@
         </div>
         <h2 class="order-success-title">Thank you for your order!</h2>
         <p class="order-success-sub">We'll verify your payment and process it shortly.</p>
+
+        <div id="successMemberSavingsRow" class="order-success-savings" style="display:none">
+          <i class="fas fa-crown" aria-hidden="true"></i>
+          You saved <strong id="successMemberSavings">₹0</strong> with your membership on this order
+        </div>
 
         <div class="order-success-details">
           <div class="osd-row"><span>Order ID</span><strong id="successOrderId">—</strong></div>
