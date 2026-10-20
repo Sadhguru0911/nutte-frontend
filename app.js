@@ -1339,27 +1339,6 @@ function clearSearch() {
   $('searchClear').style.display = 'none';
 }
 
-/* Mobile nav search toggle — the search box lives in the nav itself
-   (sticky), so on narrow screens it's hidden behind a search icon that
-   expands it as a dropdown panel under the nav bar. */
-function toggleNavSearch() {
-  const el = $('navSearch');
-  if (!el) return;
-  const opening = !el.classList.contains('open');
-  el.classList.toggle('open', opening);
-  if (opening) {
-    setTimeout(() => { const input = $('searchInput'); if (input) input.focus(); }, 50);
-  }
-}
-
-document.addEventListener('click', (e) => {
-  const navSearch = $('navSearch');
-  const toggleBtn = $('navSearchToggle');
-  if (!navSearch || !navSearch.classList.contains('open')) return;
-  if (navSearch.contains(e.target) || (toggleBtn && toggleBtn.contains(e.target))) return;
-  navSearch.classList.remove('open');
-});
-
 async function openProductFromSearch(category, subcategory) {
   clearSearch();
   $('backToCategoriesBtn').style.display = 'flex';

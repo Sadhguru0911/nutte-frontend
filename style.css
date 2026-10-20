@@ -57,18 +57,21 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .nav-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 32px;
-  height: 64px;
+  padding: 12px 32px;
+  min-height: 64px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 20px;
+  gap: 10px 20px;
 }
 .nav-brand {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   text-decoration: none;
+  flex-shrink: 0;
 }
 .nav-logo {
   height: 36px;
@@ -82,21 +85,35 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   font-size: 22px;
   color: #fff;
   letter-spacing: 0.5px;
+  line-height: 1;
 }
 .nav-name em { color: var(--rd-gold); font-style: italic; }
+.nav-eyebrow {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--rd-gold);
+  opacity: 0.85;
+  line-height: 1;
+}
 .nav-links {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-/* ============ NAV SEARCH — floating, follows the sticky nav on scroll ============ */
+/* ============ NAV SEARCH — floating, follows the sticky nav on scroll.
+   Always visible: on desktop it sits inline between the brand and the nav
+   links; on narrow screens nav-inner wraps and this drops to its own
+   full-width row right under the brand/buttons line. ============ */
 .nav-search {
   position: relative;
   flex: 1;
   max-width: 420px;
   min-width: 0;
   margin: 0 8px;
+  order: 0;
 }
 .nav-search .search-always-inner {
   background: rgba(255,255,255,0.08);
@@ -114,31 +131,18 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .nav-search .search-clear { color: rgba(255,255,255,0.55); }
 .nav-search .search-clear:hover { color: #fff; }
 .nav-search .search-results { margin-top: 2px; }
-.nav-search-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.05rem;
-  padding: 8px;
-  cursor: pointer;
-}
-@media (max-width: 860px) {
+@media (max-width: 700px) {
   .nav-search {
-    display: none;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
+    order: 3;
+    flex: 1 1 100%;
     max-width: none;
-    margin: 0;
-    padding: 10px 16px 14px;
-    background: rgba(30, 21, 64, 0.97);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    margin: 2px 0 0;
   }
-  .nav-search.open { display: block; }
-  .nav-search-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  /* Keep brand + login/join/cart together on row 1 (scrolling internally if
+     tight) so the search row cleanly wraps to its own row 2 underneath,
+     instead of nav-links also wrapping unpredictably. */
+  .nav-links { flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; justify-content: flex-end; }
+  .nav-links::-webkit-scrollbar { display: none; }
 }
 .nav-tagline {
   font-size: 0.82rem;
@@ -208,24 +212,25 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
    photo. Decorative only (aria-hidden, no alt text, no pointer events). */
 .hero-product-blend {
   position: absolute;
-  top: -10px;
-  right: 0;
-  width: 360px;
-  height: 360px;
+  top: 20px;
+  right: 40px;
+  width: 320px;
+  height: 320px;
   object-fit: cover;
-  -webkit-mask-image: radial-gradient(circle at 58% 42%, black 38%, rgba(0,0,0,0.55) 55%, transparent 72%);
-  mask-image: radial-gradient(circle at 58% 42%, black 38%, rgba(0,0,0,0.55) 55%, transparent 72%);
-  opacity: 0.8;
+  -webkit-mask-image: radial-gradient(circle at 56% 42%, black 46%, rgba(0,0,0,0.6) 62%, transparent 78%);
+  mask-image: radial-gradient(circle at 56% 42%, black 46%, rgba(0,0,0,0.6) 62%, transparent 78%);
+  opacity: 0.95;
+  filter: brightness(1.1) saturate(1.12);
   mix-blend-mode: normal;
   z-index: 0;
   pointer-events: none;
   user-select: none;
 }
 @media (max-width: 960px) {
-  .hero-product-blend { width: 260px; height: 260px; top: -6px; opacity: 0.6; }
+  .hero-product-blend { width: 240px; height: 240px; top: 14px; right: 24px; opacity: 0.9; }
 }
 @media (max-width: 600px) {
-  .hero-product-blend { width: 190px; height: 190px; opacity: 0.4; }
+  .hero-product-blend { width: 175px; height: 175px; top: 6px; right: 16px; opacity: 0.85; filter: brightness(1.2) saturate(1.15); }
 }
 .hero-eyebrow {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
