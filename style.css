@@ -84,16 +84,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   letter-spacing: 0.5px;
 }
 .nav-name em { color: var(--rd-gold); font-style: italic; }
-.nav-product-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: 50% 42%;
-  border: 1.5px solid var(--rd-gold);
-  box-shadow: 0 0 0 3px rgba(201,168,76,0.14), 0 2px 10px rgba(0,0,0,0.35);
-  flex-shrink: 0;
-}
 .nav-links {
   display: flex;
   align-items: center;
@@ -206,10 +196,36 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   position: relative;
   overflow: hidden;
 }
-.hero-content { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+.hero-content { max-width: 1280px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 2; }
 .hero::after {
   content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 60px;
-  background: var(--white); clip-path: ellipse(55% 100% at 50% 100%);
+  background: var(--white); clip-path: ellipse(55% 100% at 50% 100%); z-index: 1;
+}
+
+/* Product photo blended into the purple hero — sits top-right, below where
+   Login/Join sit in the nav above, edges feathered into the gradient via a
+   radial mask so it reads as part of the background texture, not a pasted
+   photo. Decorative only (aria-hidden, no alt text, no pointer events). */
+.hero-product-blend {
+  position: absolute;
+  top: -10px;
+  right: 0;
+  width: 360px;
+  height: 360px;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(circle at 58% 42%, black 38%, rgba(0,0,0,0.55) 55%, transparent 72%);
+  mask-image: radial-gradient(circle at 58% 42%, black 38%, rgba(0,0,0,0.55) 55%, transparent 72%);
+  opacity: 0.8;
+  mix-blend-mode: normal;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+@media (max-width: 960px) {
+  .hero-product-blend { width: 260px; height: 260px; top: -6px; opacity: 0.6; }
+}
+@media (max-width: 600px) {
+  .hero-product-blend { width: 190px; height: 190px; opacity: 0.4; }
 }
 .hero-eyebrow {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
