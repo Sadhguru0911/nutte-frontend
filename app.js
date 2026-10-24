@@ -1286,10 +1286,51 @@ async function buildSearchIndex() {
     renderThemeCards();
     renderFestiveCards();
     renderSubcategoryRows();
+    renderHeroMarquee();
   } catch (e) {
     console.warn('Search index build failed (non-critical):', e);
     allProductsCache = [];
   }
+}
+
+/* ── HERO BEST-SELLER MARQUEE ──
+   Builds the scrolling strip of real best-seller product photos that
+   overlays the static hero image once product data is in. Falls back to
+   leaving the static .hero-product-blend image visible (it's underneath,
+   untouched) if there are no best-seller images to show. */
+function renderHeroMarquee() {
+  const wrap = $('heroMarquee');
+  const track = $('heroMarqueeTrack');
+  if (!wrap || !track) return;
+
+  const images = allProductsCache
+    .filter(p => (p.tags || []).some(t => (t || '').toLowerCase() === 'best seller') && p.image)
+    .map(p => ({ src: p.image, name: p.product_name || '' }));
+
+  // De-dupe by image URL, cap the strip at a sane length
+  const seen = new Set();
+  const unique = [];
+  for (const img of images) {
+    if (seen.has(img.src)) continue;
+    seen.add(img.src);
+    unique.push(img);
+    if (unique.length >= 12) break;
+  }
+
+  if (unique.length < 3) {
+    // Not enough real best-seller photos to make a convincing loop —
+    // leave the static fallback image showing instead.
+    wrap.style.display = 'none';
+    return;
+  }
+
+  // Duplicate the set so the CSS translateX(-50%) loop is seamless
+  const doubled = [...unique, ...unique];
+  track.innerHTML = doubled.map(img => `
+    <img src="${escapeHtml(img.src)}" alt="" loading="lazy" onerror="this.remove()" />
+  `).join('');
+
+  wrap.style.display = 'block';
 }
 
 function handleSearch() {

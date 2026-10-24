@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=70" />
-  <script src="app.js?v=70" defer></script>
+  <link rel="stylesheet" href="style.css?v=71" />
+  <script src="app.js?v=71" defer></script>
 </head>
 <body>
 
@@ -68,18 +68,100 @@
 
   <!-- HERO -->
   <section class="hero">
-    <img src="assets/CoverImage-hero.jpg" alt="" aria-hidden="true" class="hero-product-blend" />
+    <!-- Fallback static image — stays underneath; the marquee overlays it
+         once best-seller product images are ready (renderHeroMarquee in
+         app.js), so there's never an empty gap if products fail to load. -->
+    <img src="assets/CoverImage-hero.jpg" alt="" aria-hidden="true" class="hero-product-blend" id="heroFallbackImg" />
+    <div class="hero-bestseller-marquee" aria-hidden="true" id="heroMarquee" style="display:none">
+      <div class="hero-marquee-track" id="heroMarqueeTrack"></div>
+    </div>
     <div class="hero-content">
       <h1 class="hero-title">
         <span class="hero-title-come">Come</span>
         <span class="hero-title-unite">Unite.</span>
       </h1>
-      <p class="hero-subtitle">Wholesale prices on premium dry fruits, nuts, and spices for your apartment community. We pool demand. You save up to 40%.</p>
-      <div class="hero-cta-row">
-        <button class="btn-gold" onclick="scrollToSection('shopSection')">Browse Products</button>
-        <button class="btn-outline" onclick="openMembershipModal()">Join Membership</button>
+      <p class="hero-subtitle">Wholesale prices on premium dry fruits, nuts, and spices for your apartment community. We pool demand. You save.</p>
+    </div>
+  </section>
+
+  <!-- MEMBER-ONLY SAVINGS BANNER -->
+  <section class="member-savings-banner">
+    <div class="msb-ribbon-row">
+      <div class="msb-ribbon-tail msb-ribbon-tail--left"></div>
+      <div class="msb-ribbon-label">Member-Only Savings</div>
+      <div class="msb-ribbon-tail msb-ribbon-tail--right"></div>
+    </div>
+    <h2 class="msb-title">Spend &amp; Save</h2>
+    <p class="msb-subtitle">Exclusive pricing for CommunitE members — the more you stock up, the more you save</p>
+
+    <div class="msb-tiers">
+      <div class="msb-tier">
+        <span class="msb-tier-spend-label">Spend</span>
+        <span class="msb-tier-spend-val">₹999</span>
+        <span class="msb-tier-save-label">Save</span>
+        <span class="msb-tier-save-val">₹100</span>
+      </div>
+      <svg class="msb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="msb-tier">
+        <span class="msb-tier-spend-label">Spend</span>
+        <span class="msb-tier-spend-val">₹1,999</span>
+        <span class="msb-tier-save-label">Save</span>
+        <span class="msb-tier-save-val">₹250</span>
+      </div>
+      <svg class="msb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="msb-tier">
+        <span class="msb-tier-spend-label">Spend</span>
+        <span class="msb-tier-spend-val">₹2,999</span>
+        <span class="msb-tier-save-label">Save</span>
+        <span class="msb-tier-save-val">₹400</span>
+      </div>
+      <svg class="msb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="msb-tier msb-tier-best">
+        <div class="msb-tier-best-badge">Best Value</div>
+        <span class="msb-tier-spend-label">Spend</span>
+        <span class="msb-tier-spend-val">₹3,999+</span>
+        <span class="msb-tier-save-label">Save</span>
+        <span class="msb-tier-save-val">₹600</span>
       </div>
     </div>
+
+    <button class="msb-cta-btn" onclick="openMembershipModal()">Join CommunitE &rarr;</button>
+    <div class="msb-fineprint">Exclusive to CommunitE members &middot; applied automatically at checkout</div>
+  </section>
+
+  <!-- SHOP SECTION — Search + Categories + Subcategories + Products
+       (moved up to sit right after the hero/banner, ahead of trust bar
+       and theme cards, per request) -->
+  <section id="shopSection" class="shop-section">
+
+    <div class="storage-tip-banner">
+      🌿 <strong>Keeping it fresh:</strong> Store in an airtight container, away from sunlight and heat. In humid weather, refrigerating extends freshness — most nuts and dried fruits stay good for 3–4 months this way.
+    </div>
+
+    <!-- Categories grid — always visible -->
+    <div id="categorySection" class="shop-categories">
+      <div class="section-eyebrow">Categories</div>
+      <h2 class="section-title">Shop by what you need</h2>
+      <p class="section-desc">Swipe to explore.</p>
+      <div id="categoryContainer" class="category-grid"></div>
+    </div>
+
+    <!-- Subcategories — appear below categories when one is selected -->
+    <div id="subcategorySection" class="shop-subcategories" style="display:none">
+      <h2 class="shop-section-label" id="subcategoryTitle"></h2>
+      <div id="subcategoryContainer" class="category-grid category-grid--sub"></div>
+    </div>
+
+    <!-- Products — appear below subcategories -->
+    <div id="productSection" class="shop-products" style="display:none">
+      <h2 class="shop-section-label" id="productTitle"></h2>
+      <div id="productFilterLabel" class="product-filter-label" style="display:none">
+        <span>🔍 Filtered view</span>
+        <button onclick="goBackToCategories()">Clear ✕</button>
+      </div>
+      <div id="productContainer" class="product-grid"></div>
+    </div>
+
   </section>
 
   <!-- TRUST BAR — pulled from real About Us stats, surfaced right up front -->
@@ -138,39 +220,6 @@
     </div>
     <div class="floating-cart-cta">View Cart <i class="fas fa-arrow-right"></i></div>
   </div>
-
-  <!-- SHOP SECTION — Search + Categories + Subcategories + Products -->
-  <section id="shopSection" class="shop-section">
-
-    <div class="storage-tip-banner">
-      🌿 <strong>Keeping it fresh:</strong> Store in an airtight container, away from sunlight and heat. In humid weather, refrigerating extends freshness — most nuts and dried fruits stay good for 3–4 months this way.
-    </div>
-
-    <!-- Categories grid — always visible -->
-    <div id="categorySection" class="shop-categories">
-      <div class="section-eyebrow">Categories</div>
-      <h2 class="section-title">Shop by what you need</h2>
-      <p class="section-desc">Swipe to explore.</p>
-      <div id="categoryContainer" class="category-grid"></div>
-    </div>
-
-    <!-- Subcategories — appear below categories when one is selected -->
-    <div id="subcategorySection" class="shop-subcategories" style="display:none">
-      <h2 class="shop-section-label" id="subcategoryTitle"></h2>
-      <div id="subcategoryContainer" class="category-grid category-grid--sub"></div>
-    </div>
-
-    <!-- Products — appear below subcategories -->
-    <div id="productSection" class="shop-products" style="display:none">
-      <h2 class="shop-section-label" id="productTitle"></h2>
-      <div id="productFilterLabel" class="product-filter-label" style="display:none">
-        <span>🔍 Filtered view</span>
-        <button onclick="goBackToCategories()">Clear ✕</button>
-      </div>
-      <div id="productContainer" class="product-grid"></div>
-    </div>
-
-  </section>
 
   <!-- TAGLINE STRIP -->
   <div class="tagline-strip">
