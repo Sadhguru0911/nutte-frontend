@@ -341,31 +341,43 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   max-width: 480px;
   margin: 0 auto 28px;
 }
+/* All 4 tiers must stay on one row at every width — nowrap, and each
+   tier is a flexible (not fixed-min-width) column so they shrink evenly
+   on narrow phones instead of the last one wrapping. Extra top padding
+   on the row makes room for the "Best Value" badge, which floats above
+   its tier and would otherwise overlap the subtitle text or the tier
+   next to it once things got tight. */
 .ssb-tiers {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 0 4px;
+  flex-wrap: nowrap;
+  gap: 0 2px;
   margin-bottom: 26px;
+  padding-top: 22px;
 }
 .ssb-tier {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 108px;
-  padding: 6px 4px;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 130px;
+  padding: 6px 2px 0;
 }
 .ssb-tier-spend-label, .ssb-tier-save-label {
   font-size: 0.6rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  white-space: nowrap;
 }
 .ssb-tier-spend-label { color: rgba(245,237,214,0.5); }
 .ssb-tier-save-label { color: var(--rd-gold); margin-top: 8px; }
 .ssb-tier-spend-val {
   font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--rd-gold-light); margin-top: 3px;
+  white-space: nowrap;
 }
 .ssb-tier-save-val {
   font-family: 'DM Serif Display', serif; font-weight: 700; font-size: 1.55rem; color: var(--rd-gold); margin-top: 2px;
+  white-space: nowrap;
 }
 .ssb-tier-best {
   position: relative;
@@ -375,7 +387,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   font-size: 0.55rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
   color: var(--rd-purple); background: var(--rd-gold); padding: 2px 8px; border-radius: 10px; white-space: nowrap;
 }
-.ssb-chevron { opacity: 0.4; flex-shrink: 0; align-self: center; margin-top: 10px; }
+.ssb-chevron { opacity: 0.4; flex-shrink: 0; align-self: flex-start; margin-top: 32px; }
 .ssb-cta-btn {
   display: inline-block; background: var(--rd-gold); color: var(--rd-purple);
   font-weight: 700; font-size: 0.9rem; padding: 13px 30px; border-radius: 30px;
@@ -387,10 +399,20 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 @media (max-width: 700px) {
   .ssb-title { font-size: 1.7rem; }
-  .ssb-tier { min-width: 78px; }
-  .ssb-tier-save-val { font-size: 1.2rem; }
-  .ssb-tier-spend-val { font-size: 0.95rem; }
-  .ssb-chevron svg { width: 14px; height: 14px; }
+  .ssb-tiers { gap: 0 1px; padding-top: 20px; }
+  .ssb-tier { padding: 4px 1px 0; }
+  .ssb-tier-spend-label, .ssb-tier-save-label { font-size: 0.5rem; letter-spacing: 0.8px; }
+  .ssb-tier-save-val { font-size: 1rem; }
+  .ssb-tier-spend-val { font-size: 0.78rem; }
+  .ssb-tier-best-badge { font-size: 0.46rem; padding: 2px 5px; top: -18px; }
+  .ssb-chevron { margin-top: 26px; }
+  .ssb-chevron svg { width: 9px; height: 9px; }
+}
+@media (max-width: 420px) {
+  .ssb-tier-spend-label, .ssb-tier-save-label { font-size: 0.42rem; letter-spacing: 0.4px; }
+  .ssb-tier-save-val { font-size: 0.86rem; }
+  .ssb-tier-spend-val { font-size: 0.68rem; }
+  .ssb-chevron { display: none; }
 }
 .hero-product-strip {
   display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch;

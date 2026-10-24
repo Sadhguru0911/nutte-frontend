@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=72" />
-  <script src="app.js?v=72" defer></script>
+  <link rel="stylesheet" href="style.css?v=74" />
+  <script src="app.js?v=74" defer></script>
 </head>
 <body>
 
@@ -84,6 +84,15 @@
       <div class="hero-marquee-track" id="heroMarqueeTrack"></div>
     </div>
   </section>
+
+  <!-- TRUST BAR — pulled from real About Us stats; floats up into the
+       hero's own bottom curve, so it has to stay directly after .hero
+       (its -28px top margin is tuned for that white cutout). -->
+  <div class="trust-bar">
+    <div class="trust-item"><div class="trust-number">450+</div><div class="trust-label">Members</div></div>
+    <div class="trust-item"><div class="trust-number">20+</div><div class="trust-label">Societies</div></div>
+    <div class="trust-item"><div class="trust-number">40%</div><div class="trust-label">Max Savings</div></div>
+  </div>
 
   <!-- MEMBER-ONLY SAVINGS BANNER -->
   <section class="spend-save-banner">
@@ -164,13 +173,6 @@
     </div>
 
   </section>
-
-  <!-- TRUST BAR — pulled from real About Us stats, surfaced right up front -->
-  <div class="trust-bar">
-    <div class="trust-item"><div class="trust-number">450+</div><div class="trust-label">Members</div></div>
-    <div class="trust-item"><div class="trust-number">20+</div><div class="trust-label">Societies</div></div>
-    <div class="trust-item"><div class="trust-number">40%</div><div class="trust-label">Max Savings</div></div>
-  </div>
 
   <!-- THEME CARDS — dynamic, generated from product Tags + Member Discount -->
   <div class="theme-cards-section">
