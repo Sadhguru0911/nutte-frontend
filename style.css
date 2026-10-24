@@ -195,7 +195,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* ── HERO ── */
 .hero {
   max-width: 100%;
-  padding: 20px 0 100px;
+  padding: 20px 0 70px;
   background: linear-gradient(170deg, var(--rd-purple) 0%, var(--rd-purple-mid) 55%, var(--rd-purple-deep) 100%);
   position: relative;
   overflow: hidden;
@@ -206,102 +206,64 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: var(--white); clip-path: ellipse(55% 100% at 50% 100%); z-index: 1;
 }
 
-/* Product photo blended into the purple hero — sits top-right, below where
-   Login/Join sit in the nav above, edges feathered into the gradient via a
-   radial mask so it reads as part of the background texture, not a pasted
-   photo. Decorative only (aria-hidden, no alt text, no pointer events). */
-.hero-product-blend {
-  position: absolute;
-  top: 20px;
-  right: 40px;
-  width: 320px;
-  height: 320px;
-  object-fit: cover;
-  -webkit-mask-image: radial-gradient(circle at 56% 42%, black 46%, rgba(0,0,0,0.6) 62%, transparent 78%);
-  mask-image: radial-gradient(circle at 56% 42%, black 46%, rgba(0,0,0,0.6) 62%, transparent 78%);
-  opacity: 0.95;
-  filter: brightness(1.1) saturate(1.12);
-  mix-blend-mode: normal;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
-}
-@media (max-width: 960px) {
-  .hero-product-blend { width: 240px; height: 240px; top: 14px; right: 24px; opacity: 0.9; }
-}
-@media (max-width: 600px) {
-  /* Not enough width at phone size to float this beside the headline
-     without colliding with it — stack it in normal flow above the text
-     instead of overlaying it. */
-  .hero-product-blend {
-    position: static;
-    display: block;
-    width: 150px;
-    height: 150px;
-    margin: 4px auto 16px;
-    top: auto; right: auto;
-    opacity: 0.95;
-    filter: brightness(1.15) saturate(1.12);
-    -webkit-mask-image: radial-gradient(circle at 50% 42%, black 50%, rgba(0,0,0,0.6) 66%, transparent 80%);
-    mask-image: radial-gradient(circle at 50% 42%, black 50%, rgba(0,0,0,0.6) 66%, transparent 80%);
-  }
-}
-
-/* Best-seller image marquee — replaces the static blended photo with a
-   continuously scrolling strip of real best-seller product shots, in the
-   same position/mask/footprint .hero-product-blend used. Hidden by JS
-   (renderHeroMarquee) until at least one best-seller image is ready, so
-   the static .hero-product-blend underneath is always the fallback —
-   nothing ever flashes empty. */
+/* Best-seller image marquee — a full-width strip below the hero text, not
+   a small boxed-in photo. A continuously scrolling row of real best-seller
+   product shots, each its own rounded tile with breathing room between
+   them. Hidden by JS (renderHeroMarquee) until at least 3 best-seller
+   images are ready; otherwise the hero just runs text-only. */
 .hero-bestseller-marquee {
-  position: absolute;
-  top: 20px;
-  right: 40px;
-  width: 320px;
-  height: 320px;
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: 32px auto 0;
+  padding: 0 32px;
   overflow: hidden;
-  -webkit-mask-image: radial-gradient(circle at 56% 42%, black 46%, rgba(0,0,0,0.6) 62%, transparent 78%);
-  mask-image: radial-gradient(circle at 56% 42%, black 46%, rgba(0,0,0,0.6) 62%, transparent 78%);
-  opacity: 0.95;
-  filter: brightness(1.1) saturate(1.12);
-  z-index: 0;
+}
+.hero-bestseller-marquee::before,
+.hero-bestseller-marquee::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 60px;
+  z-index: 1;
   pointer-events: none;
-  user-select: none;
+}
+.hero-bestseller-marquee::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--rd-purple-deep) 0%, transparent 100%);
+}
+.hero-bestseller-marquee::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--rd-purple-deep) 0%, transparent 100%);
 }
 .hero-marquee-track {
   display: flex;
-  height: 100%;
+  align-items: center;
+  gap: 24px;
   width: max-content;
-  animation: heroMarqueeScroll 22s linear infinite;
+  animation: heroMarqueeScroll 26s linear infinite;
 }
 .hero-marquee-track img {
-  width: 320px;
-  height: 320px;
+  width: 220px;
+  height: 220px;
+  border-radius: 20px;
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.28);
 }
 @keyframes heroMarqueeScroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 @media (max-width: 960px) {
-  .hero-bestseller-marquee { width: 240px; height: 240px; top: 14px; right: 24px; opacity: 0.9; }
-  .hero-marquee-track img { width: 240px; height: 240px; }
+  .hero-bestseller-marquee { margin-top: 24px; padding: 0 24px; }
+  .hero-marquee-track { gap: 18px; }
+  .hero-marquee-track img { width: 170px; height: 170px; border-radius: 16px; }
 }
 @media (max-width: 600px) {
-  .hero-bestseller-marquee {
-    position: static;
-    display: block;
-    width: 150px;
-    height: 150px;
-    margin: 4px auto 16px;
-    top: auto; right: auto;
-    opacity: 0.95;
-    filter: brightness(1.15) saturate(1.12);
-    -webkit-mask-image: radial-gradient(circle at 50% 42%, black 50%, rgba(0,0,0,0.6) 66%, transparent 80%);
-    mask-image: radial-gradient(circle at 50% 42%, black 50%, rgba(0,0,0,0.6) 66%, transparent 80%);
-  }
-  .hero-marquee-track img { width: 150px; height: 150px; }
+  .hero-bestseller-marquee { margin-top: 20px; padding: 0 20px; }
+  .hero-marquee-track { gap: 14px; }
+  .hero-marquee-track img { width: 140px; height: 140px; border-radius: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-marquee-track { animation: none; }

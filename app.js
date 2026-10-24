@@ -1294,10 +1294,11 @@ async function buildSearchIndex() {
 }
 
 /* ── HERO BEST-SELLER MARQUEE ──
-   Builds the scrolling strip of real best-seller product photos that
-   overlays the static hero image once product data is in. Falls back to
-   leaving the static .hero-product-blend image visible (it's underneath,
-   untouched) if there are no best-seller images to show. */
+   Builds the scrolling strip of real best-seller product photos below the
+   hero text once product data is in. There's no static fallback image
+   anymore — if there aren't enough best-seller photos to make a
+   convincing loop, the strip just stays hidden and the hero runs
+   text-only. */
 function renderHeroMarquee() {
   const wrap = $('heroMarquee');
   const track = $('heroMarqueeTrack');
@@ -1319,7 +1320,7 @@ function renderHeroMarquee() {
 
   if (unique.length < 3) {
     // Not enough real best-seller photos to make a convincing loop —
-    // leave the static fallback image showing instead.
+    // keep the hero text-only rather than show a half-empty strip.
     wrap.style.display = 'none';
     return;
   }

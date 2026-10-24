@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=71" />
-  <script src="app.js?v=71" defer></script>
+  <link rel="stylesheet" href="style.css?v=72" />
+  <script src="app.js?v=72" defer></script>
 </head>
 <body>
 
@@ -68,13 +68,6 @@
 
   <!-- HERO -->
   <section class="hero">
-    <!-- Fallback static image — stays underneath; the marquee overlays it
-         once best-seller product images are ready (renderHeroMarquee in
-         app.js), so there's never an empty gap if products fail to load. -->
-    <img src="assets/CoverImage-hero.jpg" alt="" aria-hidden="true" class="hero-product-blend" id="heroFallbackImg" />
-    <div class="hero-bestseller-marquee" aria-hidden="true" id="heroMarquee" style="display:none">
-      <div class="hero-marquee-track" id="heroMarqueeTrack"></div>
-    </div>
     <div class="hero-content">
       <h1 class="hero-title">
         <span class="hero-title-come">Come</span>
@@ -82,51 +75,59 @@
       </h1>
       <p class="hero-subtitle">Wholesale prices on premium dry fruits, nuts, and spices for your apartment community. We pool demand. You save.</p>
     </div>
+
+    <!-- Best-seller image marquee — full-width strip below the hero text,
+         not a small boxed-in image. Populated by renderHeroMarquee in
+         app.js from real best-seller product photos; stays hidden (no
+         image at all) if fewer than 3 are available. -->
+    <div class="hero-bestseller-marquee" aria-hidden="true" id="heroMarquee" style="display:none">
+      <div class="hero-marquee-track" id="heroMarqueeTrack"></div>
+    </div>
   </section>
 
   <!-- MEMBER-ONLY SAVINGS BANNER -->
-  <section class="member-savings-banner">
-    <div class="msb-ribbon-row">
-      <div class="msb-ribbon-tail msb-ribbon-tail--left"></div>
-      <div class="msb-ribbon-label">Member-Only Savings</div>
-      <div class="msb-ribbon-tail msb-ribbon-tail--right"></div>
+  <section class="spend-save-banner">
+    <div class="ssb-ribbon-row">
+      <div class="ssb-ribbon-tail ssb-ribbon-tail--left"></div>
+      <div class="ssb-ribbon-label">Member-Only Savings</div>
+      <div class="ssb-ribbon-tail ssb-ribbon-tail--right"></div>
     </div>
-    <h2 class="msb-title">Spend &amp; Save</h2>
-    <p class="msb-subtitle">Exclusive pricing for CommunitE members — the more you stock up, the more you save</p>
+    <h2 class="ssb-title">Spend &amp; Save</h2>
+    <p class="ssb-subtitle">Exclusive pricing for CommunitE members — the more you stock up, the more you save</p>
 
-    <div class="msb-tiers">
-      <div class="msb-tier">
-        <span class="msb-tier-spend-label">Spend</span>
-        <span class="msb-tier-spend-val">₹999</span>
-        <span class="msb-tier-save-label">Save</span>
-        <span class="msb-tier-save-val">₹100</span>
+    <div class="ssb-tiers">
+      <div class="ssb-tier">
+        <span class="ssb-tier-spend-label">Spend</span>
+        <span class="ssb-tier-spend-val">₹999</span>
+        <span class="ssb-tier-save-label">Save</span>
+        <span class="ssb-tier-save-val">₹100</span>
       </div>
-      <svg class="msb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div class="msb-tier">
-        <span class="msb-tier-spend-label">Spend</span>
-        <span class="msb-tier-spend-val">₹1,999</span>
-        <span class="msb-tier-save-label">Save</span>
-        <span class="msb-tier-save-val">₹250</span>
+      <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="ssb-tier">
+        <span class="ssb-tier-spend-label">Spend</span>
+        <span class="ssb-tier-spend-val">₹1,999</span>
+        <span class="ssb-tier-save-label">Save</span>
+        <span class="ssb-tier-save-val">₹250</span>
       </div>
-      <svg class="msb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div class="msb-tier">
-        <span class="msb-tier-spend-label">Spend</span>
-        <span class="msb-tier-spend-val">₹2,999</span>
-        <span class="msb-tier-save-label">Save</span>
-        <span class="msb-tier-save-val">₹400</span>
+      <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="ssb-tier">
+        <span class="ssb-tier-spend-label">Spend</span>
+        <span class="ssb-tier-spend-val">₹2,999</span>
+        <span class="ssb-tier-save-label">Save</span>
+        <span class="ssb-tier-save-val">₹400</span>
       </div>
-      <svg class="msb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div class="msb-tier msb-tier-best">
-        <div class="msb-tier-best-badge">Best Value</div>
-        <span class="msb-tier-spend-label">Spend</span>
-        <span class="msb-tier-spend-val">₹3,999+</span>
-        <span class="msb-tier-save-label">Save</span>
-        <span class="msb-tier-save-val">₹600</span>
+      <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="ssb-tier ssb-tier-best">
+        <div class="ssb-tier-best-badge">Best Value</div>
+        <span class="ssb-tier-spend-label">Spend</span>
+        <span class="ssb-tier-spend-val">₹3,999+</span>
+        <span class="ssb-tier-save-label">Save</span>
+        <span class="ssb-tier-save-val">₹600</span>
       </div>
     </div>
 
-    <button class="msb-cta-btn" onclick="openMembershipModal()">Join CommunitE &rarr;</button>
-    <div class="msb-fineprint">Exclusive to CommunitE members &middot; applied automatically at checkout</div>
+    <button class="ssb-cta-btn" onclick="openMembershipModal()">Join CommunitE &rarr;</button>
+    <div class="ssb-fineprint">Exclusive to CommunitE members &middot; applied automatically at checkout</div>
   </section>
 
   <!-- SHOP SECTION — Search + Categories + Subcategories + Products
