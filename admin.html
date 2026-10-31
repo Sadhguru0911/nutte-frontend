@@ -179,11 +179,24 @@
     <!-- DELIVERY SUMMARY TAB -->
     <div class="tab-panel" id="tab-delivery">
       <div class="card">
-        <strong>Packing list by delivery date</strong>
+        <strong>Packing list from selected orders</strong>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:4px">Tick the orders to include, then generate the packing list. Orders with failed payments are not listed.</div>
         <div class="summary-controls" style="margin-top:12px">
-          <select id="deliveryDateSelect"><option value="">Loading dates…</option></select>
-          <button class="btn-outline" onclick="loadDeliveryDates()">↻ Refresh dates</button>
-          <button class="btn-primary" onclick="loadDeliverySummary()">Generate Summary</button>
+          <label for="pickDateFilter" style="font-size:0.82rem;font-weight:600;color:var(--muted)">Show</label>
+          <select id="pickDateFilter" onchange="renderOrderPicker()"></select>
+          <button class="btn-outline" onclick="loadOrders()">↻ Refresh orders</button>
+          <button class="btn-outline" onclick="pickAllShown(true)">Select all shown</button>
+          <button class="btn-outline" onclick="pickAllShown(false)">Clear selection</button>
+        </div>
+        <div id="pickEmpty" class="empty-note" style="display:none">No orders to show for this filter.</div>
+        <table id="pickTable" style="display:none">
+          <thead>
+            <tr><th style="width:36px"></th><th>Order</th><th>Customer</th><th>Delivery</th><th>Items</th><th>Total</th><th>Payment</th></tr>
+          </thead>
+          <tbody id="pickBody"></tbody>
+        </table>
+        <div class="summary-controls" style="margin-top:12px">
+          <button class="btn-primary" id="generateSelectedBtn" onclick="loadSelectedSummary()">Generate Summary (0 selected)</button>
         </div>
 
         <div id="summaryResults" style="display:none">
@@ -206,7 +219,7 @@
             <button class="btn-outline" onclick="copySummaryText()">Copy Text</button>
           </div>
         </div>
-        <div id="summaryEmpty" class="empty-note" style="display:none">No orders found for that delivery date.</div>
+        <div id="summaryEmpty" class="empty-note" style="display:none">Nothing to summarise for the selected orders.</div>
       </div>
     </div>
 
@@ -376,6 +389,7 @@ async function loadOrders() {
       return;
     }
     allOrdersCache = data.orders;
+    if (typeof renderOrderPicker === 'function') renderOrderPicker();
     populateOrderDateFilter();
     populateSalesYearFilter();
     filterOrdersByDate(currentOrderDateFilter); // re-apply whatever filter was active, if any
@@ -628,32 +642,87 @@ async function verifyPayment(rowNumber, orderId, btnEl) {
   }
 }
 
-/* ---- Delivery summary tab ---- */
-async function loadDeliveryDates() {
-  const select = document.getElementById('deliveryDateSelect');
-  try {
-    const res = await fetch(`${apiBase}/api/admin/delivery-dates?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
-    const data = await res.json();
-    if (handleAuthFailure(data)) return;
-    if (!data.success || !data.dates || data.dates.length === 0) {
-      select.innerHTML = '<option value="">No upcoming delivery dates</option>';
-      return;
-    }
-    select.innerHTML = data.dates.map(d => `<option value="${d}">${d}</option>`).join('');
-  } catch (e) {
-    select.innerHTML = '<option value="">Could not load dates</option>';
-  }
-}
-
+/* ---- Delivery summary tab: hand-pick orders, then build the packing list ---- */
+const pickedOrderIds = new Set();   // survives filter changes and refreshes
 let lastSummaryText = '';
 
-async function loadDeliverySummary() {
-  const date = document.getElementById('deliveryDateSelect').value;
-  if (!date) return;
+function loadDeliveryDates() { /* the picker now fills itself whenever orders load (see loadOrders) */ }
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function pickableOrders() {
+  return allOrdersCache.filter(o => !isFailedOrder(o));
+}
+
+function renderOrderPicker() {
+  const select = document.getElementById('pickDateFilter');
+  const prev = select.value || '__upcoming__';
+  const dates = [...new Set(pickableOrders().map(o => o.delivery_date).filter(Boolean))].sort();
+  select.innerHTML =
+    '<option value="__upcoming__">Upcoming deliveries (today onwards)</option>' +
+    '<option value="__all__">All orders</option>' +
+    dates.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+  select.value = [...select.options].some(o => o.value === prev) ? prev : '__upcoming__';
+
+  const today = todayStr();
+  let list = pickableOrders();
+  if (select.value === '__upcoming__') list = list.filter(o => (o.delivery_date || '') >= today);
+  else if (select.value !== '__all__') list = list.filter(o => o.delivery_date === select.value);
+  list = list.slice().sort((a, b) => String(a.delivery_date).localeCompare(String(b.delivery_date)) || String(a.order_id).localeCompare(String(b.order_id)));
+
+  document.getElementById('pickEmpty').style.display = list.length ? 'none' : 'block';
+  document.getElementById('pickTable').style.display = list.length ? 'table' : 'none';
+  document.getElementById('pickBody').innerHTML = list.map(o => {
+    const verified = String(o.payment_status).toLowerCase() === 'verified';
+    const badge = verified ? 'badge--verified' : 'badge--pending';
+    return `
+      <tr>
+        <td data-label=""><input type="checkbox" ${pickedOrderIds.has(o.order_id) ? 'checked' : ''} onchange="togglePick('${escapeHtml(o.order_id)}', this.checked)" /></td>
+        <td data-label="Order">${escapeHtml(o.order_id)}</td>
+        <td data-label="Customer">${escapeHtml(o.full_name)}<br><span style="color:var(--muted);font-size:0.75rem">${escapeHtml(o.apt_number)}${o.apt_number && o.community ? ', ' : ''}${escapeHtml(o.community)}</span></td>
+        <td data-label="Delivery">${escapeHtml(o.delivery_date)}</td>
+        <td data-label="Items" class="items-cell">${escapeHtml(o.cart_items)}</td>
+        <td data-label="Total">₹${escapeHtml(o.total_amount)}</td>
+        <td data-label="Payment"><span class="badge ${badge}">${escapeHtml(o.payment_status || 'Pending')}</span></td>
+      </tr>`;
+  }).join('');
+  updatePickCount();
+}
+
+function togglePick(orderId, on) {
+  if (on) pickedOrderIds.add(orderId); else pickedOrderIds.delete(orderId);
+  updatePickCount();
+}
+
+function pickAllShown(on) {
+  document.querySelectorAll('#pickBody input[type=checkbox]').forEach(cb => {
+    cb.checked = on;
+    const id = cb.closest('tr').children[1].textContent.trim();
+    if (on) pickedOrderIds.add(id); else pickedOrderIds.delete(id);
+  });
+  updatePickCount();
+}
+
+function updatePickCount() {
+  // only count selections that still exist and haven't failed payment
+  const valid = new Set(pickableOrders().map(o => o.order_id));
+  [...pickedOrderIds].forEach(id => { if (!valid.has(id)) pickedOrderIds.delete(id); });
+  document.getElementById('generateSelectedBtn').textContent = `Generate Summary (${pickedOrderIds.size} selected)`;
+}
+
+async function loadSelectedSummary() {
+  if (pickedOrderIds.size === 0) { alert('Tick at least one order first.'); return; }
   document.getElementById('summaryResults').style.display = 'none';
   document.getElementById('summaryEmpty').style.display = 'none';
   try {
-    const res = await fetch(`${apiBase}/api/admin/delivery-summary?passcode=${encodeURIComponent(ADMIN_PASSCODE)}&date=${encodeURIComponent(date)}`);
+    const res = await fetch(`${apiBase}/api/admin/delivery-summary-selected`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE, order_ids: [...pickedOrderIds] })
+    });
     const data = await res.json();
     if (handleAuthFailure(data)) return;
     if (!data.success || !data.items || data.items.length === 0) {
@@ -666,8 +735,8 @@ async function loadDeliverySummary() {
 
     const warningEl = document.getElementById('summaryWarning');
     const warnParts = [];
-    if (data.pending_count > 0) warnParts.push(`⚠️ ${data.pending_count} order(s) in this batch still have unverified payments — check the Orders tab before shipping.`);
-    if (data.failed_count > 0) warnParts.push(`${data.failed_count} order(s) with failed payments are left out of this packing list.`);
+    if (data.pending_count > 0) warnParts.push(`⚠️ ${data.pending_count} selected order(s) still have unverified payments — check the Orders tab before shipping.`);
+    if (data.failed_count > 0) warnParts.push(`${data.failed_count} selected order(s) with failed payments were left out.`);
     if (warnParts.length) {
       warningEl.style.display = 'block';
       warningEl.textContent = warnParts.join(' ');
