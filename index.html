@@ -24,9 +24,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=74" />
-  <script src="app.js?v=74" defer></script>
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <link rel="stylesheet" href="style.css?v=75" />
+  <script src="app.js?v=75" defer></script>
 </head>
 <body>
 
@@ -494,45 +494,19 @@
         <div id="paymentStep" style="display:none">
           <div class="order-amount-summary">
             <div class="oas-row"><span>Products</span><span>₹<span id="oasSubtotal">0</span></span></div>
-            <div class="oas-row" id="oasMemberRow" style="display:none">
-              <span>Membership <span id="oasMemberPlan" class="plan-badge"></span></span>
-              <span>₹<span id="oasMemberFee">0</span></span>
-            </div>
             <div class="oas-row"><span>Delivery</span><span>₹50</span></div>
-            <div class="oas-total"><span>Pay exactly</span><strong>₹<span id="oasTotal">0</span></strong></div>
+            <div class="oas-total"><span>Total</span><strong>₹<span id="oasTotal">0</span></strong></div>
           </div>
-          <div class="upi-payment-box">
-            <p class="upi-instruction">Scan QR or tap below to pay the amount above</p>
-            <div id="upiQrContainer" class="upi-qr-img"></div>
-            <a id="upiPayAppBtn" class="btn-primary btn-block upi-pay-app-btn" href="#" target="_blank" rel="noopener">
-              <i class="fas fa-mobile-screen-button"></i> Pay ₹<span id="upiPayAmount">0</span> via UPI App
-            </a>
-            <div id="upiIosAppButtons" class="upi-ios-app-buttons" style="display:none">
-              <a id="upiGpayBtn" class="btn-secondary upi-app-btn" href="#">
-                <i class="fas fa-mobile-screen-button"></i> Google Pay
-              </a>
-              <a id="upiPhonepeBtn" class="btn-secondary upi-app-btn" href="#">
-                <i class="fas fa-mobile-screen-button"></i> PhonePe
-              </a>
-            </div>
-            <p id="upiIosNote" class="upi-ios-note" style="display:none">Using another app (Paytm, BHIM, etc.)? Scan the QR above or use the UPI ID below. After paying, come back here and tap Confirm Order.</p>
-            <div class="upi-id-box">
-              <span class="upi-id-label">UPI ID</span>
-              <span class="upi-id-value">Mab.037213027680043@axisbank</span>
-              <button class="upi-copy-btn" onclick="copyUPI()"><i class="fas fa-copy"></i></button>
-            </div>
-          </div>
-          <div class="form-group" style="margin-top:16px">
-            <label class="field-label">UPI Transaction ID / RR Number <span style="color:var(--green)">*</span></label>
-            <input id="orderRRNumber" class="field-input" type="text" inputmode="numeric" maxlength="12" placeholder="12-digit transaction ID" oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)" />
-          </div>
+          <p class="upi-instruction" style="text-align:center;margin:14px 0">
+            <i class="fas fa-lock"></i> Pay securely with UPI, cards or netbanking via Cashfree
+          </p>
           <p class="checkout-policy-note">
-            By confirming, you agree to our <a href="#" onclick="openReturnsPolicyModal(); return false;">Returns Policy</a> —
+            By paying, you agree to our <a href="#" onclick="openReturnsPolicyModal(); return false;">Returns Policy</a> —
             replacement within 10 days of delivery for quality issues.
           </p>
           <div class="payment-step-actions">
             <button class="btn-secondary" onclick="backToDetailsStep()"><i class="fas fa-arrow-left"></i> Back</button>
-            <button id="confirmOrderBtn" class="btn-primary" onclick="submitOrderWithPayment()">Confirm Order <i class="fas fa-check"></i></button>
+            <button id="confirmOrderBtn" class="btn-primary" onclick="submitOrderWithPayment()">Pay ₹<span id="payBtnAmount">0</span> <i class="fas fa-lock"></i></button>
           </div>
         </div>
         <div id="lookupResult" style="display:none"></div>
@@ -679,33 +653,10 @@
             <p>Plan: <strong id="paymentPlanLabel"></strong></p>
             <p>Amount: <strong id="paymentAmount"></strong></p>
           </div>
-          <div class="upi-payment-box">
-            <p class="upi-instruction">Scan the QR code or tap below to pay</p>
-            <div id="memberUpiQrContainer" class="upi-qr-img"></div>
-            <a id="memberUpiPayAppBtn" class="btn-primary btn-block upi-pay-app-btn" href="#" target="_blank" rel="noopener">
-              <i class="fas fa-mobile-screen-button"></i> Pay via UPI App
-            </a>
-            <div id="memberUpiIosAppButtons" class="upi-ios-app-buttons" style="display:none">
-              <a id="memberUpiGpayBtn" class="btn-secondary upi-app-btn" href="#">
-                <i class="fas fa-mobile-screen-button"></i> Google Pay
-              </a>
-              <a id="memberUpiPhonepeBtn" class="btn-secondary upi-app-btn" href="#">
-                <i class="fas fa-mobile-screen-button"></i> PhonePe
-              </a>
-            </div>
-            <p id="memberUpiIosNote" class="upi-ios-note" style="display:none">Using another app (Paytm, BHIM, etc.)? Scan the QR above or use the UPI ID below. After paying, come back here and tap Confirm.</p>
-            <div class="upi-id-box">
-              <span class="upi-id-label">UPI ID</span>
-              <span class="upi-id-value">Mab.037213027680043@axisbank</span>
-              <button class="upi-copy-btn" onclick="copyUPI()"><i class="fas fa-copy"></i></button>
-            </div>
-            <p class="upi-note">Pay exactly <strong id="upiExactAmount"></strong> and enter your Transaction ID below</p>
-          </div>
-          <div class="form-group" style="margin-top:16px">
-            <label class="field-label">UPI Transaction ID / RR Number</label>
-            <input id="memberRRNumber" class="field-input" type="text" inputmode="numeric" maxlength="12" placeholder="12-digit transaction ID" oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)" />
-          </div>
-          <button id="submitMembershipBtn" class="btn-primary btn-block" style="margin-top:12px" onclick="submitMembership()">Submit Membership <i class="fas fa-check"></i></button>
+          <p class="upi-note" style="margin-top:14px">
+            <i class="fas fa-rotate"></i> Your membership renews automatically. You'll approve a UPI AutoPay / card mandate on Cashfree's secure page — cancel anytime.
+          </p>
+          <button id="submitMembershipBtn" class="btn-primary btn-block" style="margin-top:12px" onclick="submitMembership()">Continue to Secure Payment <i class="fas fa-lock"></i></button>
         </div>
         <div id="memberStep3" class="member-step" style="display:none">
           <div class="member-active-card">
@@ -1023,14 +974,14 @@
           <img src="assets/NuttE_edited.png" alt="NuttE mascot" />
         </div>
         <h2 class="order-success-title">Membership request received!</h2>
-        <p class="order-success-sub">We'll verify your payment and activate your membership shortly.</p>
+        <p class="order-success-sub">Once your AutoPay approval goes through, your membership activates automatically — you'll get a confirmation email.</p>
 
         <div class="order-success-details">
           <div class="osd-row"><span>Plan</span><strong id="msPlan">—</strong></div>
           <div class="osd-row"><span>Amount</span><strong id="msAmount">—</strong></div>
         </div>
 
-        <p class="order-success-email">
+        <p class="order-success-email" id="msEmailRow" style="display:none">
           <i class="fas fa-envelope"></i> A confirmation email has been sent to
           <strong id="msEmail">—</strong>
         </p>

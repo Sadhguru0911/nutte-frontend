@@ -6,6 +6,9 @@ const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
 const DELIVERY_CHARGE = 50;
 const MEMBERSHIP_PRICES = { monthly: 400, annual: 3999 };
 
+/* Cashfree checkout mode: "sandbox" while testing, change to "production" at launch */
+const CASHFREE_MODE = "sandbox";
+
 /* UPI — used to build a dynamic pay link/QR so the amount is pre-filled
    instead of the customer having to type it in manually. */
 const UPI_VPA = "Mab.037213027680043@axisbank";
@@ -74,6 +77,7 @@ async function apiCall(endpoint, options = {}) {
 /* boot */
 document.addEventListener('DOMContentLoaded', () => {
   bindUI();
+  handleMembershipReturn();
   loadCategories();
   initScrollAnimations();
   const closeAboutBtn = document.getElementById('closeAboutBtn');
@@ -1035,27 +1039,15 @@ function goToPaymentStep() {
     return;
   }
 
-  // Calculate amounts to show in payment step
-  const productItems = cart.filter(i => !i._isMembershipFee);
-  const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
-  const total = subtotal + membershipFeeAmount + DELIVERY_CHARGE;
+  const subtotal = cart.reduce((s, i) => s + i.total_price, 0);
+  const total = subtotal + DELIVERY_CHARGE;
 
   $('oasSubtotal').textContent = subtotal;
   $('oasTotal').textContent = total;
-
-  if (membershipAddedToCart && membershipFeeAmount > 0) {
-    $('oasMemberRow').style.display = 'flex';
-    $('oasMemberFee').textContent = membershipFeeAmount;
-    $('oasMemberPlan').textContent = selectedMemberPlan === 'annual' ? 'Annual' : 'Monthly';
-  } else {
-    $('oasMemberRow').style.display = 'none';
-  }
+  $('payBtnAmount').textContent = total;
 
   $('customerForm').style.display = 'none';
   $('paymentStep').style.display = 'block';
-  $('orderRRNumber').value = '';
-
-  renderUpiQr('upiQrContainer', 'upiPayAppBtn', total, 'CommunitE Order');
 }
 
 /* Step 2 → Step 1: back to details */
@@ -1064,18 +1056,21 @@ function backToDetailsStep() {
   $('customerForm').style.display = 'block';
 }
 
-/* Final submit with RR number */
+/* Cashfree checkout. Flow: save order (payment Pending) -> ask server for a
+   Cashfree payment session -> open Cashfree's checkout. The server marks the
+   order Verified when Cashfree's webhook confirms payment; we never trust the
+   browser alone for that. */
 let isSubmittingOrder = false; // guards against duplicate orders from double-clicks / slow taps
+let cashfreeSdk = null;
+function getCashfree() {
+  if (!cashfreeSdk) cashfreeSdk = Cashfree({ mode: CASHFREE_MODE });
+  return cashfreeSdk;
+}
+
 async function submitOrderWithPayment() {
   if (isSubmittingOrder) return;
-
-  const rrNumber = ($('orderRRNumber').value || '').trim();
-  if (!rrNumber) {
-    alert('Please enter your UPI Transaction ID / RR Number after making the payment');
-    return;
-  }
-  if (!/^\d{12}$/.test(rrNumber)) {
-    alert('UPI Transaction ID / RR Number must be exactly 12 digits');
+  if (typeof Cashfree === 'undefined') {
+    alert('Payment system could not load. Please check your connection and try again.');
     return;
   }
 
@@ -1086,11 +1081,11 @@ async function submitOrderWithPayment() {
   const community = $('community').value.trim();
   const deliveryInstructions = $('deliveryInstructions').value.trim();
 
-  const productItems = cart.filter(i => !i._isMembershipFee);
+  const productItems = cart.slice();
   const subtotal = productItems.reduce((s, i) => s + i.total_price, 0);
+  const total = subtotal + DELIVERY_CHARGE;
 
-  // Real savings this order actually got from member pricing (unit_price was already
-  // set to member_price at add-to-cart time if the shopper was a member then)
+  // Real savings this order actually got from member pricing
   const memberSavingsThisOrder = productItems.reduce((s, i) => {
     if (i.member_price && i.regular_price && i.unit_price <= i.member_price && i.member_price < i.regular_price) {
       return s + ((i.regular_price - i.member_price) * i.quantity);
@@ -1098,77 +1093,85 @@ async function submitOrderWithPayment() {
     return s;
   }, 0);
 
+  const isMember = memberState.status === 'active' || memberState.status === 'pending';
   const order = {
     customer: { full_name: fullName, mobile_number: mobileNumber, email, apt_number: aptNumber, community },
     cart: productItems,
     subtotal,
     delivery_charge: DELIVERY_CHARGE,
-    total_amount: subtotal + membershipFeeAmount + DELIVERY_CHARGE,
+    total_amount: total,
     delivery_instructions: deliveryInstructions || '',
-    upi_rr_number: rrNumber,
-    is_member: memberState.status === 'active' || memberState.status === 'pending' || membershipAddedToCart,
-    membership_plan: membershipAddedToCart ? selectedMemberPlan : null,
-    membership_fee: membershipAddedToCart ? membershipFeeAmount : 0
+    payment_method: 'Cashfree',
+    is_member: isMember,
+    membership_plan: null,
+    membership_fee: 0
   };
 
   isSubmittingOrder = true;
   const btn = $('confirmOrderBtn');
   const originalBtnHtml = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening payment...';
 
   try {
+    // 1. Save the order (payment status stays Pending until the webhook confirms)
     const resp = await apiCall('/submit-order', { method: 'POST', body: JSON.stringify(order) });
-    if (resp.success) {
-      // Save new customer if first time
-      if ($('customerForm').dataset.isNew === 'true') {
-        try {
-          await apiCall('/new-customer', {
-            method: 'POST',
-            body: JSON.stringify({ full_name: fullName, mobile_number: mobileNumber, email, apt_number: aptNumber, community, delivery_instructions: deliveryInstructions || '' })
-          });
-          delete $('customerForm').dataset.isNew;
-        } catch (saveErr) {
-          console.warn('Customer save failed (non-critical):', saveErr);
-        }
-      }
-      // Save membership if bundled
-      if (membershipAddedToCart) {
-        try {
-          await apiCall('/join-member', {
-            method: 'POST',
-            body: JSON.stringify({
-              mobile_number: mobileNumber,
-              full_name: fullName,
-              email,
-              plan: selectedMemberPlan,
-              amount_paid: membershipFeeAmount,
-              rr_number: rrNumber
-            })
-          });
-        } catch (memErr) {
-          console.warn('Membership save failed (non-critical):', memErr);
-        }
-      }
-      cart = [];
-      membershipAddedToCart = false;
-      membershipFeeAmount = 0;
-      selectedMemberPlan = null;
-      updateCartCount();
-      renderCart();
-      $('customerModal').style.display = 'none'; // overlay stays up for the success modal
-      showOrderSuccessModal({
-        orderId: resp.order_id,
-        deliveryDate: formatDate(resp.delivery_date),
-        email,
-        memberSavings: memberSavingsThisOrder,
-        isMember: order.is_member
-      });
-    } else {
+    if (!resp.success) {
       alert('Could not submit order: ' + (resp.message || 'Unknown error'));
+      return;
     }
+
+    // Save new customer if first time
+    if ($('customerForm').dataset.isNew === 'true') {
+      try {
+        await apiCall('/new-customer', {
+          method: 'POST',
+          body: JSON.stringify({ full_name: fullName, mobile_number: mobileNumber, email, apt_number: aptNumber, community, delivery_instructions: deliveryInstructions || '' })
+        });
+        delete $('customerForm').dataset.isNew;
+      } catch (saveErr) {
+        console.warn('Customer save failed (non-critical):', saveErr);
+      }
+    }
+
+    // 2. Get a Cashfree payment session for this order
+    const pay = await apiCall('/create-order-payment', {
+      method: 'POST',
+      body: JSON.stringify({
+        order_id: resp.order_id,
+        amount: total,
+        customer_name: fullName,
+        customer_phone: mobileNumber,
+        customer_email: email
+      })
+    });
+    if (!pay.success || !pay.payment_session_id) {
+      alert('Could not start payment: ' + (pay.message || 'Please try again') + '\nYour order ' + resp.order_id + ' is saved — you can retry or contact us.');
+      return;
+    }
+
+    // 3. Open Cashfree checkout
+    const result = await getCashfree().checkout({ paymentSessionId: pay.payment_session_id, redirectTarget: '_modal' });
+    if (result && result.error) {
+      alert('Payment was not completed: ' + (result.error.message || 'please try again') + '\nYour order ' + resp.order_id + ' is saved but unpaid.');
+      return;
+    }
+
+    // Payment went through on Cashfree's side; the webhook marks the order Verified.
+    cart = [];
+    selectedMemberPlan = null;
+    updateCartCount();
+    renderCart();
+    $('customerModal').style.display = 'none'; // overlay stays up for the success modal
+    showOrderSuccessModal({
+      orderId: resp.order_id,
+      deliveryDate: formatDate(resp.delivery_date),
+      email,
+      memberSavings: memberSavingsThisOrder,
+      isMember
+    });
   } catch (e) {
-    alert('Error submitting order. Please try again.');
+    alert('Error processing payment. Please try again.');
   } finally {
     isSubmittingOrder = false;
     btn.disabled = false;
@@ -1558,7 +1561,6 @@ function resetMembershipModal() {
   $('memberNewForm').style.display = 'none';
   $('memberMobileRow').style.display = 'block';
   $('memberMobile').value = '';
-  $('memberRRNumber').value = '';
 }
 
 function showMemberStep(n) {
@@ -1625,24 +1627,17 @@ function goToMemberPayment() {
   const planLabel = selectedMemberPlan === 'annual' ? 'Annual — ₹3,999/year' : 'Monthly — ₹400/month';
 
   $('paymentPlanLabel').textContent = planLabel;
-  $('paymentAmount').textContent = `₹${amount}`;
-  $('upiExactAmount').textContent = `₹${amount}`;
-
+  $('paymentAmount').textContent = `₹${amount}` + (selectedMemberPlan === 'annual' ? ' / year' : ' / month');
   showMemberStep(2);
-
-  renderUpiQr('memberUpiQrContainer', 'memberUpiPayAppBtn', amount, `CommunitE ${planLabel} Membership`);
 }
 
-/* Submit membership (standalone — not bundled with order) */
-let isSubmittingMembership = false; // guards against duplicate membership requests from double-clicks / slow taps
+/* Start auto-renewing membership: server creates a Cashfree subscription,
+   we send the customer to Cashfree to approve the UPI AutoPay / card mandate.
+   Membership is activated by the webhook once the mandate is approved. */
+let isSubmittingMembership = false;
 async function submitMembership() {
   if (isSubmittingMembership) return;
 
-  const rrNumber = ($('memberRRNumber').value || '').trim();
-  if (!rrNumber) { alert('Please enter your UPI Transaction ID / RR Number'); return; }
-  if (!/^\d{12}$/.test(rrNumber)) { alert('UPI Transaction ID / RR Number must be exactly 12 digits'); return; }
-
-  // Get customer details from whichever path we came through
   let mobile, name, email, apt, community;
   const confirmCard = $('memberCustomerConfirm');
   const newForm = $('memberNewForm');
@@ -1660,50 +1655,51 @@ async function submitMembership() {
     if (!name || !email) { alert('Please fill your name and email'); return; }
   }
 
-  const amount = MEMBERSHIP_PRICES[selectedMemberPlan];
-  const planLabel = selectedMemberPlan === 'annual' ? 'Annual — ₹3,999/year' : 'Monthly — ₹400/month';
-
   isSubmittingMembership = true;
   const btn = $('submitMembershipBtn');
   const originalBtnHtml = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to payment...';
 
   try {
-    const resp = await apiCall('/join-member', {
+    const resp = await apiCall('/create-membership-subscription', {
       method: 'POST',
       body: JSON.stringify({
-        mobile_number: mobile,
-        full_name: name,
-        email,
+        plan: selectedMemberPlan,
+        customer_name: name,
+        customer_phone: mobile,
+        customer_email: email,
         apt_number: apt || '',
         community: community || '',
-        plan: selectedMemberPlan,
-        amount_paid: amount,
-        rr_number: rrNumber
+        return_url: location.origin + location.pathname + '?membership_return=1'
       })
     });
-
-    if (resp.success) {
-      closeMembershipModal();
-      showMembershipSuccessModal({ plan: planLabel, amount, email });
-    } else {
-      alert('Could not submit membership: ' + (resp.message || 'Please try again'));
+    if (resp.success && resp.auth_link) {
+      window.location.href = resp.auth_link;
+      return; // leaving the page
     }
-  } catch(e) {
-    alert('Error submitting membership. Please try again.');
-  } finally {
-    isSubmittingMembership = false;
-    btn.disabled = false;
-    btn.innerHTML = originalBtnHtml;
+    alert('Could not start membership: ' + (resp.message || 'Please try again'));
+  } catch (e) {
+    alert('Error starting membership. Please try again.');
   }
+  isSubmittingMembership = false;
+  btn.disabled = false;
+  btn.innerHTML = originalBtnHtml;
+}
+
+/* Customer lands back here after approving (or abandoning) the mandate */
+function handleMembershipReturn() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('membership_return') && !params.has('membership_sub')) return;
+  history.replaceState({}, '', location.pathname);
+  showMembershipSuccessModal({ plan: 'Auto-renewing membership', amount: null, email: '' });
 }
 
 /* Membership success modal — mirrors the order success modal */
 function showMembershipSuccessModal({ plan, amount, email }) {
   $('msPlan').textContent = plan || '—';
   $('msAmount').textContent = amount ? `₹${amount}` : '—';
-  $('msEmail').textContent = email || '—';
+  $('msEmail').textContent = email || '—'; $('msEmailRow').style.display = email ? '' : 'none';
   $('overlay').style.display = 'block';
   $('membershipSuccessModal').style.display = 'flex';
   $('membershipSuccessModal').setAttribute('aria-hidden', 'false');
@@ -1715,105 +1711,6 @@ function closeMembershipSuccessModal() {
   $('membershipSuccessModal').setAttribute('aria-hidden', 'true');
 }
 
-/* Add membership fee to cart and switch prices */
-function addMembershipToCart(plan) {
-  if (membershipAddedToCart) return; // already added
-
-  selectedMemberPlan = plan;
-  membershipFeeAmount = MEMBERSHIP_PRICES[plan];
-  membershipAddedToCart = true;
-
-  // Switch all cart items to member prices
-  cart = cart.map(item => {
-    if (item.member_price && item.member_price < item.regular_price) {
-      return { ...item, unit_price: item.member_price, total_price: item.quantity * item.member_price };
-    }
-    return item;
-  });
-
-  renderCart();
-  showCartToast(`🌟 Member pricing applied! ₹${membershipFeeAmount} membership fee added.`);
-}
-
-/* iOS (unlike Android) has no system-wide chooser for a generic upi://
-   link — whichever single app has registered that URL scheme just opens
-   directly. WhatsApp registers itself as a upi://pay handler as part of
-   WhatsApp Payments, so on iPhones with WhatsApp installed, tapping a plain
-   upi:// link opens WhatsApp instead of the customer's actual UPI app —
-   and since the vendor isn't set up to receive WhatsApp Payments, WhatsApp
-   shows "you can't pay this vendor" instead of completing anything. */
-function isIOS() {
-  const ua = navigator.userAgent;
-  const isIOSDevice = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-  const isIPadOS13Plus = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-  return isIOSDevice || isIPadOS13Plus;
-}
-
-/* Build a upi://pay deep link with the amount pre-filled, render it as a
-   QR code into `containerId`, and point the payment buttons at it.
-   note: 'note' becomes the transaction note shown in the customer's UPI app.
-
-   btnId follows a naming convention this function relies on to find its
-   sibling elements — e.g. btnId 'upiPayAppBtn' implies 'upiIosAppButtons',
-   'upiGpayBtn', 'upiPhonepeBtn', 'upiIosNote' also exist in the DOM (see
-   the two call sites below and their matching HTML blocks). If you add a
-   third payment step, follow the same '<prefix>PayAppBtn' pattern. */
-function renderUpiQr(containerId, btnId, amount, note) {
-  const noteParam = encodeURIComponent(note || 'CommunitE Order');
-  // NPCI's UPI linking spec calls for 'am' as a strict decimal string (e.g.
-  // "72.00") — a bare integer like "72" causes some apps to fail parsing
-  // the whole link, sometimes surfacing a misleading error (e.g. "receiver
-  // not available") instead of an amount-specific one.
-  const amountFormatted = Number(amount).toFixed(2);
-  const upiLink = `upi://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amountFormatted}&cu=INR&tn=${noteParam}`;
-
-  const container = $(containerId);
-  if (container) {
-    container.innerHTML = '';
-    if (window.QRCode) {
-      new QRCode(container, { text: upiLink, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
-    } else {
-      // QR library failed to load — fall back to a plain link so payment isn't blocked
-      container.innerHTML = `<a href="${upiLink}" style="font-size:0.8rem;padding:8px;display:block;">Tap to pay ₹${amount}</a>`;
-    }
-  }
-
-  const prefix = btnId.replace('PayAppBtn', '');
-  const btn = $(btnId);
-  const iosGroup = $(`${prefix}IosAppButtons`);
-  const gpayBtn = $(`${prefix}GpayBtn`);
-  const phonepeBtn = $(`${prefix}PhonepeBtn`);
-  const iosNote = $(`${prefix}IosNote`);
-
-  if (isIOS()) {
-    // A plain upi:// link is unreliable on iOS (see isIOS() comment above),
-    // so instead of that single generic button, point people at each app's
-    // own URL scheme directly — confirmed against Google's official iOS
-    // integration docs (gpay://upi/pay) and a live sample deep link from a
-    // payment gateway's own backend (phonepe://upi/pay). Together these two
-    // cover most of India's UPI market; the QR code and UPI ID below remain
-    // the fallback for Paytm, BHIM, or any other app.
-    if (btn) btn.style.display = 'none';
-    if (gpayBtn) gpayBtn.href = `gpay://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amountFormatted}&cu=INR&tn=${noteParam}`;
-    if (phonepeBtn) phonepeBtn.href = `phonepe://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amountFormatted}&cu=INR&tn=${noteParam}`;
-    if (iosGroup) iosGroup.style.display = 'flex';
-    if (iosNote) iosNote.style.display = 'block';
-  } else {
-    if (btn) { btn.style.display = ''; btn.href = upiLink; }
-    if (iosGroup) iosGroup.style.display = 'none';
-    if (iosNote) iosNote.style.display = 'none';
-  }
-
-  const amountLabel = $('upiPayAmount');
-  if (amountLabel) amountLabel.textContent = amount;
-}
-
-/* Copy UPI ID */
-function copyUPI() {
-  navigator.clipboard.writeText(UPI_VPA).then(() => {
-    showCartToast('UPI ID copied!');
-  });
-}
 
 /* Format date helper */
 function formatDate(dateStr) {
