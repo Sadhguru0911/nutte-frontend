@@ -71,6 +71,9 @@
   .badge{ display:inline-block; padding:3px 9px; border-radius:999px; font-size:0.72rem; font-weight:700; }
   .badge--pending{ background:#fff3cd; color:#8a6416; }
   .badge--failed{ background:#fde8e8; color:#b3261e; }
+  .plink-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index:50; padding:16px; }
+  .plink-box{ background:#fff; border-radius:14px; padding:20px; max-width:460px; width:100%; }
+  .plink-box textarea{ width:100%; min-height:90px; margin:10px 0; font-size:0.82rem; padding:8px; border:1px solid var(--border); border-radius:8px; box-sizing:border-box; }
   .badge--verified, .badge--active, .badge--approved{ background:#e6f4ea; color:var(--green-dark); }
 
   .btn-sm{
@@ -288,6 +291,19 @@
 
   </div>
 
+
+<div class="plink-overlay" id="plinkOverlay">
+  <div class="plink-box">
+    <strong id="plinkTitle">Payment link</strong>
+    <div style="font-size:0.78rem;color:var(--muted);margin-top:4px" id="plinkMeta"></div>
+    <textarea id="plinkText" readonly></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="sendPaymentLinkWhatsApp()">📲 Send via WhatsApp</button>
+      <button class="btn-outline" onclick="copyPaymentLink()">Copy</button>
+      <button class="btn-outline" onclick="closePaymentLinkModal()">Close</button>
+    </div>
+  </div>
+</div>
 <script>
 const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
 let ADMIN_PASSCODE = sessionStorage.getItem('communite_admin_passcode') || '';
@@ -542,6 +558,7 @@ function renderOrders(orders) {
         <td data-label="Payment"><span class="badge ${badgeClass}">${escapeHtml(o.payment_status || 'Pending')}</span></td>
         <td data-label="">
           ${isVerified ? '' : `<button class="btn-sm" onclick="verifyPayment(${o.row_number}, '${escapeHtml(o.order_id)}', this)">Verify</button>`}
+          ${isVerified ? '' : `<button class="btn-outline" onclick="createPaymentLink('${escapeHtml(o.order_id)}', this)" style="margin-left:4px">Pay link</button>`}
           <button class="btn-outline" onclick="sendInvoiceWhatsApp(${o.row_number})" style="margin-left:4px">Invoice</button>
           <button class="btn-outline" onclick="editOrder('${escapeHtml(o.order_id)}')" style="margin-left:4px">Edit</button>
         </td>
@@ -616,6 +633,58 @@ function editOrder(orderId) {
   window.open(url, '_blank');
 }
 
+
+let currentPlinkPhone = '';
+
+async function createPaymentLink(orderId, btnEl) {
+  btnEl.disabled = true;
+  const original = btnEl.textContent;
+  btnEl.textContent = 'Creating…';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/create-payment-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE, order_id: orderId })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (!data.success) {
+      alert(data.message || 'Could not create the payment link.');
+      return;
+    }
+    const order = allOrdersCache.find(o => o.order_id === orderId) || {};
+    const name = (order.full_name || '').split(' ')[0] || 'there';
+    const text = `Hi ${name}, here is your CommunitE payment link for order ${orderId} (₹${data.amount}): ${data.link_url}\n\nThe link is valid for 48 hours. Thank you!`;
+    currentPlinkPhone = data.mobile_number;
+    document.getElementById('plinkTitle').textContent = `Payment link — order ${orderId}`;
+    document.getElementById('plinkMeta').textContent = `₹${data.amount} · expires in 48 hours · creating another link for this order makes a new one`;
+    document.getElementById('plinkText').value = text;
+    document.getElementById('plinkOverlay').style.display = 'flex';
+  } catch (e) {
+    alert('Network error — please try again.');
+  } finally {
+    btnEl.disabled = false;
+    btnEl.textContent = original;
+  }
+}
+
+function sendPaymentLinkWhatsApp() {
+  const digits = String(currentPlinkPhone || '').replace(/\D/g, '');
+  if (!digits) { alert('No mobile number for this order.'); return; }
+  const fullPhone = digits.length === 10 ? `91${digits}` : digits;
+  window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(document.getElementById('plinkText').value)}`, '_blank');
+}
+
+function copyPaymentLink() {
+  const ta = document.getElementById('plinkText');
+  ta.select();
+  navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand('copy'));
+  alert('Copied to clipboard.');
+}
+
+function closePaymentLinkModal() {
+  document.getElementById('plinkOverlay').style.display = 'none';
+}
 
 async function verifyPayment(rowNumber, orderId, btnEl) {
   btnEl.disabled = true;
