@@ -70,6 +70,7 @@
 
   .badge{ display:inline-block; padding:3px 9px; border-radius:999px; font-size:0.72rem; font-weight:700; }
   .badge--pending{ background:#fff3cd; color:#8a6416; }
+  .badge--failed{ background:#fde8e8; color:#b3261e; }
   .badge--verified, .badge--active, .badge--approved{ background:#e6f4ea; color:var(--green-dark); }
 
   .btn-sm{
@@ -347,6 +348,10 @@ function handleAuthFailure(data) {
 
 /* ---- Orders tab ---- */
 let allOrdersCache = [];
+/* Orders whose payment Cashfree reported as failed: shown (in red) on the Orders tab,
+   but never counted in totals or the sales summary. */
+const isFailedOrder = o => String(o.payment_status || '').trim().toLowerCase() === 'payment failed';
+const countableOrders = () => allOrdersCache.filter(o => !isFailedOrder(o));
 let currentOrderDateFilter = '';
 
 function parseAmount(v) {
@@ -393,9 +398,12 @@ function filterOrdersByDate(date) {
 
   const totalEl = document.getElementById('orderFilterTotal');
   if (date) {
-    const totalValue = filtered.reduce((sum, o) => sum + parseAmount(o.total_amount), 0);
+    const counted = filtered.filter(o => !isFailedOrder(o));
+    const failedHidden = filtered.length - counted.length;
+    const totalValue = counted.reduce((sum, o) => sum + parseAmount(o.total_amount), 0);
     totalEl.style.display = 'block';
-    totalEl.textContent = `${filtered.length} order(s) for ${date} — Total value: ₹${totalValue.toLocaleString('en-IN')}`;
+    totalEl.textContent = `${counted.length} order(s) for ${date} — Total value: ₹${totalValue.toLocaleString('en-IN')}` +
+      (failedHidden ? ` (${failedHidden} failed-payment order(s) not counted)` : '');
   } else {
     totalEl.style.display = 'none';
   }
@@ -416,7 +424,7 @@ const MONTH_NAMES = ['January','February','March','April','May','June','July','A
 function populateSalesYearFilter() {
   const yearSelect = document.getElementById('yearFilter');
   const years = [...new Set(
-    allOrdersCache.map(o => (o.delivery_date || '').slice(0, 4)).filter(y => /^\d{4}$/.test(y))
+    countableOrders().map(o => (o.delivery_date || '').slice(0, 4)).filter(y => /^\d{4}$/.test(y))
   )].sort().reverse();
 
   if (years.length === 0) {
@@ -441,7 +449,7 @@ function onSalesYearChange() {
     monthSelect.disabled = true;
   } else {
     const monthsInYear = [...new Set(
-      allOrdersCache
+      countableOrders()
         .filter(o => (o.delivery_date || '').slice(0, 4) === year)
         .map(o => (o.delivery_date || '').slice(5, 7))
     )].sort();
@@ -456,7 +464,7 @@ function renderSalesSummaryTable() {
   const year = document.getElementById('yearFilter').value;
   const month = document.getElementById('monthFilter').value;
 
-  let filtered = allOrdersCache;
+  let filtered = countableOrders();
   if (year) filtered = filtered.filter(o => (o.delivery_date || '').slice(0, 4) === year);
   if (year && month) filtered = filtered.filter(o => (o.delivery_date || '').slice(5, 7) === month);
 
@@ -506,7 +514,8 @@ function renderOrders(orders) {
   const body = document.getElementById('ordersBody');
   body.innerHTML = orders.map(o => {
     const isVerified = String(o.payment_status).toLowerCase() === 'verified';
-    const badgeClass = isVerified ? 'badge--verified' : 'badge--pending';
+    const isFailed = isFailedOrder(o);
+    const badgeClass = isVerified ? 'badge--verified' : (isFailed ? 'badge--failed' : 'badge--pending');
     return `
       <tr>
         <td data-label="Order">${escapeHtml(o.order_id)}<br><span style="color:var(--muted);font-size:0.75rem">${escapeHtml(o.timestamp)}</span></td>
@@ -656,9 +665,12 @@ async function loadDeliverySummary() {
     document.getElementById('summaryPendingCount').textContent = data.pending_count;
 
     const warningEl = document.getElementById('summaryWarning');
-    if (data.pending_count > 0) {
+    const warnParts = [];
+    if (data.pending_count > 0) warnParts.push(`⚠️ ${data.pending_count} order(s) in this batch still have unverified payments — check the Orders tab before shipping.`);
+    if (data.failed_count > 0) warnParts.push(`${data.failed_count} order(s) with failed payments are left out of this packing list.`);
+    if (warnParts.length) {
       warningEl.style.display = 'block';
-      warningEl.textContent = `⚠️ ${data.pending_count} order(s) in this batch still have unverified payments — check the Orders tab before shipping.`;
+      warningEl.textContent = warnParts.join(' ');
     } else {
       warningEl.style.display = 'none';
     }
