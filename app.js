@@ -9,6 +9,12 @@ const MEMBERSHIP_PRICES = { monthly: 400, annual: 3999 };
 /* Cashfree checkout mode: "sandbox" while testing, change to "production" at launch */
 const CASHFREE_MODE = "sandbox";
 
+/* How the first membership fee is collected:
+   "authorization" = ONE step: the customer approves AutoPay and pays the first fee at the same
+                     time (authorisation amount = full fee, not refunded). Card/UPI only. EXPERIMENT.
+   "order"         = TWO steps: pay the first fee as a normal payment, then approve AutoPay for renewals. */
+const MEMBERSHIP_FLOW = "authorization";
+
 /* UPI — used to build a dynamic pay link/QR so the amount is pre-filled
    instead of the customer having to type it in manually. */
 const UPI_VPA = "Mab.037213027680043@axisbank";
@@ -1628,6 +1634,13 @@ function goToMemberPayment() {
 
   $('paymentPlanLabel').textContent = planLabel;
   $('paymentAmount').textContent = `₹${amount}` + (selectedMemberPlan === 'annual' ? ' / year' : ' / month');
+  const flowNote = $('memberFlowNote');
+  if (flowNote) {
+    flowNote.innerHTML = MEMBERSHIP_FLOW === 'authorization'
+      ? `<i class="fas fa-rotate"></i> You'll pay your first fee and set up AutoPay in one step on Cashfree's secure page. It renews automatically — cancel anytime.` +
+        (selectedMemberPlan === 'annual' ? ' (Annual plan: card payments only.)' : '')
+      : `<i class="fas fa-rotate"></i> You pay the first fee now and become a member right away. Then you'll approve AutoPay on Cashfree's secure page so it renews automatically — cancel anytime.`;
+  }
   showMemberStep(2);
 }
 
@@ -1659,32 +1672,84 @@ async function submitMembership() {
   const btn = $('submitMembershipBtn');
   const originalBtnHtml = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to payment...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening payment...';
+
+  const customer = {
+    plan: selectedMemberPlan,
+    customer_name: name,
+    customer_phone: mobile,
+    customer_email: email,
+    apt_number: apt || '',
+    community: community || ''
+  };
 
   try {
-    const resp = await apiCall('/create-membership-subscription', {
-      method: 'POST',
-      body: JSON.stringify({
-        plan: selectedMemberPlan,
-        customer_name: name,
-        customer_phone: mobile,
-        customer_email: email,
-        apt_number: apt || '',
-        community: community || '',
-        return_url: location.origin + location.pathname + '?membership_return=1'
-      })
-    });
-    if (resp.success && resp.auth_link) {
-      window.location.href = resp.auth_link;
-      return; // leaving the page
+    if (typeof Cashfree === 'undefined') {
+      alert('Payment system could not load. Please check your connection and try again.');
+      return;
     }
-    alert('Could not start membership: ' + (resp.message || 'Please try again'));
+
+    if (MEMBERSHIP_FLOW === 'authorization') {
+      // ONE STEP: approve AutoPay and pay the first fee together on Cashfree's page
+      const sub = await apiCall('/create-membership-subscription', {
+        method: 'POST',
+        body: JSON.stringify({ ...customer, first_payment: 'authorization', return_url: location.origin + location.pathname + '?membership_return=1' })
+      });
+      if (!sub.success || !sub.subscription_session_id) {
+        alert('Could not start membership: ' + (sub.message || 'Please try again'));
+        return;
+      }
+      const subResult = await getCashfree().subscriptionsCheckout({
+        subsSessionId: sub.subscription_session_id,
+        redirectTarget: '_self'
+      });
+      if (subResult && subResult.error) {
+        alert('Could not open the payment page: ' + (subResult.error.message || 'please try again'));
+        return;
+      }
+      return; // leaving the page; membership activates when Cashfree confirms the payment
+    }
+
+    // STEP 1: pay the first membership fee now (normal payment) -> member immediately
+    const pay = await apiCall('/create-membership-payment', { method: 'POST', body: JSON.stringify(customer) });
+    if (!pay.success || !pay.payment_session_id) {
+      alert('Could not start payment: ' + (pay.message || 'Please try again'));
+      return;
+    }
+    const payResult = await getCashfree().checkout({ paymentSessionId: pay.payment_session_id, redirectTarget: '_modal' });
+    if (payResult && payResult.error) {
+      alert('Payment was not completed: ' + (payResult.error.message || 'please try again'));
+      return;
+    }
+
+    // STEP 2: set up AutoPay so renewals are automatic (first debit is one cycle from now)
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up auto-renewal...';
+    try {
+      const sub = await apiCall('/create-membership-subscription', {
+        method: 'POST',
+        body: JSON.stringify({ ...customer, return_url: location.origin + location.pathname + '?membership_return=1' })
+      });
+      if (sub.success && sub.subscription_session_id) {
+        const subResult = await getCashfree().subscriptionsCheckout({
+          subsSessionId: sub.subscription_session_id,
+          redirectTarget: '_self'
+        });
+        if (!(subResult && subResult.error)) return; // leaving the page to approve AutoPay
+      }
+    } catch (subErr) {
+      console.warn('AutoPay setup failed (membership is still active):', subErr);
+    }
+
+    // Paid, but AutoPay step couldn't open: still a member, just no auto-renewal yet
+    closeMembershipModal();
+    showMembershipSuccessModal({ plan: selectedMemberPlan === 'annual' ? 'Annual' : 'Monthly', amount: MEMBERSHIP_PRICES[selectedMemberPlan], email });
   } catch (e) {
-    alert('Error starting membership. Please try again.');
+    alert('Error processing membership. Please try again.');
+  } finally {
+    isSubmittingMembership = false;
+    btn.disabled = false;
+    btn.innerHTML = originalBtnHtml;
   }
-  isSubmittingMembership = false;
-  btn.disabled = false;
-  btn.innerHTML = originalBtnHtml;
 }
 
 /* Customer lands back here after approving (or abandoning) the mandate */

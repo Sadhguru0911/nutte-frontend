@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-  <link rel="stylesheet" href="style.css?v=75" />
-  <script src="app.js?v=75" defer></script>
+  <link rel="stylesheet" href="style.css?v=79" />
+  <script src="app.js?v=79" defer></script>
 </head>
 <body>
 
@@ -52,8 +52,8 @@
       </div>
 
       <div class="nav-links">
-        <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()">
-          <span id="accountNavLabel">Login</span>
+        <button id="accountNavBtn" class="account-nav-btn" onclick="openProfileModal()" aria-label="Login or my account">
+          <span class="account-nav-icon" aria-hidden="true">👤</span><span id="accountNavLabel">Login</span>
         </button>
         <button id="memberLoginBtn" class="member-login-btn" onclick="openMemberLogin()">
           <span id="memberLoginLabel">Join</span>
@@ -653,8 +653,8 @@
             <p>Plan: <strong id="paymentPlanLabel"></strong></p>
             <p>Amount: <strong id="paymentAmount"></strong></p>
           </div>
-          <p class="upi-note" style="margin-top:14px">
-            <i class="fas fa-rotate"></i> Your membership renews automatically. You'll approve a UPI AutoPay / card mandate on Cashfree's secure page — cancel anytime.
+          <p class="upi-note" id="memberFlowNote" style="margin-top:14px">
+            <i class="fas fa-rotate"></i> You pay the first fee now and become a member right away. Then you'll approve AutoPay on Cashfree's secure page so it renews automatically — cancel anytime.
           </p>
           <button id="submitMembershipBtn" class="btn-primary btn-block" style="margin-top:12px" onclick="submitMembership()">Continue to Secure Payment <i class="fas fa-lock"></i></button>
         </div>
@@ -973,8 +973,8 @@
         <div class="order-success-mascot">
           <img src="assets/NuttE_edited.png" alt="NuttE mascot" />
         </div>
-        <h2 class="order-success-title">Membership request received!</h2>
-        <p class="order-success-sub">Once your AutoPay approval goes through, your membership activates automatically — you'll get a confirmation email.</p>
+        <h2 class="order-success-title">You are a CommunitE member!</h2>
+        <p class="order-success-sub">Welcome to CommunitE! Once your payment is confirmed, your membership activates automatically (usually within a minute) and renews automatically — you can cancel anytime.</p>
 
         <div class="order-success-details">
           <div class="osd-row"><span>Plan</span><strong id="msPlan">—</strong></div>

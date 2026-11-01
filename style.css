@@ -1442,6 +1442,7 @@ main {
 }
 .account-nav-btn:hover { border-color: var(--rd-gold); color: var(--rd-gold); transform: scale(1.03); }
 .nav-emoji { font-size: 1rem; line-height: 1; }
+.account-nav-icon { display: none; }
 
 /* Profile modal */
 .modal-box--profile { max-width: 440px; }
@@ -1658,13 +1659,19 @@ main {
 .btn-text:hover { opacity: 0.75; }
 
 @media (max-width: 600px) {
-  .nav-inner { gap: 8px; }
-  .nav-links { gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
-  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-inner { gap: 8px; padding-left: 14px; padding-right: 14px; }
+  /* All three nav buttons (account, join, cart) must stay visible: no inner scrolling,
+     no extra side margins, and a slimmer brand so everything fits on one row. */
+  .nav-links { gap: 6px; overflow: visible; flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
   .nav-tagline { flex-shrink: 0; }
-  .account-nav-btn { padding: 7px 10px; flex-shrink: 0; }
-  .member-login-btn { padding: 7px 10px; flex-shrink: 0; }
-  .cart-btn { flex-shrink: 0; }
+  .nav-name { font-size: 20px; }
+  .nav-eyebrow { font-size: 0.5rem; letter-spacing: 1.3px; white-space: nowrap; }
+  /* Account button becomes a compact person icon (the name/Login text is hidden) */
+  .account-nav-btn { padding: 7px 10px; flex-shrink: 0; margin-right: 0; }
+  .account-nav-btn #accountNavLabel { display: none; }
+  .account-nav-icon { display: inline; font-size: 1rem; line-height: 1; }
+  .member-login-btn { padding: 7px 10px; flex-shrink: 0; margin-right: 0; }
+  .cart-btn { flex-shrink: 0; padding: 8px 10px; gap: 5px; }
 }
 
 /* ── DUAL PRICING ON PRODUCT CARDS ── */
