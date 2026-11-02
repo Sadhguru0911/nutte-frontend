@@ -1744,7 +1744,11 @@ async function submitMembership() {
     closeMembershipModal();
     showMembershipSuccessModal({ plan: selectedMemberPlan === 'annual' ? 'Annual' : 'Monthly', amount: MEMBERSHIP_PRICES[selectedMemberPlan], email });
   } catch (e) {
-    alert('Error processing membership. Please try again.');
+    // apiCall throws the server's response body on HTTP errors - surface its message
+    let detail = '';
+    try { detail = (JSON.parse(e.message) || {}).message || ''; } catch (_) { detail = ''; }
+    console.error('Membership error:', e);
+    alert('Error processing membership. ' + (detail ? detail + ' ' : '') + 'Please try again.');
   } finally {
     isSubmittingMembership = false;
     btn.disabled = false;
