@@ -3134,3 +3134,18 @@ body.overlay-open .floating-cart-bar {
 .footer-contact a { color: var(--rd-gold); }
 .footer-divider { width: 40px; height: 2px; background: rgba(255,255,255,0.1); margin: 20px auto; border-radius: 1px; }
 .footer-copy { font-size: 0.68rem; color: rgba(255,255,255,0.25); }
+
+
+/* Membership cancellation + policy */
+.policy-box { margin-top: 12px; font-size: 0.8rem; color: var(--muted); text-align: left; }
+.policy-box summary { cursor: pointer; font-weight: 600; color: var(--black); }
+.policy-box ul { margin: 8px 0 0; padding-left: 18px; line-height: 1.5; }
+.policy-box li { margin-bottom: 6px; }
+.cancel-area { margin-top: 14px; text-align: center; }
+.cancel-link { background: none; border: none; color: var(--muted); text-decoration: underline; font-size: 0.82rem; cursor: pointer; padding: 6px; }
+.cancel-note { font-size: 0.82rem; color: var(--muted); margin: 8px 0; text-align: left; }
+.cancel-msg { font-size: 0.82rem; margin-top: 8px; min-height: 1em; }
+.cancel-msg.ok { color: #1e6b3c; }
+.cancel-msg.err { color: #b3261e; }
+.cancel-estimate { background: #f6f1e4; border: 1px solid #e4d8b4; border-radius: 10px; padding: 10px 12px; font-size: 0.84rem; text-align: left; line-height: 1.5; margin: 8px 0; }
+.cancel-estimate strong { color: var(--black); }

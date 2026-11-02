@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-  <link rel="stylesheet" href="style.css?v=81" />
-  <script src="app.js?v=81" defer></script>
+  <link rel="stylesheet" href="style.css?v=84" />
+  <script src="app.js?v=84" defer></script>
 </head>
 <body>
 
@@ -656,6 +656,15 @@
           <p class="upi-note" id="memberFlowNote" style="margin-top:14px">
             <i class="fas fa-rotate"></i> You pay the first fee now and become a member right away. Then you'll approve AutoPay on Cashfree's secure page so it renews automatically — cancel anytime.
           </p>
+          <details class="policy-box">
+            <summary>Cancellation &amp; refund policy</summary>
+            <ul>
+              <li><strong>Cancel anytime.</strong> Cancelling stops future auto-renewal charges. Open your UPI app (PhonePe, GPay or Paytm) &rarr; AutoPay / Mandates &rarr; cancel &ldquo;CommunitE&rdquo;, or use <em>Cancel auto-renewal</em> in your membership panel here and we&rsquo;ll do it within 24 hours.</li>
+              <li><strong>Monthly plan:</strong> no refund for the current month. Your membership stays active until the end of the month you&rsquo;ve paid for.</li>
+              <li><strong>Annual plan:</strong> your membership stays active until the end of your current paid month, counted from the day you joined (a part month counts as a full month). We refund the rest: &#8377;3,999 minus &#8377;400 for each month used, back to your original payment method within 7 working days.</li>
+              <li>Please cancel at least 2 days before your renewal date. If a renewal is charged by mistake or twice, we refund it in full.</li>
+            </ul>
+          </details>
           <button id="submitMembershipBtn" class="btn-primary btn-block" style="margin-top:12px" onclick="submitMembership()">Continue to Secure Payment <i class="fas fa-lock"></i></button>
         </div>
         <div id="memberStep3" class="member-step" style="display:none">
@@ -668,6 +677,26 @@
               <div class="mac-row"><span>Valid until</span><strong id="memberActiveExpiry"></strong></div>
             </div>
             <p class="mac-note">You're enjoying exclusive member pricing on all products 🎉</p>
+          </div>
+          <div class="cancel-area">
+            <button type="button" id="cancelRenewalLink" class="cancel-link" onclick="toggleCancelRequest()">Cancel auto-renewal</button>
+            <div id="cancelRequestBox" style="display:none">
+              <div id="cancelEstimate" class="cancel-estimate">Checking your membership…</div>
+              <p class="cancel-note">We&rsquo;ll cancel your AutoPay within 24 hours and email you. Nothing changes until you send the request.</p>
+              <label class="field-label" for="cancelReason">Reason (optional)</label>
+              <input id="cancelReason" class="field-input" type="text" maxlength="200" placeholder="Tell us what we could do better" />
+              <button type="button" id="cancelSendBtn" class="btn-secondary btn-block" style="margin-top:10px" onclick="submitCancelRequest()">Confirm cancellation request</button>
+              <div id="cancelMsg" class="cancel-msg"></div>
+            </div>
+            <details class="policy-box">
+              <summary>Cancellation &amp; refund policy</summary>
+              <ul>
+                <li><strong>Cancel anytime.</strong> Cancelling stops future auto-renewal charges. Open your UPI app (PhonePe, GPay or Paytm) &rarr; AutoPay / Mandates &rarr; cancel &ldquo;CommunitE&rdquo;, or use <em>Cancel auto-renewal</em> in your membership panel here and we&rsquo;ll do it within 24 hours.</li>
+                <li><strong>Monthly plan:</strong> no refund for the current month. Your membership stays active until the end of the month you&rsquo;ve paid for.</li>
+                <li><strong>Annual plan:</strong> your membership stays active until the end of your current paid month, counted from the day you joined (a part month counts as a full month). We refund the rest: &#8377;3,999 minus &#8377;400 for each month used, back to your original payment method within 7 working days.</li>
+                <li>Please cancel at least 2 days before your renewal date. If a renewal is charged by mistake or twice, we refund it in full.</li>
+              </ul>
+            </details>
           </div>
         </div>
       </div>

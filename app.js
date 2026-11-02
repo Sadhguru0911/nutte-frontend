@@ -1567,6 +1567,7 @@ function resetMembershipModal() {
   $('memberNewForm').style.display = 'none';
   $('memberMobileRow').style.display = 'block';
   $('memberMobile').value = '';
+  if ($('cancelRequestBox')) { $('cancelRequestBox').style.display = 'none'; $('cancelSendBtn').style.display = ''; }
 }
 
 function showMemberStep(n) {
@@ -2766,4 +2767,65 @@ function updateSubrowArrows(rowIdx) {
   nextBtn.style.display = '';
   prevBtn.disabled = track.scrollLeft <= 4;
   nextBtn.disabled = track.scrollLeft >= maxScroll - 4;
+}
+
+
+/* ---- Cancel auto-renewal (member panel) ---- */
+async function toggleCancelRequest() {
+  const box = $('cancelRequestBox');
+  const open = box.style.display === 'none';
+  box.style.display = open ? 'block' : 'none';
+  if (!open) return;
+  $('cancelMsg').textContent = '';
+  $('cancelMsg').className = 'cancel-msg';
+  const est = $('cancelEstimate');
+  const sendBtn = $('cancelSendBtn');
+  sendBtn.disabled = true;
+  est.textContent = 'Checking your membership…';
+  try {
+    const res = await fetch(`${apiBase}/api/membership/cancel-estimate?mobile=${encodeURIComponent(memberState.mobile || '')}`);
+    const d = await res.json();
+    if (!d.success) { est.textContent = d.message || 'We could not check your membership right now.'; return; }
+    const until = formatDate(d.benefits_end);
+    if (d.plan === 'annual') {
+      est.innerHTML = d.refund > 0
+        ? `If you cancel today, your membership stays active until <strong>${until}</strong> and you&rsquo;ll be refunded <strong>₹${Number(d.refund).toLocaleString('en-IN')}</strong> (₹3,999 minus ₹400 for each of the ${d.months_used} month(s) used) to your original payment method within 7 working days.`
+        : `If you cancel today, your membership stays active until <strong>${until}</strong>. No refund is due, because ${d.months_used} month(s) of your annual plan are already used.`;
+    } else {
+      est.innerHTML = `If you cancel today, your membership stays active until <strong>${until}</strong>. Monthly memberships aren&rsquo;t refunded for the current month.`;
+    }
+    sendBtn.disabled = false;
+  } catch (e) {
+    est.textContent = 'We could not check your membership right now. Please try again.';
+  }
+}
+
+async function submitCancelRequest() {
+  const btn = $('cancelSendBtn');
+  const msg = $('cancelMsg');
+  if (!memberState.mobile) {
+    msg.className = 'cancel-msg err';
+    msg.textContent = 'We could not identify your membership on this device. Please contact us.';
+    return;
+  }
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = 'Sending…';
+  try {
+    const res = await fetch(`${apiBase}/api/membership/cancel-request`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: memberState.mobile, reason: $('cancelReason').value.trim() })
+    });
+    const data = await res.json().catch(() => ({}));
+    msg.className = 'cancel-msg ' + (data.success ? 'ok' : 'err');
+    msg.textContent = data.message || (data.success ? 'Request received.' : 'Could not send the request. Please try again.');
+    if (data.success) { $('cancelReason').value = ''; btn.style.display = 'none'; }
+  } catch (e) {
+    msg.className = 'cancel-msg err';
+    msg.textContent = 'Could not reach the server. Please try again.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
 }

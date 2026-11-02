@@ -110,6 +110,27 @@
   }
   .btn-primary:hover{ background:var(--green-dark); }
 
+  /* ---- Expenses + P&L tabs ---- */
+  .expense-form{ display:grid; grid-template-columns:repeat(6, 1fr); gap:10px; margin-top:12px; align-items:end; }
+  .expense-form label{ display:block; font-size:0.72rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:4px; }
+  .expense-form input, .expense-form select{
+    width:100%; box-sizing:border-box; padding:9px 10px; border:1.5px solid var(--border); border-radius:8px; font-size:0.88rem; background:#fff;
+  }
+  .expense-form .f-desc{ grid-column:span 2; }
+  .expense-msg{ font-size:0.82rem; margin-top:10px; min-height:1.1em; }
+  .expense-msg.ok{ color:var(--green-dark); }
+  .expense-msg.err{ color:#b3261e; }
+  .num{ text-align:right; white-space:nowrap; }
+  th.num{ text-align:right; }
+  .neg{ color:#b3261e; font-weight:700; }
+  .pos{ color:var(--green-dark); font-weight:700; }
+  .pnl-note{ font-size:0.78rem; color:var(--muted); margin-top:8px; line-height:1.5; }
+  @media (max-width: 720px){
+    .expense-form{ grid-template-columns:1fr 1fr; }
+    .expense-form .f-desc{ grid-column:span 2; }
+    td.num{ text-align:left; }
+  }
+
   .partner-story{ font-size:0.8rem; color:#555; max-width:280px; }
   .partner-photos{ display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
   .partner-photos img{ width:44px; height:44px; object-fit:cover; border-radius:6px; }
@@ -149,6 +170,8 @@
       <button class="tab-btn active" data-tab="orders">Orders</button>
       <button class="tab-btn" data-tab="delivery">Delivery Summary</button>
       <button class="tab-btn" data-tab="sales">Sales Summary</button>
+      <button class="tab-btn" data-tab="expenses">Expenses</button>
+      <button class="tab-btn" data-tab="pnl">P&amp;L</button>
       <button class="tab-btn" data-tab="memberships">Memberships <span id="membershipBadge" class="tab-badge" style="display:none">0</span></button>
       <button class="tab-btn" data-tab="partners">Community Listings <span id="partnerBadge" class="tab-badge" style="display:none">0</span></button>
     </div>
@@ -253,6 +276,84 @@
       <div id="salesTabEmpty" class="empty-note" style="display:none">No orders yet.</div>
     </div>
 
+    <!-- EXPENSES TAB -->
+    <div class="tab-panel" id="tab-expenses">
+      <div class="card">
+        <strong>Add an expense</strong>
+        <form id="expenseForm" class="expense-form" onsubmit="return saveExpense(event)">
+          <div><label for="expDate">Date</label><input id="expDate" type="date" required /></div>
+          <div><label for="expType">Type</label>
+            <select id="expType"><option value="Purchase">Purchase</option><option value="Delivery">Delivery</option><option value="Refund">Refund (given to a customer)</option></select></div>
+          <div class="f-desc"><label for="expDesc">Description</label><input id="expDesc" type="text" placeholder="e.g. Almonds 10 kg from supplier" required /></div>
+          <div><label for="expInvoice">Invoice #</label><input id="expInvoice" type="text" placeholder="Optional" /></div>
+          <div><label for="expAmount">Amount (₹)</label><input id="expAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required /></div>
+          <div style="grid-column:1 / -1"><button type="submit" id="expSaveBtn" class="btn-primary">Save expense</button></div>
+        </form>
+        <div id="expenseMsg" class="expense-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="summary-controls" style="margin-top:0">
+          <label for="expYearFilter" style="font-size:0.82rem;font-weight:600;color:var(--muted)">Year</label>
+          <select id="expYearFilter" onchange="onExpenseYearChange()"><option value="">Loading…</option></select>
+          <label for="expMonthFilter" style="font-size:0.82rem;font-weight:600;color:var(--muted)">Month</label>
+          <select id="expMonthFilter" onchange="renderExpenseSummary()"><option value="">All months</option></select>
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:6px">Pick a year, then optionally narrow to one month.</div>
+      </div>
+
+      <div id="expTabContent" style="display:none">
+        <div class="summary-stats">
+          <div class="summary-stat"><strong id="expStatCount">0</strong>Entries in view</div>
+          <div class="summary-stat"><strong id="expStatPurchase">₹0</strong>Purchases</div>
+          <div class="summary-stat"><strong id="expStatDelivery">₹0</strong>Delivery</div>
+          <div class="summary-stat"><strong id="expStatRefund">₹0</strong>Refunds</div>
+          <div class="summary-stat"><strong id="expStatTotal">₹0</strong>Total</div>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Date</th><th class="num">Entries</th><th class="num">Purchases</th><th class="num">Delivery</th><th class="num">Refunds</th><th class="num">Total</th></tr></thead>
+            <tbody id="expSummaryBody"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <strong style="font-size:0.9rem">Entries</strong>
+          <table style="margin-top:8px">
+            <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Invoice #</th><th class="num">Amount</th></tr></thead>
+            <tbody id="expEntriesBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="expLoading" class="loading-note">Loading expenses…</div>
+      <div id="expTabEmpty" class="empty-note" style="display:none">No expenses for this selection yet.</div>
+    </div>
+
+    <!-- P&L TAB -->
+    <div class="tab-panel" id="tab-pnl">
+      <div class="card">
+        <div class="summary-controls" style="margin:0">
+          <label for="pnlYearFilter" style="font-size:0.82rem;font-weight:600;color:var(--muted)">Year</label>
+          <select id="pnlYearFilter" onchange="renderPnl()"><option value="">All years</option></select>
+          <label style="font-size:0.82rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="pnlPaidOnly" onchange="renderPnl()" /> Count only paid (Verified) orders
+          </label>
+        </div>
+        <div class="pnl-note">Product sales = order totals by delivery date, excluding failed payments (the same as the Sales Summary), so they include delivery charges collected from customers. Memberships = verified membership payments (monthly, annual and renewals) by the date they were recorded; rows marked Test in the Memberships sheet are ignored. Purchases, Delivery and Refunds come from the Expenses tab, by their date. Profit = Product sales + Memberships − Purchases − Delivery − Refunds. Running total adds each month's profit to the months before it.</div>
+      </div>
+      <div class="summary-stats">
+        <div class="summary-stat"><strong id="pnlStatSales">₹0</strong>Income (sales + memberships)</div>
+        <div class="summary-stat"><strong id="pnlStatExpenses">₹0</strong>Costs (expenses + refunds)</div>
+        <div class="summary-stat"><strong id="pnlStatProfit">₹0</strong>Profit / (Loss)</div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Month</th><th class="num">Product sales</th><th class="num">Memberships</th><th class="num">Purchases</th><th class="num">Delivery</th><th class="num">Refunds</th><th class="num">Profit / (Loss)</th><th class="num">Running total</th></tr></thead>
+          <tbody id="pnlBody"></tbody>
+        </table>
+      </div>
+      <div id="pnlEmpty" class="empty-note" style="display:none">No sales or expenses yet.</div>
+    </div>
+
     <!-- MEMBERSHIPS TAB -->
     <div class="tab-panel" id="tab-memberships">
       <div class="card">
@@ -268,6 +369,17 @@
           <tbody id="membershipsBody"></tbody>
         </table>
         <div id="membershipsEmpty" class="empty-note" style="display:none">No pending membership requests. 🎉</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <strong>Cancellation requests <span id="cancelBadge" class="tab-badge" style="display:none">0</span></strong>
+          <button class="btn-outline" onclick="loadCancellations()">↻ Refresh</button>
+        </div>
+        <div id="cancelLoading" class="loading-note">Loading…</div>
+        <div id="cancelList"></div>
+        <div id="cancelEmpty" class="empty-note" style="display:none">No cancellation requests. 🎉</div>
+        <div class="pnl-note">"Cancel in Cashfree &amp; close" cancels the member's live AutoPay mandate and emails them. For annual members it also moves their expiry to the end of their current paid month and shows the refund to pay (₹3,999 − ₹400 per month used) &mdash; issue that refund from the Cashfree dashboard (Transactions → the payment → Refund) to the original payment method. "Mark done" only closes the request, for when you already cancelled it in Cashfree.</div>
       </div>
     </div>
 
@@ -343,8 +455,11 @@ function enterDashboard() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   loadOrders();
+  loadExpenses();
+  loadMembershipIncome();
   loadDeliveryDates();
   loadMemberships();
+  loadCancellations();
   loadPartners();
 }
 
@@ -402,12 +517,14 @@ async function loadOrders() {
       allOrdersCache = [];
       populateOrderDateFilter();
       populateSalesYearFilter();
+      if (typeof renderPnl === 'function') renderPnl();
       return;
     }
     allOrdersCache = data.orders;
     if (typeof renderOrderPicker === 'function') renderOrderPicker();
     populateOrderDateFilter();
     populateSalesYearFilter();
+    if (typeof renderPnl === 'function') renderPnl();
     filterOrdersByDate(currentOrderDateFilter); // re-apply whatever filter was active, if any
   } catch (e) {
     document.getElementById('ordersLoading').textContent = 'Could not load orders.';
@@ -970,6 +1087,349 @@ async function approvePartner(rowNumber, vendorName, btnEl) {
     alert('Network error — please try again.');
     btnEl.disabled = false;
     btnEl.textContent = 'Approve';
+  }
+}
+
+/* ---- Expenses tab ---- */
+let allExpensesCache = [];
+const fmtINR = n => {
+  const v = Math.round((Number(n) || 0) * 100) / 100;
+  const txt = Math.abs(v).toLocaleString('en-IN', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  return (v < 0 ? '−₹' : '₹') + txt;
+};
+const todayLocal = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+document.getElementById('expDate').value = todayLocal();
+
+async function loadExpenses() {
+  document.getElementById('expLoading').style.display = 'block';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/expenses?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    allExpensesCache = (data.success && data.expenses) ? data.expenses : [];
+    if (!data.success) document.getElementById('expLoading').textContent = 'Could not load expenses: ' + (data.message || 'error');
+    else document.getElementById('expLoading').style.display = 'none';
+  } catch (e) {
+    allExpensesCache = [];
+    document.getElementById('expLoading').textContent = 'Could not load expenses.';
+  }
+  populateExpenseYearFilter();
+  renderPnl();
+}
+
+async function saveExpense(ev) {
+  if (ev) ev.preventDefault();
+  const msg = document.getElementById('expenseMsg');
+  const btn = document.getElementById('expSaveBtn');
+  const body = {
+    passcode: ADMIN_PASSCODE,
+    date: document.getElementById('expDate').value,
+    type: document.getElementById('expType').value,
+    description: document.getElementById('expDesc').value.trim(),
+    invoice_no: document.getElementById('expInvoice').value.trim(),
+    amount: document.getElementById('expAmount').value
+  };
+  if (!body.date || !body.description || !(parseFloat(body.amount) > 0)) {
+    msg.className = 'expense-msg err';
+    msg.textContent = 'Please fill in the date, a description and an amount above zero.';
+    return false;
+  }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  msg.className = 'expense-msg'; msg.textContent = '';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/expenses/add`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return false;
+    if (!data.success) {
+      msg.className = 'expense-msg err';
+      msg.textContent = data.message || 'Could not save the expense.';
+    } else {
+      msg.className = 'expense-msg ok';
+      msg.textContent = `Saved ${body.type.toLowerCase()} of ${fmtINR(body.amount)} on ${body.date}.`;
+      document.getElementById('expDesc').value = '';
+      document.getElementById('expInvoice').value = '';
+      document.getElementById('expAmount').value = '';
+      await loadExpenses();
+      // jump the summary to the month just added so the new entry is visible
+      const y = body.date.slice(0, 4), m = body.date.slice(5, 7);
+      document.getElementById('expYearFilter').value = y;
+      onExpenseYearChange();
+      document.getElementById('expMonthFilter').value = m;
+      renderExpenseSummary();
+    }
+  } catch (e) {
+    msg.className = 'expense-msg err';
+    msg.textContent = 'Could not reach the server. Nothing was saved — please try again.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save expense';
+  }
+  return false;
+}
+
+function populateExpenseYearFilter() {
+  const sel = document.getElementById('expYearFilter');
+  const years = [...new Set(allExpensesCache.map(e => e.date.slice(0, 4)).filter(y => /^\d{4}$/.test(y)))].sort().reverse();
+  if (years.length === 0) {
+    sel.innerHTML = '<option value="">No expenses yet</option>';
+    document.getElementById('expMonthFilter').innerHTML = '<option value="">All months</option>';
+    document.getElementById('expMonthFilter').disabled = true;
+    renderExpenseSummary();
+    return;
+  }
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">All years</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+  sel.value = years.includes(prev) ? prev : years[0];
+  onExpenseYearChange();
+}
+
+function onExpenseYearChange() {
+  const year = document.getElementById('expYearFilter').value;
+  const monthSel = document.getElementById('expMonthFilter');
+  const prevMonth = monthSel.value;
+  if (!year) {
+    monthSel.innerHTML = '<option value="">All months</option>';
+    monthSel.disabled = true;
+  } else {
+    const months = [...new Set(allExpensesCache.filter(e => e.date.slice(0, 4) === year).map(e => e.date.slice(5, 7)))].sort();
+    monthSel.disabled = false;
+    monthSel.innerHTML = '<option value="">All months</option>' +
+      months.map(m => `<option value="${m}">${MONTH_NAMES[parseInt(m, 10) - 1]}</option>`).join('');
+    if (months.includes(prevMonth)) monthSel.value = prevMonth;
+  }
+  renderExpenseSummary();
+}
+
+function renderExpenseSummary() {
+  const year = document.getElementById('expYearFilter').value;
+  const month = document.getElementById('expMonthFilter').value;
+  let rows = allExpensesCache;
+  if (year) rows = rows.filter(e => e.date.slice(0, 4) === year);
+  if (year && month) rows = rows.filter(e => e.date.slice(5, 7) === month);
+
+  if (rows.length === 0) {
+    document.getElementById('expTabContent').style.display = 'none';
+    document.getElementById('expTabEmpty').style.display = document.getElementById('expLoading').style.display === 'block' ? 'none' : 'block';
+    return;
+  }
+  document.getElementById('expTabEmpty').style.display = 'none';
+  document.getElementById('expTabContent').style.display = 'block';
+
+  const byDate = {};
+  const tot = { Purchase: 0, Delivery: 0, Refund: 0 };
+  rows.forEach(e => {
+    const d = byDate[e.date] || (byDate[e.date] = { count: 0, Purchase: 0, Delivery: 0, Refund: 0 });
+    const t = (e.type === 'Delivery' || e.type === 'Refund') ? e.type : 'Purchase';
+    d.count += 1; d[t] += e.amount; tot[t] += e.amount;
+  });
+  const dates = Object.keys(byDate).sort().reverse();
+  const total = tot.Purchase + tot.Delivery + tot.Refund;
+
+  document.getElementById('expStatCount').textContent = rows.length;
+  document.getElementById('expStatPurchase').textContent = fmtINR(tot.Purchase);
+  document.getElementById('expStatDelivery').textContent = fmtINR(tot.Delivery);
+  document.getElementById('expStatRefund').textContent = fmtINR(tot.Refund);
+  document.getElementById('expStatTotal').textContent = fmtINR(total);
+
+  const label = year && month ? `${MONTH_NAMES[parseInt(month, 10) - 1]} ${year} Total` : year ? `${year} Total` : 'Grand Total';
+  document.getElementById('expSummaryBody').innerHTML = dates.map(d => `
+    <tr>
+      <td data-label="Date">${escapeHtml(d)}</td>
+      <td class="num" data-label="Entries">${byDate[d].count}</td>
+      <td class="num" data-label="Purchases">${fmtINR(byDate[d].Purchase)}</td>
+      <td class="num" data-label="Delivery">${fmtINR(byDate[d].Delivery)}</td>
+      <td class="num" data-label="Refunds">${fmtINR(byDate[d].Refund)}</td>
+      <td class="num" data-label="Total">${fmtINR(byDate[d].Purchase + byDate[d].Delivery + byDate[d].Refund)}</td>
+    </tr>`).join('') + `
+    <tr class="total-row">
+      <td data-label="">${label}</td>
+      <td class="num" data-label="">${rows.length}</td>
+      <td class="num" data-label="">${fmtINR(tot.Purchase)}</td>
+      <td class="num" data-label="">${fmtINR(tot.Delivery)}</td>
+      <td class="num" data-label="">${fmtINR(tot.Refund)}</td>
+      <td class="num" data-label="">${fmtINR(total)}</td>
+    </tr>`;
+
+  document.getElementById('expEntriesBody').innerHTML = rows.map(e => `
+    <tr>
+      <td data-label="Date">${escapeHtml(e.date)}</td>
+      <td data-label="Type">${escapeHtml(e.type)}</td>
+      <td data-label="Description">${escapeHtml(e.description)}</td>
+      <td data-label="Invoice #">${escapeHtml(e.invoice_no) || '—'}</td>
+      <td class="num" data-label="Amount">${fmtINR(e.amount)}</td>
+    </tr>`).join('');
+}
+
+/* Verified membership payments (from the Memberships sheet), for the P&L */
+let membershipIncomeCache = [];
+async function loadMembershipIncome() {
+  try {
+    const res = await fetch(`${apiBase}/api/admin/membership-income?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    membershipIncomeCache = (data.success && data.payments) ? data.payments : [];
+  } catch (e) {
+    membershipIncomeCache = [];
+  }
+  renderPnl();
+}
+
+/* ---- P&L tab: sales (from the shared orders cache) minus expenses, month by month ---- */
+function renderPnl() {
+  const paidOnly = document.getElementById('pnlPaidOnly').checked;
+  const orders = countableOrders().filter(o => !paidOnly || String(o.payment_status || '').trim().toLowerCase() === 'verified');
+
+  const months = {};
+  const bucket = k => months[k] || (months[k] = { sales: 0, member: 0, purchase: 0, delivery: 0, refund: 0 });
+  const okKey = k => /^\d{4}-\d{2}$/.test(k);
+  orders.forEach(o => {
+    const k = (o.delivery_date || '').slice(0, 7);
+    if (okKey(k)) bucket(k).sales += parseAmount(o.total_amount);
+  });
+  membershipIncomeCache.forEach(m => {
+    const k = String(m.date || '').slice(0, 7);
+    if (okKey(k)) bucket(k).member += Number(m.amount) || 0;
+  });
+  allExpensesCache.forEach(e => {
+    const k = e.date.slice(0, 7);
+    if (!okKey(k)) return;
+    if (e.type === 'Delivery') bucket(k).delivery += e.amount;
+    else if (e.type === 'Refund') bucket(k).refund += e.amount;
+    else bucket(k).purchase += e.amount;
+  });
+
+  const sel = document.getElementById('pnlYearFilter');
+  const years = [...new Set(Object.keys(months).map(k => k.slice(0, 4)))].sort().reverse();
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">All years</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+  if (years.includes(prev)) sel.value = prev;
+  const year = sel.value;
+
+  const keys = Object.keys(months).filter(k => !year || k.slice(0, 4) === year).sort();
+  const empty = document.getElementById('pnlEmpty');
+  const body = document.getElementById('pnlBody');
+  if (keys.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    ['pnlStatSales', 'pnlStatExpenses', 'pnlStatProfit'].forEach(id => document.getElementById(id).textContent = '₹0');
+    return;
+  }
+  empty.style.display = 'none';
+
+  const cls = n => n < 0 ? 'neg' : (n > 0 ? 'pos' : '');
+  const T = { sales: 0, member: 0, purchase: 0, delivery: 0, refund: 0 };
+  let running = 0;
+  const rows = keys.map(k => {
+    const m = months[k];
+    const profit = m.sales + m.member - m.purchase - m.delivery - m.refund;
+    running += profit;
+    Object.keys(T).forEach(f => T[f] += m[f]);
+    const [y, mo] = k.split('-');
+    return `
+    <tr>
+      <td data-label="Month">${MONTH_NAMES[parseInt(mo, 10) - 1]} ${y}</td>
+      <td class="num" data-label="Product sales">${fmtINR(m.sales)}</td>
+      <td class="num" data-label="Memberships">${fmtINR(m.member)}</td>
+      <td class="num" data-label="Purchases">${fmtINR(m.purchase)}</td>
+      <td class="num" data-label="Delivery">${fmtINR(m.delivery)}</td>
+      <td class="num" data-label="Refunds">${fmtINR(m.refund)}</td>
+      <td class="num ${cls(profit)}" data-label="Profit / (Loss)">${fmtINR(profit)}</td>
+      <td class="num ${cls(running)}" data-label="Running total">${fmtINR(running)}</td>
+    </tr>`;
+  }).join('');
+  const income = T.sales + T.member, costs = T.purchase + T.delivery + T.refund, tProfit = income - costs;
+  body.innerHTML = rows + `
+    <tr class="total-row">
+      <td data-label="">${year ? year + ' Total' : 'Total'}</td>
+      <td class="num" data-label="">${fmtINR(T.sales)}</td>
+      <td class="num" data-label="">${fmtINR(T.member)}</td>
+      <td class="num" data-label="">${fmtINR(T.purchase)}</td>
+      <td class="num" data-label="">${fmtINR(T.delivery)}</td>
+      <td class="num" data-label="">${fmtINR(T.refund)}</td>
+      <td class="num ${cls(tProfit)}" data-label="">${fmtINR(tProfit)}</td>
+      <td class="num" data-label=""></td>
+    </tr>`;
+
+  document.getElementById('pnlStatSales').textContent = fmtINR(income);
+  document.getElementById('pnlStatExpenses').textContent = fmtINR(costs);
+  const pe = document.getElementById('pnlStatProfit');
+  pe.textContent = fmtINR(tProfit);
+  pe.className = cls(tProfit);
+}
+
+/* ---- Cancellation requests (Memberships tab) ---- */
+async function loadCancellations() {
+  document.getElementById('cancelLoading').style.display = 'block';
+  document.getElementById('cancelEmpty').style.display = 'none';
+  document.getElementById('cancelList').innerHTML = '';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/cancellations?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    document.getElementById('cancelLoading').style.display = 'none';
+    const list = data.requests || [];
+    const pending = list.filter(r => String(r.status).toLowerCase() === 'pending');
+    const badge = document.getElementById('cancelBadge');
+    if (pending.length) { badge.textContent = pending.length; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; }
+    if (!data.success) { document.getElementById('cancelLoading').style.display = 'block'; document.getElementById('cancelLoading').textContent = 'Could not load cancellation requests: ' + (data.message || ''); return; }
+    if (list.length === 0) { document.getElementById('cancelEmpty').style.display = 'block'; return; }
+    renderCancellations(list);
+  } catch (e) {
+    document.getElementById('cancelLoading').textContent = 'Could not load cancellation requests.';
+  }
+}
+
+function renderCancellations(list) {
+  const rows = list.map(r => {
+    const isPending = String(r.status).toLowerCase() === 'pending';
+    let terms = '';
+    if (isPending && r.plan === 'annual' && r.annual_terms) {
+      const t = r.annual_terms;
+      terms = `<div class="summary-warning" style="margin:6px 0 0">Annual · joined ${escapeHtml(t.joined_on)} · ${t.months_used} month(s) used · benefits end <strong>${escapeHtml(t.benefits_end)}</strong> · refund to pay: <strong>₹${t.suggested_refund.toLocaleString('en-IN')}</strong></div>`;
+    } else if (isPending) {
+      terms = `<div class="pnl-note" style="margin-top:6px">Monthly · no refund · benefits stay active until ${escapeHtml(r.expiry || 'the paid month ends')}</div>`;
+    }
+    const actions = isPending
+      ? `<button class="btn-sm" onclick="processCancellation(${r.row}, 'cancel_and_close', this)">Cancel in Cashfree &amp; close</button>
+         <button class="btn-outline" onclick="processCancellation(${r.row}, 'mark_done', this)">Mark done</button>`
+      : `<span class="badge badge--verified">${escapeHtml(r.status)}</span> <span class="pnl-note">${escapeHtml(r.handled_on)} ${escapeHtml(r.note)}</span>`;
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div><strong>${escapeHtml(r.name || '—')}</strong> · ${escapeHtml(r.mobile)} · ${escapeHtml(r.plan)}
+          <div class="pnl-note" style="margin:2px 0 0">Requested ${escapeHtml(r.requested_on)}${r.reason ? ' · “' + escapeHtml(r.reason) + '”' : ''}</div></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${actions}</div>
+      </div>${terms}</div>`;
+  }).join('');
+  document.getElementById('cancelList').innerHTML = rows;
+}
+
+async function processCancellation(row, action, btnEl) {
+  const sure = action === 'cancel_and_close'
+    ? 'Cancel this member\'s AutoPay in Cashfree and close the request? This cannot be undone.'
+    : 'Mark this request done without cancelling anything in Cashfree?';
+  if (!confirm(sure)) return;
+  btnEl.disabled = true;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/cancellations/process`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE, row, action })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (!data.success) { alert(data.message || 'Could not process this request.'); btnEl.disabled = false; return; }
+    if (action === 'cancel_and_close' && data.plan === 'annual' && data.refund_due > 0) {
+      alert(`Cancelled. Benefits now end on ${data.benefits_end}.\n\nNow refund ₹${data.refund_due.toLocaleString('en-IN')} to the customer from the Cashfree dashboard (Transactions → the annual payment → Refund). The customer's email already says this refund is coming. A matching Refund entry was added to Expenses so your P&L is right; edit its amount there if you refund a different amount.`);
+    } else if (action === 'cancel_and_close') {
+      alert('Cancelled. The member has been emailed. Their membership stays active until ' + (data.benefits_end || 'the end of the paid period') + '.');
+    }
+    loadCancellations();
+  } catch (e) {
+    alert('Could not reach the server — nothing was changed.');
+    btnEl.disabled = false;
   }
 }
 </script>
