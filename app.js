@@ -1748,7 +1748,7 @@ async function submitMembership() {
     let detail = '';
     try { detail = (JSON.parse(e.message) || {}).message || ''; } catch (_) { detail = ''; }
     console.error('Membership error:', e);
-    alert('Error processing membership. ' + (detail ? detail + ' ' : '') + 'Please try again.');
+    alert(detail || 'Error processing membership. Please try again.');
   } finally {
     isSubmittingMembership = false;
     btn.disabled = false;
