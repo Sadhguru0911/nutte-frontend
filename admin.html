@@ -678,6 +678,7 @@ function renderOrders(orders) {
           ${isVerified ? '' : `<button class="btn-outline" onclick="createPaymentLink('${escapeHtml(o.order_id)}', this)" style="margin-left:4px">Pay link</button>`}
           <button class="btn-outline" onclick="sendInvoiceWhatsApp(${o.row_number})" style="margin-left:4px">Invoice</button>
           <button class="btn-outline" onclick="editOrder('${escapeHtml(o.order_id)}')" style="margin-left:4px">Edit</button>
+          ${isVerified ? `<button class="btn-outline" onclick="refundOrder('${escapeHtml(o.order_id)}', ${parseFloat(String(o.total_amount).replace(/[^0-9.]/g,'')) || 0}, this)" style="margin-left:4px">Refund</button>` : ''}
         </td>
       </tr>`;
   }).join('');
@@ -1396,7 +1397,9 @@ function renderCancellations(list) {
     const actions = isPending
       ? `<button class="btn-sm" onclick="processCancellation(${r.row}, 'cancel_and_close', this)">Cancel in Cashfree &amp; close</button>
          <button class="btn-outline" onclick="processCancellation(${r.row}, 'mark_done', this)">Mark done</button>`
-      : `<span class="badge badge--verified">${escapeHtml(r.status)}</span> <span class="pnl-note">${escapeHtml(r.handled_on)} ${escapeHtml(r.note)}</span>`;
+      : `<span class="badge badge--verified">${escapeHtml(r.status)}</span>
+         ${r.refund_due > 0 && !r.refund_issued ? `<button class="btn-sm" onclick="refundMember(${r.row}, ${r.refund_due}, this)">Issue refund ₹${r.refund_due.toLocaleString('en-IN')}</button>` : ''}
+         <span class="pnl-note">${escapeHtml(r.handled_on)} ${escapeHtml(r.note)}</span>`;
     return `<div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
         <div><strong>${escapeHtml(r.name || '—')}</strong> · ${escapeHtml(r.mobile)} · ${escapeHtml(r.plan)}
@@ -1422,7 +1425,7 @@ async function processCancellation(row, action, btnEl) {
     if (handleAuthFailure(data)) return;
     if (!data.success) { alert(data.message || 'Could not process this request.'); btnEl.disabled = false; return; }
     if (action === 'cancel_and_close' && data.plan === 'annual' && data.refund_due > 0) {
-      alert(`Cancelled. Benefits now end on ${data.benefits_end}.\n\nNow refund ₹${data.refund_due.toLocaleString('en-IN')} to the customer from the Cashfree dashboard (Transactions → the annual payment → Refund). The customer's email already says this refund is coming. A matching Refund entry was added to Expenses so your P&L is right; edit its amount there if you refund a different amount.`);
+      alert(`Cancelled. Benefits now end on ${data.benefits_end}.\n\nRefund due: ₹${data.refund_due.toLocaleString('en-IN')}. Click "Issue refund" on this request when you are ready to pay it. It is added to Expenses only after Cashfree confirms the refund.`);
     } else if (action === 'cancel_and_close') {
       alert('Cancelled. The member has been emailed. Their membership stays active until ' + (data.benefits_end || 'the end of the paid period') + '.');
     }
@@ -1431,6 +1434,47 @@ async function processCancellation(row, action, btnEl) {
     alert('Could not reach the server — nothing was changed.');
     btnEl.disabled = false;
   }
+}
+
+async function postRefund(path, payload, btnEl) {
+  btnEl.disabled = true;
+  try {
+    const res = await fetch(`${apiBase}${path}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ passcode: ADMIN_PASSCODE }, payload))
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return false;
+    if (!data.success) { alert(data.message || 'Refund failed.'); btnEl.disabled = false; return false; }
+    alert(`Refund sent to Cashfree (status: ${data.refund_status}). It is added to Expenses only when Cashfree confirms it succeeded.`);
+    return true;
+  } catch (e) {
+    alert('Could not reach the server - nothing was changed.');
+    btnEl.disabled = false;
+    return false;
+  }
+}
+
+async function refundOrder(orderId, total, btnEl) {
+  const input = prompt(`Refund how much for order ${orderId}?\n(Order total ₹${total}. Enter a smaller amount for a partial refund.)`, String(total));
+  if (input === null) return;
+  const amount = parseFloat(input);
+  if (!(amount > 0)) { alert('Enter a valid amount.'); return; }
+  const note = prompt('Note (optional). In SANDBOX type SUCCESS, FAILED or PENDING to simulate that result; leave blank for SUCCESS. In live it is just a remark.', '');
+  if (note === null) return;
+  if (!confirm(`Refund ₹${amount} to the customer for ${orderId} through Cashfree? This cannot be undone.`)) return;
+  await postRefund('/api/admin/refund/order', { order_id: orderId, amount, note }, btnEl);
+}
+
+async function refundMember(row, suggested, btnEl) {
+  const input = prompt(`Refund how much to this member?\n(Suggested by the policy: ₹${suggested}.)`, String(suggested));
+  if (input === null) return;
+  const amount = parseFloat(input);
+  if (!(amount > 0)) { alert('Enter a valid amount.'); return; }
+  const note = prompt('Note (optional). In SANDBOX type SUCCESS, FAILED or PENDING to simulate that result; leave blank for SUCCESS. In live it is just a remark.', '');
+  if (note === null) return;
+  if (!confirm(`Refund ₹${amount} to this member through Cashfree? This cannot be undone.`)) return;
+  if (await postRefund('/api/admin/refund/subscription', { row, amount, note }, btnEl)) loadCancellations();
 }
 </script>
 </body>
