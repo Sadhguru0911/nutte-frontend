@@ -374,7 +374,8 @@
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <strong>Cancellation requests <span id="cancelBadge" class="tab-badge" style="display:none">0</span></strong>
-          <button class="btn-outline" onclick="loadCancellations()">↻ Refresh</button>
+          <span style="display:flex;gap:6px"><button class="btn-outline" onclick="syncSubscriptions(this)" title="Rebuild the CashfreeSubscriptions tab with every known subscription and its live Cashfree status">Sync subscription statuses</button>
+          <button class="btn-outline" onclick="loadCancellations()">↻ Refresh</button></span>
         </div>
         <div id="cancelLoading" class="loading-note">Loading…</div>
         <div id="cancelList"></div>
@@ -1475,6 +1476,23 @@ async function refundMember(row, suggested, btnEl) {
   if (note === null) return;
   if (!confirm(`Refund ₹${amount} to this member through Cashfree? This cannot be undone.`)) return;
   if (await postRefund('/api/admin/refund/subscription', { row, amount, note }, btnEl)) loadCancellations();
+}
+
+async function syncSubscriptions(btnEl) {
+  btnEl.disabled = true;
+  const old = btnEl.textContent; btnEl.textContent = 'Syncing...';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/subscriptions/sync`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    alert(data.success
+      ? `Done. ${data.known} subscription(s) known: ${data.added} added to the CashfreeSubscriptions tab, ${data.updated} status(es) refreshed${data.not_found ? ', ' + data.not_found + ' not found in Cashfree' : ''}.`
+      : (data.message || 'Sync failed.'));
+  } catch (e) { alert('Could not reach the server.'); }
+  btnEl.disabled = false; btnEl.textContent = old;
 }
 </script>
 </body>
