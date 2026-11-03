@@ -1163,7 +1163,22 @@ async function submitOrderWithPayment() {
       return;
     }
 
-    // Payment went through on Cashfree's side; the webhook marks the order Verified.
+    // Ask the backend to confirm with Cashfree (it also marks the sheet and sends the email).
+    // The webhook does the same; whichever arrives first wins, so a slow webhook can't leave it unpaid.
+    let confirmed = false;
+    for (let attempt = 0; attempt < 5 && !confirmed; attempt++) {
+      try {
+        const v = await apiCall('/verify-order-payment', { method: 'POST', body: JSON.stringify({ order_id: resp.order_id }) });
+        confirmed = !!(v && v.paid);
+      } catch (verr) {
+        console.warn('Payment check failed:', verr);
+      }
+      if (!confirmed) await new Promise(r => setTimeout(r, 2500));
+    }
+    if (!confirmed) {
+      alert('We have not received the payment confirmation yet.\nYour order ' + resp.order_id + ' is saved. If the money was debited you will get a confirmation email shortly; otherwise please try again or contact us.');
+      return;
+    }
     cart = [];
     selectedMemberPlan = null;
     updateCartCount();
@@ -1177,7 +1192,11 @@ async function submitOrderWithPayment() {
       isMember
     });
   } catch (e) {
-    alert('Error processing payment. Please try again.');
+    // apiCall throws the server's response body on HTTP errors - surface its message
+    let detail = '';
+    try { detail = (JSON.parse(e.message) || {}).message || ''; } catch (_) { detail = ''; }
+    console.error('Order payment error:', e);
+    alert('Error processing payment: ' + (detail || String(e && e.message || e).slice(0, 200) || 'please try again') + '\nIf an order number was shown earlier it is saved but unpaid.');
   } finally {
     isSubmittingOrder = false;
     btn.disabled = false;
