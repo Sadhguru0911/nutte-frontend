@@ -1398,7 +1398,7 @@ function renderCancellations(list) {
     const actions = isPending
       ? `<button class="btn-sm" onclick="processCancellation(${r.row}, 'cancel_and_close', this)">Cancel in Cashfree &amp; close</button>
          <button class="btn-outline" onclick="processCancellation(${r.row}, 'mark_done', this)">Mark done</button>`
-      : `<span class="badge badge--verified">${escapeHtml(r.status)}</span>
+      : `${statusBadge(r)}
          ${r.refund_due > 0 && !r.refund_issued ? `<button class="btn-sm" onclick="refundMember(${r.row}, ${r.refund_due}, this)">Issue refund ₹${r.refund_due.toLocaleString('en-IN')}</button>` : ''}
          <span class="pnl-note">${escapeHtml(r.handled_on)} ${escapeHtml(r.note)}</span>`;
     return `<div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">
@@ -1493,6 +1493,20 @@ async function syncSubscriptions(btnEl) {
       : (data.message || 'Sync failed.'));
   } catch (e) { alert('Could not reach the server.'); }
   btnEl.disabled = false; btnEl.textContent = old;
+}
+
+/* The badge shows "Done" only when nothing is left to do. While a refund is due or in progress it
+   shows that instead, and flips to Done once Cashfree reports the refund as SUCCESS. */
+function statusBadge(r) {
+  const st = String(r.refund_status || '').toUpperCase();
+  if (st === 'SUCCESS' || (!st && !(r.refund_due > 0))) {
+    return `<span class="badge badge--verified">${escapeHtml(r.status)}</span>`;
+  }
+  if (['FAILED', 'CANCELLED', 'REJECTED'].includes(st)) {
+    return `<span class="badge badge--failed">Refund ${escapeHtml(st.toLowerCase())}</span>`;
+  }
+  if (st) return `<span class="badge badge--pending">Refund ${escapeHtml(st.toLowerCase())}</span>`;
+  return `<span class="badge badge--pending">Refund due</span>`;
 }
 </script>
 </body>
