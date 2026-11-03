@@ -184,6 +184,7 @@
           <strong>Recent orders</strong>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <select id="orderDateFilter" onchange="filterOrdersByDate(this.value)"><option value="">All delivery dates</option></select>
+            <button class="btn-outline" onclick="checkPendingPayments(this)" title="Ask Cashfree about unpaid orders from the last 14 days and verify the ones that are paid">Check pending payments</button>
             <button class="btn-outline" onclick="loadOrders()">↻ Refresh</button>
           </div>
         </div>
@@ -1507,6 +1508,30 @@ function statusBadge(r) {
   }
   if (st) return `<span class="badge badge--pending">Refund ${escapeHtml(st.toLowerCase())}</span>`;
   return `<span class="badge badge--pending">Refund due</span>`;
+}
+
+async function checkPendingPayments(btnEl) {
+  btnEl.disabled = true;
+  const old = btnEl.textContent; btnEl.textContent = 'Checking...';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/orders/check-pending`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: ADMIN_PASSCODE, days: 14 })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (!data.success) { alert(data.message || 'Check failed.'); }
+    else {
+      const v = data.verified.length;
+      alert(`Checked ${data.checked} unverified order(s) from the last 14 days.\n\n` +
+        `Now verified (customer emailed): ${v}${v ? '\n  ' + data.verified.join(', ') : ''}\n` +
+        `Still unpaid at Cashfree: ${data.unpaid}\n` +
+        `Never reached Cashfree (abandoned): ${data.not_at_cashfree}` +
+        (data.errors ? `\nCould not check: ${data.errors}` : ''));
+      if (v) loadOrders();
+    }
+  } catch (e) { alert('Could not reach the server.'); }
+  btnEl.disabled = false; btnEl.textContent = old;
 }
 </script>
 </body>
