@@ -7,7 +7,7 @@ const DELIVERY_CHARGE = 50;
 const MEMBERSHIP_PRICES = { monthly: 400, annual: 3999 };
 
 /* Cashfree checkout mode: "sandbox" while testing, change to "production" at launch */
-const CASHFREE_MODE = "sandbox";
+const CASHFREE_MODE = "production";
 
 /* How the first membership fee is collected:
    "authorization" = ONE step: the customer approves AutoPay and pays the first fee at the same
