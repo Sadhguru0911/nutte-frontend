@@ -80,11 +80,37 @@ async function apiCall(endpoint, options = {}) {
   return res.json();
 }
 
+/* Weekly batch notice — dates come from the backend (IST), so the page, email and sheet always agree */
+let batchInfo = null;
+function batchDateLabel(iso) {
+  try {
+    const d = new Date(String(iso).slice(0, 10) + 'T00:00:00');
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  } catch (e) { return String(iso); }
+}
+function renderBatchNotices() {
+  document.querySelectorAll('[data-batch-notice]').forEach(el => {
+    if (!batchInfo || !batchInfo.order_cycle || !batchInfo.delivery_date) { el.style.display = 'none'; return; }
+    const closes = batchDateLabel(batchInfo.order_cycle);
+    const delivers = batchDateLabel(batchInfo.delivery_date);
+    el.classList.toggle('is-missed', !!batchInfo.just_missed);
+    el.textContent = batchInfo.just_missed
+      ? `You missed this week's batch. You're in the ${closes} batch — delivered by Wednesday, ${delivers}.`
+      : `⏳ Next batch closes Thursday, 9 PM (${closes}) — delivered by Wednesday, ${delivers}.`;
+    el.style.display = '';
+  });
+}
+async function loadBatchInfo() {
+  try { batchInfo = await apiCall('/next-batch'); } catch (e) { batchInfo = null; }
+  renderBatchNotices();
+}
+
 /* boot */
 document.addEventListener('DOMContentLoaded', () => {
   bindUI();
   handleMembershipReturn();
   loadCategories();
+  loadBatchInfo();
   initScrollAnimations();
   const closeAboutBtn = document.getElementById('closeAboutBtn');
   if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);

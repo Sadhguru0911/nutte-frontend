@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-  <link rel="stylesheet" href="style.css?v=89" />
-  <script src="app.js?v=88" defer></script>
+  <link rel="stylesheet" href="style.css?v=90" />
+  <script src="app.js?v=89" defer></script>
 </head>
 <body>
 
@@ -74,6 +74,11 @@
         <span class="hero-title-unite">Unite.</span>
       </h1>
       <p class="hero-subtitle">Wholesale prices on premium dry fruits, nuts, and spices for your apartment community. We pool demand. You save.</p>
+      <div class="hero-cta-row">
+        <button type="button" class="btn-gold" onclick="scrollToSection('shopSection')">Shop the Catalog</button>
+        <button type="button" class="btn-outline" onclick="scrollToSection('membershipCard')">See Membership Savings</button>
+      </div>
+      <p class="hero-open-line">Open to everyone. Members save about 15% on average, up to 35% on some items.</p>
     </div>
 
     <!-- Best-seller image marquee — full-width strip below the hero text,
@@ -91,6 +96,8 @@
        (moved up to sit right after the hero/banner, ahead of trust bar
        and theme cards, per request) -->
   <section id="shopSection" class="shop-section">
+
+    <div class="batch-notice batch-notice--shop" data-batch-notice style="display:none"></div>
 
     <div class="storage-tip-banner">
       🌿 <strong>Keeping it fresh:</strong> Store in an airtight container, away from sunlight and heat. In humid weather, refrigerating extends freshness — most nuts and dried fruits stay good for 3–4 months this way.
@@ -178,7 +185,7 @@
   </div>
 
   <!-- HOW IT WORKS -->
-  <section class="how-section">
+  <section id="howSection" class="how-section">
     <div class="section-eyebrow">How It Works</div>
     <div class="section-title">Three steps to savings</div>
     <p class="section-desc">No middlemen. No markup. Just your community's buying power.</p>
@@ -200,8 +207,8 @@
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-content">
-          <h3>Doorstep delivery</h3>
-          <p>We deliver right to your community. Community orders, individual convenience.</p>
+          <h3>Weekly delivery to your society</h3>
+          <p>Orders close every Thursday night, are pooled with your society's batch, and delivered by the following Wednesday. One weekly run per society is how we keep prices at wholesale.</p>
         </div>
       </div>
     </div>
@@ -210,7 +217,7 @@
 
   <!-- MEMBERSHIP -->
   <section style="padding-bottom:0">
-    <div class="membership-section">
+    <div id="membershipCard" class="membership-section">
     <!-- Typical member savings (an illustration, not a separate discount) - lives inside the membership card -->
     <div class="spend-save-banner ssb-inline">
       <div class="ssb-ribbon-row">
@@ -294,8 +301,35 @@
         </div>
       </div>
       <button class="btn-gold" onclick="openMembershipModal()">Join CommunitE</button>
-      <div class="ms-reassurance">Not sure it's worth it? Cancel anytime.</div>
     </div>
+  </section>
+
+  <!-- REASSURANCE STRIP: 4 items, each linked to its proof -->
+  <section class="reassure-section" aria-label="Our promises">
+    <div class="reassure-grid">
+      <a href="#" class="reassure-item" onclick="openMembershipModal(); return false;">
+        <i class="fas fa-rotate" aria-hidden="true"></i>
+        <span>Cancel anytime</span>
+      </a>
+      <!-- OWNER: confirm the 10-day replacement promise is always honoured before going live -->
+      <a href="#" class="reassure-item" onclick="openReturnsPolicyModal(); return false;">
+        <i class="fas fa-leaf" aria-hidden="true"></i>
+        <span>Quality issue? We replace it</span>
+      </a>
+      <a href="#" class="reassure-item" onclick="scrollToSection('howSection'); return false;">
+        <i class="fas fa-truck" aria-hidden="true"></i>
+        <span>Weekly delivery to your society</span>
+      </a>
+      <a href="https://wa.me/918951048013?text=Hi%20CommunitE%2C%20I%20have%20a%20question" target="_blank" rel="noopener" class="reassure-item">
+        <i class="fas fa-comments" aria-hidden="true"></i>
+        <span>Chat with us on WhatsApp</span>
+      </a>
+    </div>
+    <details class="reassure-foot">
+      <summary>₹50 flat within 10 km of Sarjapur Road — details</summary>
+      <p>Order by Thursday 9 PM for delivery by the following Wednesday. Beyond 10 km we charge actual delivery cost, confirmed with you on WhatsApp before dispatch, never after.</p>
+    </details>
+    <p class="reassure-trust">Serving apartment societies across Bangalore</p>
   </section>
 
   <!-- COMMUNITY — Tambola, Community Listings, Reels (membership now has its own section above) -->
@@ -431,9 +465,10 @@
     </div>
 
     <div id="cartFooter" class="cart-footer" style="display:none">
+      <div class="batch-notice" data-batch-notice style="display:none"></div>
       <div class="cart-delivery-note">
         <i class="fas fa-truck"></i>
-        We deliver within 10kms of Sarjapur Road. Delivery beyond 10kms will be at actual charges.
+        ₹50 flat delivery within 10 km of Sarjapur Road. Beyond 10 km we charge actual cost, confirmed with you on WhatsApp before dispatch, never after.
       </div>
       <div class="cart-summary">
         <div class="cart-row"><span>Subtotal</span><span>₹<span id="cartSubtotal">0</span></span></div>
@@ -497,6 +532,7 @@
           </button>
         </form>
         <div id="paymentStep" style="display:none">
+          <div class="batch-notice" data-batch-notice style="display:none"></div>
           <div class="order-amount-summary">
             <div class="oas-row"><span>Products</span><span>₹<span id="oasSubtotal">0</span></span></div>
             <div class="oas-row"><span>Delivery</span><span>₹50</span></div>

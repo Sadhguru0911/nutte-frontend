@@ -3178,3 +3178,34 @@ body.overlay-open .floating-cart-bar {
   .ms-math-cols { grid-template-columns: 1fr; gap: 14px; }
   .ms-math-col + .ms-math-col { border-left: none; padding-left: 6px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 14px; }
 }
+
+
+/* ===== Step 2: hero CTAs, reassurance strip, batch notice ===== */
+.hero-open-line { font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: -18px 0 30px; max-width: 480px; line-height: 1.5; }
+.hero-cta-row .btn-gold, .hero-cta-row .btn-outline { font-family: inherit; }
+
+.reassure-section { max-width: 1280px; margin: 0 auto; padding: 8px 32px 48px; background: var(--white); text-align: center; }
+.reassure-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 900px; margin: 0 auto; }
+.reassure-item {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 12px;
+  background: var(--rd-gold-light); border: 1px solid rgba(201,168,76,0.35); border-radius: 14px;
+  font-size: 0.84rem; font-weight: 600; color: var(--rd-brown); line-height: 1.35; transition: transform 0.15s, box-shadow 0.15s;
+}
+.reassure-item:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.reassure-item i { font-size: 1.25rem; color: #a8872f; }
+.reassure-foot { max-width: 620px; margin: 14px auto 0; font-size: 0.78rem; color: var(--rd-brown-light); }
+.reassure-foot summary { cursor: pointer; list-style: none; text-decoration: underline; text-underline-offset: 3px; }
+.reassure-foot summary::-webkit-details-marker { display: none; }
+.reassure-foot p { margin: 8px 0 0; line-height: 1.5; }
+.reassure-trust { margin: 14px 0 0; font-size: 0.8rem; color: var(--rd-brown-light); }
+@media (max-width: 700px) {
+  .reassure-section { padding: 4px 16px 40px; }
+  .reassure-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.batch-notice {
+  background: var(--rd-gold-light); border: 1px solid rgba(201,168,76,0.45); color: var(--rd-brown);
+  border-radius: 10px; padding: 10px 14px; font-size: 0.82rem; line-height: 1.5; margin: 0 0 14px; font-weight: 500;
+}
+.batch-notice--shop { margin: 0 0 14px; }
+.batch-notice.is-missed { background: #fff4e5; border-color: #f0c987; }
