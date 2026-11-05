@@ -25,7 +25,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-  <link rel="stylesheet" href="style.css?v=87" />
+  <link rel="stylesheet" href="style.css?v=89" />
   <script src="app.js?v=88" defer></script>
 </head>
 <body>
@@ -207,54 +207,68 @@
     </div>
   </section>
 
-  <!-- MEMBER SAVINGS BANNER (typical savings - an illustration, not a separate discount) -->
-  <section class="spend-save-banner">
-    <div class="ssb-ribbon-row">
-      <div class="ssb-ribbon-tail ssb-ribbon-tail--left"></div>
-      <div class="ssb-ribbon-label">Member Savings</div>
-      <div class="ssb-ribbon-tail ssb-ribbon-tail--right"></div>
-    </div>
-    <h2 class="ssb-title">What You Could Save</h2>
-    <p class="ssb-subtitle">What a typical family saves on a monthly order with member pricing</p>
-
-    <div class="ssb-tiers">
-      <div class="ssb-tier">
-        <span class="ssb-tier-spend-label">Monthly order</span>
-        <span class="ssb-tier-spend-val">₹1,000</span>
-        <span class="ssb-tier-save-label">You save about</span>
-        <span class="ssb-tier-save-val">₹150</span>
-      </div>
-      <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div class="ssb-tier">
-        <span class="ssb-tier-spend-label">Monthly order</span>
-        <span class="ssb-tier-spend-val">₹2,000</span>
-        <span class="ssb-tier-save-label">You save about</span>
-        <span class="ssb-tier-save-val">₹300</span>
-      </div>
-      <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div class="ssb-tier">
-        <span class="ssb-tier-spend-label">Monthly order</span>
-        <span class="ssb-tier-spend-val">₹3,000</span>
-        <span class="ssb-tier-save-label">You save about</span>
-        <span class="ssb-tier-save-val">₹450</span>
-      </div>
-      <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div class="ssb-tier ssb-tier-best">
-        <div class="ssb-tier-best-badge">Most savings</div>
-        <span class="ssb-tier-spend-label">Monthly order</span>
-        <span class="ssb-tier-spend-val">₹4,000+</span>
-        <span class="ssb-tier-save-label">You save about</span>
-        <span class="ssb-tier-save-val">₹600</span>
-      </div>
-    </div>
-
-    <button class="ssb-cta-btn" onclick="openMembershipModal()">Join CommunitE &rarr;</button>
-    <div class="ssb-fineprint">Estimates based on the average member discount of about 15% across our catalogue, rounded. Your savings depend on what you buy. Member prices apply automatically at checkout for active members.</div>
-  </section>
 
   <!-- MEMBERSHIP -->
   <section style="padding-bottom:0">
     <div class="membership-section">
+    <!-- Typical member savings (an illustration, not a separate discount) - lives inside the membership card -->
+    <div class="spend-save-banner ssb-inline">
+      <div class="ssb-ribbon-row">
+        <div class="ssb-ribbon-tail ssb-ribbon-tail--left"></div>
+        <div class="ssb-ribbon-label">Member Savings</div>
+        <div class="ssb-ribbon-tail ssb-ribbon-tail--right"></div>
+      </div>
+      <h2 class="ssb-title">What You Could Save</h2>
+      <p class="ssb-subtitle">What a typical family saves on a monthly order with member pricing</p>
+
+      <div class="ssb-tiers">
+        <div class="ssb-tier">
+          <span class="ssb-tier-spend-label">Monthly order</span>
+          <span class="ssb-tier-spend-val">₹1,000</span>
+          <span class="ssb-tier-save-label">You save about</span>
+          <span class="ssb-tier-save-val">₹150</span>
+        </div>
+        <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="ssb-tier">
+          <span class="ssb-tier-spend-label">Monthly order</span>
+          <span class="ssb-tier-spend-val">₹2,000</span>
+          <span class="ssb-tier-save-label">You save about</span>
+          <span class="ssb-tier-save-val">₹300</span>
+        </div>
+        <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="ssb-tier">
+          <span class="ssb-tier-spend-label">Monthly order</span>
+          <span class="ssb-tier-spend-val">₹3,000</span>
+          <span class="ssb-tier-save-label">You save about</span>
+          <span class="ssb-tier-save-val">₹450</span>
+        </div>
+        <svg class="ssb-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="ssb-tier ssb-tier-best">
+          <div class="ssb-tier-best-badge">Most savings</div>
+          <span class="ssb-tier-spend-label">Monthly order</span>
+          <span class="ssb-tier-spend-val">₹4,000+</span>
+          <span class="ssb-tier-save-label">You save about</span>
+          <span class="ssb-tier-save-val">₹600</span>
+        </div>
+      </div>
+      <div class="ms-math">
+        <div class="ms-math-title">When does membership pay for itself?</div>
+        <div class="ms-math-cols">
+          <div class="ms-math-col">
+            <div class="ms-math-plan">Monthly · ₹400</div>
+            <div class="ms-math-line">You come out ahead once you order about <strong>₹2,700</strong> a month.</div>
+            <div class="ms-math-eg">At ₹3,000 a month you save about ₹450, which is ₹50 more than the fee.</div>
+          </div>
+          <div class="ms-math-col">
+            <div class="ms-math-plan">Annual · ₹3,999 (₹333 a month)</div>
+            <div class="ms-math-line">You come out ahead once you order about <strong>₹2,200</strong> a month.</div>
+            <div class="ms-math-eg">At ₹3,000 a month you save about ₹5,400 a year, which is about ₹1,400 more than the fee.</div>
+          </div>
+        </div>
+      </div>
+      <div class="ssb-fineprint">Estimates based on the average member discount of about 15% across our catalogue, rounded. Your savings depend on what you buy. Member prices apply automatically at checkout for active members.</div>
+    </div>
+      <div class="ms-divider"></div>
       <div class="section-eyebrow">Membership</div>
       <div class="section-title" style="color:#fff">Join &amp; save on every order</div>
       <p class="section-desc" style="color:rgba(255,255,255,0.6); margin:0 auto 32px;">Member pricing and doorstep delivery to your apartment.</p>
@@ -270,7 +284,6 @@
           <div class="ms-plan-name">Monthly</div>
           <div class="ms-plan-price">₹400</div>
           <div class="ms-plan-period">/month</div>
-          <div class="ms-plan-note">Cancel anytime</div>
         </div>
         <div class="ms-plan-card featured">
           <div class="ms-plan-badge">Best Value</div>

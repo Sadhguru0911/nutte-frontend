@@ -3149,3 +3149,32 @@ body.overlay-open .floating-cart-bar {
 .cancel-msg.err { color: #b3261e; }
 .cancel-estimate { background: #f6f1e4; border: 1px solid #e4d8b4; border-radius: 10px; padding: 10px 12px; font-size: 0.84rem; text-align: left; line-height: 1.5; margin: 8px 0; }
 .cancel-estimate strong { color: var(--black); }
+
+
+/* Savings block now sits INSIDE the membership card: one background, one set of corners */
+.membership-section .spend-save-banner.ssb-inline {
+  background: none;
+  padding: 0;
+  overflow: visible;
+}
+.ms-divider {
+  height: 1px; max-width: 420px; margin: 32px auto 36px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.55), transparent);
+}
+.membership-section .ssb-fineprint { max-width: 620px; margin: 18px auto 0; }
+.ms-plan-badge { white-space: nowrap; }
+
+/* Break-even math box (inside membership card) */
+.ms-math { max-width: 640px; margin: 28px auto 0; padding: 20px 18px; border: 1px solid rgba(201,168,76,0.35); border-radius: 14px; background: rgba(255,255,255,0.04); text-align: center; }
+.ms-math-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: #fff; margin-bottom: 14px; }
+.ms-math-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ms-math-col { text-align: center; padding: 0 6px; }
+.ms-math-col + .ms-math-col { border-left: 1px solid rgba(255,255,255,0.12); padding-left: 16px; }
+.ms-math-plan { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #c9a84c; margin-bottom: 8px; }
+.ms-math-line { font-size: 0.86rem; color: rgba(255,255,255,0.88); line-height: 1.5; }
+.ms-math-line strong { color: #fff; }
+.ms-math-eg { font-size: 0.78rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-top: 8px; }
+@media (max-width: 600px) {
+  .ms-math-cols { grid-template-columns: 1fr; gap: 14px; }
+  .ms-math-col + .ms-math-col { border-left: none; padding-left: 6px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 14px; }
+}
