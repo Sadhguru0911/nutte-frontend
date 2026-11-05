@@ -1309,7 +1309,11 @@ async function buildSearchIndex() {
       image: p.image || '',
       description: p.description || '',
       tags: p.tags || [],
-      member_discount: (typeof p.member_discount === 'number') ? p.member_discount : null
+      // saving as a share of the REGULAR price: (regular - member) / regular
+      // (the sheet's "Member Discount" column divides by the member price, which overstates it)
+      member_discount: (parseFloat(p.member_price) > 0 && parseFloat(p.price) > parseFloat(p.member_price))
+        ? Math.round((parseFloat(p.price) - parseFloat(p.member_price)) / parseFloat(p.price) * 1000) / 10
+        : null
     }));
     renderThemeCards();
     renderFestiveCards();
@@ -2717,7 +2721,7 @@ function filterByMemberDiscountTheme() {
 
 function filterByDiscountTier(min, max, title) {
   const filtered = allProductsCache.filter(p =>
-    typeof p.member_discount === 'number' && p.member_discount >= min && p.member_discount <= max
+    typeof p.member_discount === 'number' && p.member_discount >= min && p.member_discount < max
   );
   renderFilteredProducts(title, filtered);
 }
