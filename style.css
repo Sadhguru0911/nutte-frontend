@@ -2692,23 +2692,6 @@ body.overlay-open .floating-cart-bar {
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
 }
 
-/* Shop by Category (top-level only) — horizontal scroll, not wrapped rows */
-#categoryContainer {
-  display: flex;
-  flex-direction: row;
-  overflow-x: auto;
-  gap: 12px;
-  padding-bottom: 8px;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
-}
-#categoryContainer::-webkit-scrollbar { height: 5px; }
-#categoryContainer .category-grid-item {
-  flex: 0 0 auto;
-  width: 130px;
-  scroll-snap-align: start;
-}
-
 /* ── PRODUCTS ── */
 .shop-products {
   padding-top: 20px;
@@ -3209,3 +3192,68 @@ body.overlay-open .floating-cart-bar {
 }
 .batch-notice--shop { margin: 0 0 14px; }
 .batch-notice.is-missed { background: #fff4e5; border-color: #f0c987; }
+
+
+/* ===== Step 3: tidy grids, storage tip chip, savings badge ===== */
+/* Categories + subcategories: 4 across on desktop, 3 on tablet, 2 on phones; page scrolls for the rest */
+.category-grid, .category-grid--sub { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.category-grid-item img { aspect-ratio: 4 / 3; }
+.category-grid-label { font-size: 0.95rem; padding: 12px 12px; }
+@media (max-width: 960px) {
+  .category-grid, .category-grid--sub { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+}
+@media (max-width: 600px) {
+  .category-grid, .category-grid--sub { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .category-grid-label { font-size: 0.85rem; padding: 9px 8px; }
+}
+
+/* Storage tip now lives in the cart */
+.cart-storage-tip {
+  background: #eef7f0; border: 1px solid #cfe8d6; border-radius: 10px; color: #1a5c3a;
+  padding: 9px 12px; font-size: 0.76rem; line-height: 1.5; margin: 0 0 10px;
+}
+.cart-storage-tip strong { color: #123f28; }
+
+/* Storage chip on product cards: hover (desktop) / tap (phone) */
+.product-meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.storage-tip-chip {
+  position: relative; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+  font-size: 0.78rem; font-weight: 600; color: var(--muted); user-select: none;
+}
+.storage-tip-chip::after {
+  content: attr(data-tip); position: absolute; left: -56px; bottom: calc(100% + 8px); z-index: 20;
+  width: 200px; max-width: 62vw; padding: 10px 12px; border-radius: 10px;
+  background: var(--rd-purple); color: #fff; font-size: 0.76rem; font-weight: 400; line-height: 1.45;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.22); opacity: 0; visibility: hidden; transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s; pointer-events: none;
+}
+.storage-tip-chip:hover::after, .storage-tip-chip:focus-visible::after, .storage-tip-chip.open::after {
+  opacity: 1; visibility: visible; transform: translateY(0);
+}
+
+/* Savings badge on product photos */
+.save-badge {
+  position: absolute; top: 10px; left: 10px; z-index: 3; padding: 5px 10px; border-radius: 999px;
+  background: var(--rd-gold); color: var(--rd-purple); font-size: 0.72rem; font-weight: 800; line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.save-badge .sb-member { display: none; }
+body.is-member .save-badge .sb-member { display: inline; }
+body.is-member .save-badge .sb-visitor { display: none; }
+
+/* Theme cards: every collage cell is the same fixed size, blanks stay blank */
+.theme-card-collage { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); overflow: hidden; }
+.theme-card-cell { min-width: 0; min-height: 0; border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.12); }
+.theme-card-cell .theme-card-collage-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+
+/* Details + Storage read as clickable links */
+.product-details-link, .storage-tip-chip {
+  color: var(--green); font-size: 0.8rem; font-weight: 600;
+  text-decoration: underline; text-decoration-color: rgba(26,92,58,0.4); text-underline-offset: 3px;
+  padding: 4px 0;
+}
+.product-details-link:hover, .storage-tip-chip:hover, .storage-tip-chip.open {
+  color: var(--green-mid); text-decoration-color: currentColor;
+}
+.product-details-link i { text-decoration: none; }

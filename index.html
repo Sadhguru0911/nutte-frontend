@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-  <link rel="stylesheet" href="style.css?v=90" />
-  <script src="app.js?v=89" defer></script>
+  <link rel="stylesheet" href="style.css?v=92" />
+  <script src="app.js?v=90" defer></script>
 </head>
 <body>
 
@@ -99,15 +99,10 @@
 
     <div class="batch-notice batch-notice--shop" data-batch-notice style="display:none"></div>
 
-    <div class="storage-tip-banner">
-      🌿 <strong>Keeping it fresh:</strong> Store in an airtight container, away from sunlight and heat. In humid weather, refrigerating extends freshness — most nuts and dried fruits stay good for 3–4 months this way.
-    </div>
-
     <!-- Categories grid — always visible -->
     <div id="categorySection" class="shop-categories">
       <div class="section-eyebrow">Categories</div>
       <h2 class="section-title">Shop by what you need</h2>
-      <p class="section-desc">Swipe to explore.</p>
       <div id="categoryContainer" class="category-grid"></div>
     </div>
 
@@ -469,6 +464,9 @@
       <div class="cart-delivery-note">
         <i class="fas fa-truck"></i>
         ₹50 flat delivery within 10 km of Sarjapur Road. Beyond 10 km we charge actual cost, confirmed with you on WhatsApp before dispatch, never after.
+      </div>
+      <div class="cart-storage-tip">
+        🌿 <strong>Keeping it fresh:</strong> Store in an airtight container, away from sunlight and heat. In humid weather, refrigerating extends freshness.
       </div>
       <div class="cart-summary">
         <div class="cart-row"><span>Subtotal</span><span>₹<span id="cartSubtotal">0</span></span></div>
@@ -842,7 +840,6 @@
       <div class="modal-body">
         <img id="productDetailModalImg" class="product-detail-modal-img" src="" alt="" />
         <p id="productDetailModalDesc" class="product-detail-modal-desc"></p>
-        <p class="product-detail-storage-tip">🌿 <strong>Storage tip:</strong> Keep in an airtight container, away from sunlight and heat. Refrigerate in humid weather for longer freshness.</p>
       </div>
     </div>
   </div>

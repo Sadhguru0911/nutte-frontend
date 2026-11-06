@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   handleMembershipReturn();
   loadCategories();
   loadBatchInfo();
+  refreshSaveBadges();
   initScrollAnimations();
   const closeAboutBtn = document.getElementById('closeAboutBtn');
   if (closeAboutBtn) closeAboutBtn.addEventListener('click', closeAbout);
@@ -304,11 +305,15 @@ function buildProductCardsHTML(products, idPrefix) {
         <div class="product-img-wrap">
           <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.onerror=null;this.src='assets/placeholder.png';" />
           <canvas class="ripple-canvas"></canvas>
+          ${buildSaveBadgeHTML(firstPrice, firstMemberPrice)}
         </div>
         <div class="product-card-body">
           <div class="product-title">${escapeHtml(name)}</div>
           <div class="product-desc">${escapeHtml(desc)}</div>
-          ${anyVariantHasDesc ? `<button type="button" class="product-details-link" onclick="showProductDetail('${id}')"><i class="fas fa-circle-info"></i> Details</button>` : ''}
+          <div class="product-meta-row">
+            ${anyVariantHasDesc ? `<button type="button" class="product-details-link" onclick="showProductDetail('${id}')"><i class="fas fa-circle-info"></i> Details</button>` : ''}
+            <span class="storage-tip-chip" tabindex="0" role="button" aria-label="Storage tip" data-tip="${STORAGE_TIP_TEXT}" onclick="toggleStorageTip(this, event)">🌿 Storage</span>
+          </div>
           <div class="controls-row">
             <select class="variant-select" id="variant_${id}" onchange="updateProductDisplay('${id}')">
               ${variants.map(v => {
@@ -400,6 +405,12 @@ function updateProductDisplay(unique) {
   const desc = opt.dataset.desc;
   const priceEl = $(`price_${unique}`);
   if (priceEl) priceEl.innerHTML = buildPriceHTML(price, memberPrice, `price_${unique}`);
+  const wrap = document.querySelector(`#${unique} .product-img-wrap`);
+  if (wrap) {
+    const old = wrap.querySelector('.save-badge');
+    if (old) old.remove();
+    wrap.insertAdjacentHTML('beforeend', buildSaveBadgeHTML(price, memberPrice));
+  }
   const imgEl = document.querySelector(`#${unique} img`);
   if (imgEl && img) imgEl.src = img;
   const descEl = document.querySelector(`#${unique} .product-desc`);
@@ -451,6 +462,31 @@ function closeReturnsPolicyModal() {
 }
 
 /* Build price HTML — shows dual price or single */
+/* ---- Savings badge + storage tip chip ---- */
+const STORAGE_TIP_TEXT = 'Keep in an airtight container, away from sunlight and heat. Refrigerate in humid weather for longer freshness.';
+const SAVE_BADGE_MIN_PCT = 5;
+function buildSaveBadgeHTML(regularPrice, memberPrice) {
+  const reg = parseFloat(regularPrice) || 0;
+  const mem = parseFloat(memberPrice) || 0;
+  if (!(mem > 0 && mem < reg)) return '';
+  const pct = Math.round((reg - mem) / reg * 100);
+  if (pct < SAVE_BADGE_MIN_PCT) return '';
+  return `<span class="save-badge"><span class="sb-visitor">Save ${pct}% as a member</span><span class="sb-member">You save ${pct}%</span></span>`;
+}
+function refreshSaveBadges() {
+  const active = memberState.status === 'active' || memberState.status === 'pending';
+  document.body.classList.toggle('is-member', !!active);
+}
+function toggleStorageTip(el, ev) {
+  if (ev) ev.stopPropagation();
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.storage-tip-chip.open').forEach(e => e.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.storage-tip-chip.open').forEach(e => e.classList.remove('open'));
+});
+
 function buildPriceHTML(regularPrice, memberPrice, id) {
   const reg = parseFloat(regularPrice) || 0;
   const mem = parseFloat(memberPrice) || 0;
@@ -864,7 +900,7 @@ function applyMembershipStatus(customer, mobile) {
     expiry,
     name: customer.full_name,
     mobile
-  };
+  }; refreshSaveBadges();
 
   // Update nav member button
   const btn = $('memberLoginBtn');
@@ -1050,7 +1086,7 @@ async function saveProfileChanges() {
 function logoutProfile() {
   try { localStorage.removeItem(SAVED_MOBILE_KEY); } catch (e) { /* non-critical */ }
   loggedInCustomer = null;
-  memberState = { isMember: false, status: null, plan: null, expiry: null, name: null, mobile: null };
+  memberState = { isMember: false, status: null, plan: null, expiry: null, name: null, mobile: null }; refreshSaveBadges();
   updateAccountNavLabel();
   const btn = $('memberLoginBtn');
   btn.classList.remove('is-member');
@@ -1646,7 +1682,7 @@ async function lookupMemberCustomer() {
 
       // Already active member?
       if ((c.membership_status || '').toLowerCase() === 'active') {
-        memberState = { isMember: true, status: 'active', plan: c.membership_plan, expiry: c.membership_expiry, name: c.full_name, mobile };
+        memberState = { isMember: true, status: 'active', plan: c.membership_plan, expiry: c.membership_expiry, name: c.full_name, mobile }; refreshSaveBadges();
         showMemberStep(3);
         $('memberActiveName').textContent = `You're already a member, ${c.full_name}!`;
         $('memberActivePlan').textContent = c.membership_plan === 'annual' ? 'Annual ₹3,999/yr' : 'Monthly ₹400/mo';
@@ -2657,9 +2693,12 @@ function buildThemeCardHTML(title, color, matches, onclickCall) {
     return true;
   });
   const photos = shuffleArray([...unique]).slice(0, 4);
-  const collageHTML = photos.map(p =>
-    `<img class="theme-card-collage-img" src="${escapeHtml(p.image)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" />`
-  ).join('');
+  const collageHTML = [0, 1, 2, 3].map(i => {
+    const p = photos[i];
+    return p
+      ? `<div class="theme-card-cell"><img class="theme-card-collage-img" src="${escapeHtml(p.image)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'" /></div>`
+      : `<div class="theme-card-cell"></div>`;
+  }).join('');
 
   return `
     <div class="theme-card" style="background:${color}" onclick="${onclickCall}">
