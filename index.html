@@ -25,8 +25,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b1e3f6.js" crossorigin="anonymous"></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-  <link rel="stylesheet" href="style.css?v=93" />
-  <script src="app.js?v=90" defer></script>
+  <link rel="stylesheet" href="style.css?v=94" />
+  <script src="app.js?v=91" defer></script>
 </head>
 <body>
 
@@ -188,15 +188,15 @@
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-content">
-          <h3>Join your community</h3>
-          <p>Pick a plan starting at ₹400/month. Your apartment is your buying group.</p>
+          <h3>Shop — open to everyone</h3>
+          <p>No account or membership needed. Order at regular prices, or add a membership to pay member prices.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-content">
-          <h3>Shop at member prices</h3>
-          <p>Browse and order premium dry fruits, spices, and more at wholesale rates.</p>
+          <h3>Join to save (optional)</h3>
+          <p>Members pay ₹400 a month or ₹3,999 a year and save about 15% on average, up to 35% on some items.</p>
         </div>
       </div>
       <div class="step">
@@ -209,6 +209,23 @@
     </div>
   </section>
 
+
+  <!-- ON THE GROUND — photos added by admin in the OnTheGround sheet tab; hidden until there is at least one -->
+  <section id="onGroundSection" class="ground-section" style="display:none">
+    <div class="section-eyebrow">On the Ground</div>
+    <div class="section-title">Seen at your society</div>
+    <p class="section-desc">Photos from our stalls at apartment societies.</p>
+    <div id="onGroundGrid" class="ground-grid"></div>
+  </section>
+
+  <!-- TESTIMONIALS — approved in admin; hidden until there is at least one -->
+  <section id="testimonialsSection" class="testimonials-section" style="display:none">
+    <div class="section-eyebrow">What Our Customers Say</div>
+    <div class="section-title">Neighbours, in their own words</div>
+    <div id="testimonialsFeatured"></div>
+    <div id="testimonialsGrid" class="testimonials-grid"></div>
+    <p class="testimonials-cta"><a href="share-your-experience.html">Shopped with us? Share your experience</a></p>
+  </section>
 
   <!-- MEMBERSHIP -->
   <section style="padding-bottom:0">
@@ -327,33 +344,46 @@
     <p class="reassure-trust">Serving apartment societies across Bangalore</p>
   </section>
 
-  <!-- COMMUNITY — Tambola, Community Listings, Reels (membership now has its own section above) -->
-  <section class="community-section">
-    <div class="section-eyebrow">More Than Shopping</div>
-    <div class="section-title">Your community hub</div>
-    <p class="section-desc">Shopping is just the start.</p>
-    <div class="community-cards">
-      <div class="community-card" onclick="openTambolaModal()">
-        <div class="community-icon">🎲</div>
-        <div>
-          <h3>Tambola Nights</h3>
-          <p>Free in-app Tambola for your apartment gatherings. Generate tickets, call numbers, play together.</p>
-        </div>
-      </div>
-      <div class="community-card" onclick="openPartnersModal()">
-        <div class="community-icon">🤝</div>
-        <div>
-          <h3>Community Listings</h3>
-          <p>Small businesses who list with CommunitE.</p>
-        </div>
-      </div>
-      <div class="community-card" onclick="openReels()">
-        <div class="community-icon">📹</div>
-        <div>
-          <h3>Behind the Scenes</h3>
-          <p>Follow @dryfruits_communitE for reels on sourcing, packing, and community stories.</p>
-        </div>
-      </div>
+  <!-- FAQ -->
+  <section id="faqSection" class="faq-section">
+    <div class="section-eyebrow">FAQ</div>
+    <div class="section-title">Questions, answered</div>
+
+    <h3 class="faq-group">Ordering and delivery</h3>
+    <div class="faq-list">
+      <details class="faq-item"><summary>Do I have to be a member to order?</summary>
+        <div class="faq-a">No. Anyone can shop. Members pay lower prices; everyone else pays the regular price.</div></details>
+      <details class="faq-item"><summary>When will my order arrive?</summary>
+        <div class="faq-a">Orders close every Thursday at 9 PM. We pool them with your society's batch and deliver by the following Wednesday. If you order after the cut-off, you're in the next week's batch. The cart and checkout show the exact dates.</div></details>
+      <details class="faq-item"><summary>What does delivery cost?</summary>
+        <div class="faq-a">&#8377;50 flat within 10 km of Sarjapur Road. Beyond 10 km we charge the actual delivery cost, and we confirm it with you on WhatsApp before dispatch, never after.</div></details>
+      <details class="faq-item"><summary>How should I store dry fruits?</summary>
+        <div class="faq-a">Keep them in an airtight container, away from sunlight and heat. In humid weather, refrigerating helps them stay fresh longer.</div></details>
+    </div>
+
+    <h3 class="faq-group">Membership</h3>
+    <div class="faq-list">
+      <details class="faq-item"><summary>What does membership cost?</summary>
+        <div class="faq-a">&#8377;400 a month, or &#8377;3,999 a year (about &#8377;333 a month). Both renew automatically through AutoPay on Cashfree's secure page.</div></details>
+      <details class="faq-item"><summary>How much will I save?</summary>
+        <div class="faq-a">About 15% on average against the regular price, and up to 35% on some items. What you save depends on what you buy. The monthly plan pays for itself at roughly &#8377;2,700 of regular-price shopping a month, and the annual plan at roughly &#8377;2,200 a month.</div></details>
+      <details class="faq-item"><summary>How do I cancel?</summary>
+        <div class="faq-a">You can cancel anytime; it stops future auto-renewal charges. If you paid by UPI, open your UPI app, go to AutoPay / Mandates and cancel "CommunitE". If you paid by card, tap &#11088; Member at the top of the page, then <em>Cancel auto-renewal</em>, and we'll cancel the card mandate within 24 hours. Please cancel at least 2 days before your renewal date.</div></details>
+      <details class="faq-item"><summary>Do I get a refund if I cancel?</summary>
+        <div class="faq-a"><strong>Monthly plan:</strong> no refund for the current month; your membership stays active until the end of the month you've paid for.<br>
+          <strong>Annual plan:</strong> your membership stays active until the end of your current paid month, counted from the day you joined (a part month counts as a full month). We refund the rest: &#8377;3,999 minus &#8377;400 for each month used, back to your original payment method within 7 working days.<br>
+          If a renewal is charged by mistake or twice, we refund it in full.</div></details>
+    </div>
+
+    <h3 class="faq-group">Returns and refunds</h3>
+    <div class="faq-list">
+      <details class="faq-item"><summary>Can I return something?</summary>
+        <div class="faq-a">Because we sell food, we don't accept returns for change of mind or personal taste. If a product arrives damaged, is the wrong item, or has a genuine quality issue, we'll replace it.</div></details>
+      <details class="faq-item"><summary>What if something is wrong with my order?</summary>
+        <div class="faq-a">Message us on WhatsApp or call <a href="tel:+918951048013">+91 89510 48013</a> within 10 days of delivery, with a photo of the product. Once we confirm the issue, we arrange a replacement with your next delivery cycle.</div></details>
+      <!-- OWNER: confirm this duplicate-payment promise before going live -->
+      <details class="faq-item"><summary>What if I was charged twice?</summary>
+        <div class="faq-a">Message us on WhatsApp with the payment details and we'll refund the extra charge to your original payment method. See our <a href="#" onclick="openRefundPolicyModal(); return false;">Refund Policy</a>.</div></details>
     </div>
   </section>
 
@@ -393,6 +423,36 @@
   <div id="subcategoryRowsSection" class="subcategory-rows-section"></div>
 
 
+  <!-- COMMUNITY — Tambola, Community Listings, Reels (membership now has its own section above) -->
+  <section class="community-section">
+    <div class="section-eyebrow">More Than Shopping</div>
+    <div class="section-title">Your community hub</div>
+    <p class="section-desc">Shopping is just the start.</p>
+    <div class="community-cards">
+      <div class="community-card" onclick="openTambolaModal()">
+        <div class="community-icon">🎲</div>
+        <div>
+          <h3>Tambola Nights</h3>
+          <p>Free in-app Tambola for your apartment gatherings. Generate tickets, call numbers, play together.</p>
+        </div>
+      </div>
+      <div class="community-card" onclick="openPartnersModal()">
+        <div class="community-icon">🤝</div>
+        <div>
+          <h3>Community Listings</h3>
+          <p>Small businesses who list with CommunitE.</p>
+        </div>
+      </div>
+      <div class="community-card" onclick="openReels()">
+        <div class="community-icon">📹</div>
+        <div>
+          <h3>Behind the Scenes</h3>
+          <p>Follow @dryfruits_communitE for reels on sourcing, packing, and community stories.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- MASCOT CALLOUT -->
   <div class="mascot-callout">
     <img class="mascot-img" src="assets/NuttE_edited.png" alt="NuttE mascot" />
@@ -412,6 +472,8 @@
       <span onclick="openAbout()" style="cursor:pointer">About Us</span>
       <span onclick="openPartnersModal()" style="cursor:pointer">Community Listings</span>
       <span onclick="openReturnsPolicyModal()" style="cursor:pointer">Returns Policy</span>
+      <span onclick="openRefundPolicyModal()" style="cursor:pointer">Refund Policy</span>
+      <a href="share-your-experience.html">Share Your Experience</a>
       <a href="https://instagram.com/dryfruits_communitE" target="_blank" rel="noopener">Instagram</a>
     </div>
     <div class="footer-divider"></div>
@@ -863,6 +925,25 @@
         <p class="policy-note">
           To report an issue, message us on WhatsApp or call <a href="tel:+918951048013">+91 89510 48013</a>.
         </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFUND POLICY MODAL -->
+  <div id="refundPolicyModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">Refund Policy</h2>
+        <button class="icon-btn" aria-label="Close" onclick="closeRefundPolicyModal()"><span class="icon-x" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="policy-note"><strong>Product orders.</strong> We don't refund for change of mind or personal taste. If a product arrives damaged, is the wrong item, or has a genuine quality issue, we replace it. See our <a href="#" onclick="closeRefundPolicyModal(); openReturnsPolicyModal(); return false;">Returns Policy</a>.</p>
+        <!-- OWNER: confirm this duplicate-payment promise before going live -->
+        <p class="policy-note"><strong>Charged twice or by mistake.</strong> Message us on WhatsApp with the payment details and we refund the extra charge to your original payment method.</p>
+        <p class="policy-note"><strong>Monthly membership.</strong> No refund for the current month. Your membership stays active until the end of the month you've paid for.</p>
+        <p class="policy-note"><strong>Annual membership.</strong> Your membership stays active until the end of your current paid month, counted from the day you joined (a part month counts as a full month). We refund the rest: &#8377;3,999 minus &#8377;400 for each month used, back to your original payment method within 7 working days.</p>
+        <p class="policy-note"><strong>Renewals.</strong> Please cancel at least 2 days before your renewal date. If a renewal is charged by mistake or twice, we refund it in full.</p>
+        <p class="policy-note">Questions? Message us on WhatsApp or call <a href="tel:+918951048013">+91 89510 48013</a>.</p>
       </div>
     </div>
   </div>

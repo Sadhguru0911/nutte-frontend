@@ -174,6 +174,7 @@
       <button class="tab-btn" data-tab="pnl">P&amp;L</button>
       <button class="tab-btn" data-tab="memberships">Memberships <span id="membershipBadge" class="tab-badge" style="display:none">0</span></button>
       <button class="tab-btn" data-tab="partners">Community Listings <span id="partnerBadge" class="tab-badge" style="display:none">0</span></button>
+      <button class="tab-btn" data-tab="testimonials">Testimonials <span id="testimonialBadge" class="tab-badge" style="display:none">0</span></button>
     </div>
 
     <!-- ORDERS TAB -->
@@ -385,6 +386,20 @@
       </div>
     </div>
 
+    <!-- TESTIMONIALS TAB -->
+    <div class="tab-panel" id="tab-testimonials">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <strong>Pending testimonials</strong>
+          <button class="btn-outline" onclick="loadTestimonials()">↻ Refresh</button>
+        </div>
+        <p class="empty-note" style="text-align:left;padding:0 0 12px">Customers fill in the public form (share-your-experience.html). Edit the quote if you like (fix typos, pick the best line), tick Featured for the large card on the site, then Approve. Only approved ones appear. "On the Ground" photos are added directly in the <strong>OnTheGround</strong> tab of the Orders sheet (Photo URL, Society, Message, Date; set Show to No to hide a row).</p>
+        <div id="testimonialsLoading" class="loading-note">Loading…</div>
+        <div id="testimonialsList"></div>
+        <div id="testimonialsEmpty" class="empty-note" style="display:none">No pending testimonials.</div>
+      </div>
+    </div>
+
     <!-- PARTNERS TAB -->
     <div class="tab-panel" id="tab-partners">
       <div class="card">
@@ -463,6 +478,7 @@ function enterDashboard() {
   loadMemberships();
   loadCancellations();
   loadPartners();
+  loadTestimonials();
 }
 
 /* Auto-enter if we already have a passcode from this session */
@@ -1090,6 +1106,73 @@ async function approvePartner(rowNumber, vendorName, btnEl) {
     alert('Network error — please try again.');
     btnEl.disabled = false;
     btnEl.textContent = 'Approve';
+  }
+}
+
+/* ---- Testimonials tab ---- */
+let pendingTestimonials = [];
+async function loadTestimonials() {
+  document.getElementById('testimonialsLoading').style.display = 'block';
+  document.getElementById('testimonialsEmpty').style.display = 'none';
+  document.getElementById('testimonialsList').innerHTML = '';
+  try {
+    const res = await fetch(`${apiBase}/api/admin/testimonials/pending?passcode=${encodeURIComponent(ADMIN_PASSCODE)}`);
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    document.getElementById('testimonialsLoading').style.display = 'none';
+    pendingTestimonials = data.testimonials || [];
+    const badge = document.getElementById('testimonialBadge');
+    if (pendingTestimonials.length) { badge.textContent = pendingTestimonials.length; badge.style.display = 'inline-block'; }
+    else { badge.style.display = 'none'; }
+    if (!data.success || !pendingTestimonials.length) {
+      document.getElementById('testimonialsEmpty').style.display = 'block';
+      return;
+    }
+    document.getElementById('testimonialsList').innerHTML = pendingTestimonials.map((t, i) => `
+      <div style="border:1px solid #e2e0da;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="font-weight:700">${escapeHtml(t.name)} <span style="font-weight:400;color:#777">· ${escapeHtml(t.society)}${t.member_since ? ' · Member since ' + escapeHtml(t.member_since) : ''}</span></div>
+        <div style="font-size:0.78rem;color:#888;margin:2px 0 8px">Submitted ${escapeHtml(t.submitted_on)}${t.contact ? ' · Contact: ' + escapeHtml(t.contact) : ''}${t.photo_url ? ` · <a href="${escapeHtml(t.photo_url)}" target="_blank" rel="noopener">photo</a>` : ''}</div>
+        <div style="font-size:0.8rem;color:#555;line-height:1.5;margin-bottom:8px">
+          ${t.price ? `<div><strong>Price:</strong> ${escapeHtml(t.price)}</div>` : ''}
+          ${t.quality ? `<div><strong>Quality:</strong> ${escapeHtml(t.quality)}</div>` : ''}
+          ${t.delivery ? `<div><strong>Delivery:</strong> ${escapeHtml(t.delivery)}</div>` : ''}
+          ${t.membership ? `<div><strong>Membership:</strong> ${escapeHtml(t.membership)}</div>` : ''}
+        </div>
+        <label style="font-size:0.78rem;font-weight:700">Quote shown on the site</label>
+        <textarea id="tq_${i}" rows="3" maxlength="700" style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:8px;font-family:inherit;font-size:0.9rem;margin:4px 0 8px">${escapeHtml(t.quote)}</textarea>
+        <label style="font-size:0.82rem"><input type="checkbox" id="tf_${i}"> Featured (large card)</label>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn-sm" onclick="reviewTestimonial(${i}, 'approve', this)">Approve</button>
+          <button class="btn-outline" onclick="reviewTestimonial(${i}, 'reject', this)">Reject</button>
+        </div>
+      </div>`).join('');
+  } catch (e) {
+    document.getElementById('testimonialsLoading').textContent = 'Could not load testimonials.';
+  }
+}
+
+async function reviewTestimonial(i, action, btnEl) {
+  const t = pendingTestimonials[i];
+  if (!t) return;
+  if (action === 'reject' && !confirm('Reject this testimonial? It will not be shown on the site.')) return;
+  btnEl.disabled = true;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/testimonials/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        passcode: ADMIN_PASSCODE, row_number: t.row_number, name: t.name, action,
+        quote: document.getElementById('tq_' + i).value,
+        featured: document.getElementById('tf_' + i).checked
+      })
+    });
+    const data = await res.json();
+    if (handleAuthFailure(data)) return;
+    if (data.success) { loadTestimonials(); }
+    else { alert(data.message || 'Could not update this testimonial.'); btnEl.disabled = false; }
+  } catch (e) {
+    alert('Network error - please try again.');
+    btnEl.disabled = false;
   }
 }
 

@@ -111,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
   handleMembershipReturn();
   loadCategories();
   loadBatchInfo();
+  loadOnTheGround();
+  loadTestimonials();
   refreshSaveBadges();
   initScrollAnimations();
   const closeAboutBtn = document.getElementById('closeAboutBtn');
@@ -195,6 +197,7 @@ function bindUI() {
     if ($('becomePartnerModal') && $('becomePartnerModal').style.display !== 'none') closeBecomePartnerInfo();
     if ($('productDetailModal') && $('productDetailModal').style.display !== 'none') closeProductDetailModal();
     if ($('returnsPolicyModal') && $('returnsPolicyModal').style.display !== 'none') closeReturnsPolicyModal();
+    if ($('refundPolicyModal') && $('refundPolicyModal').style.display !== 'none') closeRefundPolicyModal();
     if ($('editOrderModal') && $('editOrderModal').style.display !== 'none') closeEditOrderReviewModal();
   });
 }
@@ -459,6 +462,65 @@ function closeReturnsPolicyModal() {
   $('overlay').style.display = 'none';
   $('returnsPolicyModal').style.display = 'none';
   $('returnsPolicyModal').setAttribute('aria-hidden', 'true');
+}
+
+function openRefundPolicyModal() {
+  $('overlay').style.display = 'block';
+  $('refundPolicyModal').style.display = 'flex';
+  $('refundPolicyModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeRefundPolicyModal() {
+  $('overlay').style.display = 'none';
+  $('refundPolicyModal').style.display = 'none';
+  $('refundPolicyModal').setAttribute('aria-hidden', 'true');
+}
+
+/* ---- On the Ground + testimonials (both hidden until the sheet has approved rows) ---- */
+async function loadOnTheGround() {
+  try {
+    const res = await apiCall('/on-the-ground');
+    const photos = (res && res.photos) || [];
+    if (!photos.length) return;
+    $('onGroundGrid').innerHTML = photos.map(p => `
+      <figure class="ground-item">
+        <img src="${escapeHtml(p.photo_url)}" alt="${escapeHtml(p.society || 'CommunitE stall')}" loading="lazy" onerror="this.closest('figure').style.display='none'" />
+        <figcaption>
+          ${p.society ? `<strong>${escapeHtml(p.society)}</strong>` : ''}
+          ${p.message ? `<span>${escapeHtml(p.message)}</span>` : ''}
+          ${p.date ? `<em>${escapeHtml(p.date)}</em>` : ''}
+        </figcaption>
+      </figure>`).join('');
+    $('onGroundSection').style.display = '';
+  } catch (e) { /* section simply stays hidden */ }
+}
+
+function testimonialCardHTML(t, featured) {
+  const initial = escapeHtml((t.name || '?').trim().charAt(0).toUpperCase());
+  const avatar = t.photo_url
+    ? `<img class="tm-avatar" src="${escapeHtml(t.photo_url)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;tm-avatar tm-avatar--initial&quot;>${initial}</span>'" />`
+    : `<span class="tm-avatar tm-avatar--initial">${initial}</span>`;
+  return `
+    <blockquote class="tm-card${featured ? ' tm-card--featured' : ''}">
+      <p class="tm-quote">&ldquo;${escapeHtml(t.quote)}&rdquo;</p>
+      <footer class="tm-by">
+        ${avatar}
+        <span class="tm-who"><strong>${escapeHtml(t.name)}</strong><span>${escapeHtml(t.society)}</span></span>
+        ${t.member_since ? `<span class="tm-badge">Member since ${escapeHtml(t.member_since)}</span>` : ''}
+      </footer>
+    </blockquote>`;
+}
+
+async function loadTestimonials() {
+  try {
+    const res = await apiCall('/testimonials');
+    const list = (res && res.testimonials) || [];
+    if (!list.length) return;
+    const [first, ...rest] = list;
+    $('testimonialsFeatured').innerHTML = testimonialCardHTML(first, true);
+    $('testimonialsGrid').innerHTML = rest.slice(0, 4).map(t => testimonialCardHTML(t, false)).join('');
+    $('testimonialsSection').style.display = '';
+  } catch (e) { /* section simply stays hidden */ }
 }
 
 /* Build price HTML — shows dual price or single */

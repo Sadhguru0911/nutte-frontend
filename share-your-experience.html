@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Share your CommunitE experience</title>
+<style>
+  :root{ --green:#2d8a5e; --ink:#2b2b2b; --bg:#faf8f4; }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink);
+    margin:0; padding:28px 18px 60px; max-width:520px; margin-inline:auto;
+  }
+  h1{font-size:1.3rem; margin:0 0 4px;}
+  p.sub{color:#666; font-size:0.88rem; line-height:1.5; margin:0 0 20px;}
+  .card{background:#fff; border:1px solid #e2e0da; border-radius:12px; padding:20px;}
+  label{display:block; font-size:0.84rem; font-weight:700; margin-bottom:6px; color:#444;}
+  .hint{font-size:0.76rem; color:#888; margin:-2px 0 8px; line-height:1.45;}
+  input[type=text], textarea{
+    width:100%; padding:11px 12px; border:1.5px solid #ccc; border-radius:8px; font-size:0.95rem;
+    margin-bottom:4px; font-family:inherit;
+  }
+  textarea{ resize:vertical; min-height:84px; }
+  .field{ margin-bottom:18px; }
+  .section-h{ font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:#a8872f; font-weight:800; margin:6px 0 14px; }
+  .consent{ display:flex; gap:10px; align-items:flex-start; font-size:0.84rem; line-height:1.5; font-weight:400; color:#444; }
+  .consent input{ margin-top:3px; width:18px; height:18px; flex-shrink:0; }
+  button{
+    width:100%; padding:13px; border:none; border-radius:24px; background:var(--green); color:#fff;
+    font-size:0.95rem; font-weight:700; cursor:pointer; margin-top:6px;
+  }
+  button:disabled{opacity:.6;}
+  .result{ margin-top:16px; padding:14px; border-radius:8px; font-size:0.88rem; line-height:1.5; display:none; }
+  .result.err{ background:#fdecea; border:1px solid #f2b8b5; display:block; }
+  #successView{ display:none; text-align:center; }
+  #successView h2{ font-size:1.1rem; }
+</style>
+</head>
+<body>
+
+  <div id="formView">
+    <h1>Share your CommunitE experience</h1>
+    <p class="sub">Thank you for shopping with us. A few honest lines help your neighbours decide.
+    Answer only what you've actually experienced. You can skip any question, and you don't need to be
+    a member to take part.</p>
+
+    <div class="card">
+      <div class="section-h">About you</div>
+      <div class="field">
+        <label for="name">Your name *</label>
+        <div class="hint">First name and last initial is fine, e.g. Meera R.</div>
+        <input id="name" type="text" maxlength="60" placeholder="Meera R." />
+      </div>
+      <div class="field">
+        <label for="contact">Your phone number</label>
+        <div class="hint">Optional. Only so we can check with you if needed. Never shown on the website.</div>
+        <input id="contact" type="text" inputmode="tel" maxlength="80" placeholder="e.g. 98765 43210" />
+      </div>
+      <div class="field">
+        <label for="society">Your apartment society and area *</label>
+        <input id="society" type="text" maxlength="100" placeholder="e.g. Greenview Apartments, Whitefield" />
+      </div>
+      <div class="field">
+        <label for="memberSince">Member since (only if you're a member)</label>
+        <input id="memberSince" type="text" maxlength="30" placeholder="e.g. June 2026" />
+      </div>
+
+      <div class="section-h">Your experience (answer at least one)</div>
+      <div class="field">
+        <label for="price">Was it actually cheaper?</label>
+        <div class="hint">What do you usually buy, and roughly how much do you save compared with where you shopped before?</div>
+        <textarea id="price" maxlength="500"></textarea>
+      </div>
+      <div class="field">
+        <label for="quality">How was the quality and freshness?</label>
+        <div class="hint">Mention a product if you can, and how it compared with what you used to buy.</div>
+        <textarea id="quality" maxlength="500"></textarea>
+      </div>
+      <div class="field">
+        <label for="delivery">How was ordering and delivery?</label>
+        <div class="hint">When did you order, and when did it reach your society?</div>
+        <textarea id="delivery" maxlength="500"></textarea>
+      </div>
+      <div class="field">
+        <label for="membership">If you're a member: has it been worth it?</label>
+        <div class="hint">Has the saving covered the membership fee for you?</div>
+        <textarea id="membership" maxlength="500"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="consent" for="consent">
+          <input id="consent" type="checkbox" />
+          <span>I agree that CommunitE may show my name, my society and my answers on its website. I can ask for it to be removed at any time. *</span>
+        </label>
+      </div>
+
+      <button id="submitBtn" onclick="submitTestimonial()">Submit</button>
+      <div id="resultMsg" class="result"></div>
+    </div>
+  </div>
+
+  <div id="successView">
+    <div class="card">
+      <h2>Thank you!</h2>
+      <p class="sub">We've received your feedback. We review every response before anything appears
+      on the site, and we may tidy the wording slightly.</p>
+    </div>
+  </div>
+
+<script>
+  const apiBase = "https://nutte-communite-994718298855.asia-south1.run.app";
+  const val = id => document.getElementById(id).value.trim();
+
+  async function submitTestimonial() {
+    const resultEl = document.getElementById('resultMsg');
+    resultEl.className = 'result';
+    resultEl.textContent = '';
+
+    const payload = {
+      name: val('name'), society: val('society'), member_since: val('memberSince'),
+      price: val('price'), quality: val('quality'), delivery: val('delivery'), membership: val('membership'),
+      contact: val('contact'),
+      consent: document.getElementById('consent').checked
+    };
+
+    if (!payload.name || !payload.society) {
+      resultEl.className = 'result err';
+      resultEl.textContent = 'Please add your name and society.';
+      return;
+    }
+    if (!(payload.price || payload.quality || payload.delivery || payload.membership)) {
+      resultEl.className = 'result err';
+      resultEl.textContent = 'Please answer at least one question.';
+      return;
+    }
+    if (!payload.consent) {
+      resultEl.className = 'result err';
+      resultEl.textContent = 'Please tick the box so we can show your name and society.';
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    try {
+      const res = await fetch(`${apiBase}/api/submit-testimonial`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+        window.scrollTo(0, 0);
+      } else {
+        resultEl.className = 'result err';
+        resultEl.textContent = data.message || 'Something went wrong. Please try again.';
+      }
+    } catch (e) {
+      resultEl.className = 'result err';
+      resultEl.textContent = 'Network error. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit';
+    }
+  }
+</script>
+</body>
+</html>
