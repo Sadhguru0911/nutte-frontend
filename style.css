@@ -3257,3 +3257,21 @@ body.is-member .save-badge .sb-visitor { display: none; }
   color: var(--green-mid); text-decoration-color: currentColor;
 }
 .product-details-link i { text-decoration: none; }
+
+
+/* Best Picks / Celebrate: vertical grid aligned with categories (4 across desktop, 3 tablet, 1 per row on phones) */
+.theme-cards-section { max-width: 1280px; margin-left: auto; margin-right: auto; }
+.theme-cards-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 8px 32px 10px;
+  overflow: visible; scroll-snap-type: none;
+}
+.theme-cards-row .theme-card { flex: none; width: auto; min-width: 0; padding: 20px 18px; }
+.theme-card-collage { aspect-ratio: 4 / 3; gap: 8px; }
+.theme-card-title { font-size: 1.1rem; }
+@media (max-width: 960px) {
+  .theme-cards-row { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+}
+@media (max-width: 600px) {
+  .theme-cards-row { grid-template-columns: 1fr; gap: 14px; padding: 8px 32px 10px; }
+  .theme-cards-row .theme-card { width: auto; flex-basis: auto; padding: 18px 16px; }
+}
